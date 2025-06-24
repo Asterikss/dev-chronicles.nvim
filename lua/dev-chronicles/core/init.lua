@@ -71,7 +71,11 @@ M.record_session = function(project_id, duration, end_time)
   local data_or_error = utils.load_data()
 
   if type(data_or_error) == 'string' then
-    vim.notify('Error: ' .. data_or_error)
+    local f = io.open(vim.fn.stdpath('data') .. '/log.dev-chronicles.log', 'a')
+    if f then
+      f:write('Error recording a session: ' .. data_or_error)
+      f:close()
+    end
     return
   end
 
