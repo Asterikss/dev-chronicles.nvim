@@ -25,7 +25,7 @@ M.is_project = function(cwd)
   -- assumes all paths are absolute and expanded, and all dirs end with a slash
   local config = require('dev-chronicles.config')
   -- TODO: probably start from longest so that nested projects are treated correctly
-  for _, tracked_path in ipairs(config.options.tracked_paths) do
+  for _, tracked_path in ipairs(config.options.tracked_dirs) do
     -- No exact matches. Only subdirectories are matched.
     if
       cwd:find(tracked_path, 1, true) == 1
