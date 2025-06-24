@@ -2,7 +2,7 @@ local M = {}
 
 local defaults = {
   tracked_dirs = {},
-  tracked_pahts = {},
+  tracked_paths = {},
   min_session_time = 180,
   data_file = 'dev-chronicles.json',
 }
@@ -19,6 +19,14 @@ M.setup = function(opts)
 
   for i = 1, #M.options.tracked_dirs do
     M.options.tracked_dirs[i] = utils.expand(M.options.tracked_dirs[i])
+  end
+
+  if type(M.options.tracked_paths) == 'string' then
+    M.options.tracked_paths = { M.options.tracked_paths }
+  end
+
+  for i = 1, #M.options.tracked_paths do
+    M.options.tracked_paths[i] = utils.expand(M.options.tracked_paths[i])
   end
 
   if vim.fn.isabsolutepath(M.options.data_file) == 1 then
