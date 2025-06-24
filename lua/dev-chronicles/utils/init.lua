@@ -93,16 +93,19 @@ function M.get_current_month()
   return tostring(os.date('%m.%Y'))
 end
 
----Returns the previous month as a string in this format: 'MM.YYYY'
+---Returns the previous month as a string in format: 'MM.YYYY'. Offset can
+---be passed to change how many months back to go (default 1).
+---@param offset integer | nil How many months back to go (default 1)
 ---@return string
-M.get_previous_month = function()
+M.get_previous_month = function(offset)
+  offset = offset or 1
   local month, year = M.get_current_month():match('(%d%d)%.(%d%d%d%d)')
   month = tonumber(month)
   year = tonumber(year)
 
-  month = month - 1
-  if month == 0 then
-    month = 12
+  month = month - offset
+  while month <= 0 do
+    month = month + 12
     year = year - 1
   end
 
