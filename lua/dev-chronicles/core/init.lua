@@ -7,13 +7,15 @@ local session = {
 }
 
 M.init = function()
+  vim.api.nvim_create_user_command('DevChronicles', function()
+    require('dev-chronicles').dashboard()
+  end, {})
+
   M.setup_autocmds()
 end
 
 M.setup_autocmds = function()
   local group = vim.api.nvim_create_augroup('DevChronicles', { clear = true })
-
-  vim.notify('here')
 
   vim.api.nvim_create_autocmd('VimEnter', {
     group = group,
@@ -31,12 +33,10 @@ M.setup_autocmds = function()
 end
 
 M.start_session = function()
-  vim.notify('here2')
   local utils = require('dev-chronicles.utils')
   local cwd = vim.fn.getcwd()
 
   local is_project, project_id = utils.is_project(cwd)
-  print(is_project)
 
   if is_project then
     session.project_id = project_id
@@ -58,7 +58,6 @@ M.end_session = function()
 
   -- Only record if session is longer than minimum session length
   if session_duration >= config.options.min_session_time then
-    vim.notify('in here')
     M.record_session(session.project_id, session_duration, end_time)
   end
 
