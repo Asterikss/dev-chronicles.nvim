@@ -84,4 +84,8 @@ function M.current_timestamp()
   return os.time()
 end
 
+function M.get_current_month()
+  return os.date('%m.%Y')
+end
+
 return M

@@ -86,12 +86,15 @@ M.record_session = function(project_id, duration, end_time)
       total_time = 0,
       first_worked = end_time,
       last_worked = end_time,
+      by_month = {},
     }
   end
 
   local project = data_or_error.projects[project_id]
+  local curr_month = utils.get_current_month()
   project.total_time = project.total_time + duration
   project.last_worked = end_time
+  project.by_month[curr_month] = (project.by_month[curr_month] or 0) + duration
 
   utils.save_data(data_or_error)
 end
