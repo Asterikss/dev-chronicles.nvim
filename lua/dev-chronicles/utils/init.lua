@@ -12,6 +12,15 @@ M.expand = function(path)
   return expanded
 end
 
+M.unexpand = function(path)
+  local home = vim.loop.os_homedir()
+  if path:sub(1, #home) == home then
+    return '~' .. path:sub(#home + 1)
+  else
+    return path
+  end
+end
+
 M.is_project = function(cwd)
   -- assumes all paths are absolute and expanded, and all dirs end with a slash
   local config = require('dev-chronicles.config')
@@ -27,7 +36,7 @@ M.is_project = function(cwd)
       local first_dir = cwd:sub(#tracked_path):match('([^/]+)')
       if first_dir then
         local project_id = tracked_path .. first_dir .. '/'
-        return true, project_id
+        return true, M.unexpand(project_id)
       end
     end
   end
