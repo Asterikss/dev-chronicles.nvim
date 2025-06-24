@@ -7,9 +7,47 @@ local session = {
 }
 
 M.init = function()
-  vim.api.nvim_create_user_command('DevChronicles', function()
-    require('dev-chronicles').dashboard()
-  end, {})
+  local dashboard = require('dev-chronicles.core.dashboard')
+  local curr_month = require('dev-chronicles.utils').get_current_month()
+
+  vim.api.nvim_create_user_command('DevChronicles', function(opts)
+    local args = opts.fargs
+
+    if #args == 0 then
+      require('dev-chronicles').dashboard(dashboard.DashboardType.Default)
+    elseif args[1] == 'all' then
+      require('dev-chronicles').dashboard(dashboard.DashboardType.All)
+    elseif args[1] == 'exit' then
+      require('dev-chronicles').exit()
+    elseif #args == 1 then
+      require('dev-chronicles').dashboard {
+        dashboard.DashboardType.Custom,
+        start = args[1],
+        end_ = args[1],
+      }
+    elseif #args == 2 then
+      require('dev-chronicles').dashboard {
+        dashboard.DashboardType.Custom,
+        start = args[1],
+        end_ = args[2],
+      }
+    else
+      print('Usage: :DevChronicles [all|exit|start [end]]')
+    end
+  end, {
+    nargs = '*',
+    complete = function(
+      _ --[[arg_lead]],
+      cmd_line,
+      _ --[[cursor_pos]]
+    )
+      local split = vim.split(cmd_line, '%s+')
+      if #split == 2 then
+        return { 'all', 'exit', curr_month }
+      end
+      return { curr_month }
+    end,
+  })
 
   M.setup_autocmds()
 end
