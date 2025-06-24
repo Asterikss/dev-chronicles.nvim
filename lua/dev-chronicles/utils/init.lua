@@ -93,15 +93,27 @@ function M.get_current_month()
   return tostring(os.date('%m.%Y'))
 end
 
+---Accepts a month-year string in format: 'MM.YYYY' and extracts month
+---and year from it, turning them to integers.
+---@param month_year_str string Date in format: 'MM.YYYY'
+---@return integer, integer: month, year
+local function extract_month_year(month_year_str)
+  local month, year = month_year_str:match('(%d%d)%.(%d%d%d%d)')
+  month = tonumber(month)
+  year = tonumber(year)
+  if not month or not year then
+    error('Invalid month or year: ' .. tostring(month_year_str))
+  end
+  return month, year
+end
+
 ---Returns the previous month as a string in format: 'MM.YYYY'. Offset can
 ---be passed to change how many months back to go (default 1).
 ---@param offset integer | nil How many months back to go (default 1)
 ---@return string
 M.get_previous_month = function(offset)
   offset = offset or 1
-  local month, year = M.get_current_month():match('(%d%d)%.(%d%d%d%d)')
-  month = tonumber(month)
-  year = tonumber(year)
+  local month, year = extract_month_year(M.get_current_month())
 
   month = month - offset
   while month <= 0 do
@@ -110,6 +122,15 @@ M.get_previous_month = function(offset)
   end
 
   return string.format('%02d.%d', month, year)
+end
+
+---Accepts a month-year string in format: 'MM.YYYY' and transforms it into a
+---unix timestamp
+---@param month_year_str string Date in format: 'MM.YYYY'
+---@return integer unix timestamp
+M.convert_month_str_to_timestamp = function(month_year_str)
+  local month, year = extract_month_year(month_year_str)
+  return os.time({ year = year, month = month, day = 1, hour = 0, min = 0, sec = 0 })
 end
 
 return M
