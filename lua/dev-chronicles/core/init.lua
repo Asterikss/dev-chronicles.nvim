@@ -117,7 +117,7 @@ M.record_session = function(project_id, duration, end_time)
     return
   end
 
-  data_or_error.global_time = (data_or_error.global_time or 0) + duration
+  data_or_error.global_time = data_or_error.global_time + duration
 
   if not data_or_error.projects[project_id] then
     data_or_error.projects[project_id] = {

@@ -50,6 +50,7 @@ M.load_data = function()
   if vim.fn.filereadable(file_path) == 0 then
     return {
       global_time = 0,
+      tracking_start = M.current_timestamp(),
       projects = {},
     }
   end
