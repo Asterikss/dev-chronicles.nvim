@@ -1,5 +1,9 @@
 local M = {}
 
+---Create DevChronicles dashboard
+---@param dashboard_type DashboardType
+---@param start string | nil
+---@param end_ string | nil
 function M.dashboard(dashboard_type, start, end_)
   local dashboard = require('dev-chronicles.core.dashboard')
 
@@ -26,7 +30,7 @@ function M.dashboard(dashboard_type, start, end_)
     title_pos = 'center',
   })
 
-  local stats = dashboard.get_recent_stats(30)
+  local stats = dashboard.get_stats(dashboard_type, start, end_)
 
   local lines, highlights = dashboard.create_dashboard_content(stats, win_width, win_height)
 
