@@ -81,12 +81,32 @@ M.save_data = function(data)
   end
 end
 
+---Returns current unix timestamp
+---@return integer
 function M.current_timestamp()
   return os.time()
 end
 
+---Returns the current month as a string in this format: 'MM.YYYY'
+---@return string
 function M.get_current_month()
-  return os.date('%m.%Y')
+  return tostring(os.date('%m.%Y'))
+end
+
+---Returns the previous month as a string in this format: 'MM.YYYY'
+---@return string
+M.get_previous_month = function()
+  local month, year = M.get_current_month():match('(%d%d)%.(%d%d%d%d)')
+  month = tonumber(month)
+  year = tonumber(year)
+
+  month = month - 1
+  if month == 0 then
+    month = 12
+    year = year - 1
+  end
+
+  return string.format('%02d.%d', month, year)
 end
 
 return M
