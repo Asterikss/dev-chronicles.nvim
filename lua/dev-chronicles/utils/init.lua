@@ -1,5 +1,19 @@
 local M = {}
 
+---@class ProjectData
+---@field total_time number
+---@field by_month table<string, number>
+---@field first_worked number
+---@field last_worked number
+
+---@class Projects
+---@field [string] ProjectData
+
+---@class ChroniclesData
+---@field global_time number
+---@field tracking_start number
+---@field projects Projects
+
 M.get_data_file_path = function()
   return require('dev-chronicles.config').data_path
 end
