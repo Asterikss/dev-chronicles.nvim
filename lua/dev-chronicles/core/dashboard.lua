@@ -213,9 +213,94 @@ M.create_dashboard_content = function(stats, win_width, win_height)
   return lines, highlights
 end
 
-M.get_stats = function()
+---Get the filtered project stats depending on the DashboardType
+---@param dashboard_type DashboardType Default | Custom | All
+---@param start? string  Start month
+---@param end_? string  End month
+M.get_stats = function(dashboard_type, start, end_)
   local utils = require('dev-chronicles.utils')
-  return utils.load_data()
+  local data = utils.load_data()
+  if not data then
+    return
+  end
+
+  if dashboard_type == M.DashboardType.All then
+    return data
+  end
+
+  local options = require('dev-chronicles.config').options
+
+  if dashboard_type == M.DashboardType.Default then
+    start = utils.get_previous_month(options.dashboard.n_months_by_default - 1)
+    end_ = utils.get_current_month()
+  end
+
+  if not start or not end_ then
+    vim.notify('When displaying custom dashboard both start and end_ date should be set')
+    return
+  end
+
+  -- First filter out all the projects where not worked on during set period
+  ---@type table<string, ProjectData>
+  local filtered_projects = {}
+
+  local start_timestamp = utils.convert_month_str_to_timestamp(start)
+  local end_timestamp = utils.convert_month_str_to_timestamp(end_, true)
+
+  if start_timestamp > end_timestamp then
+    vim.notify('DevChronicles error: start date cannot be greater than end date')
+    return
+  end
+
+  for project_id, project_data in pairs(data.projects) do
+    if project_data.first_worked < end_timestamp and project_data.last_worked > start_timestamp then
+      filtered_projects[project_id] = project_data
+    end
+  end
+
+  if next(filtered_projects) == nil then
+    vim.notify('DevChronicles: No project data in the specified period')
+    return {}
+  end
+
+  -- Collect total time for each project in the chosen time period from the filtered projects
+  ---@type table<string, integer>
+  local projects_total_time = {}
+
+  local start_month, start_year = utils.extract_month_year(start)
+  local curr_month, curr_year = utils.extract_month_year(end_)
+
+  while not (start_month == curr_month and start_year == curr_year) do
+    local curr_date_key = string.format('%02d.%d', curr_month, curr_year)
+    for project_id, project_data in pairs(filtered_projects) do
+      local month_time = project_data.by_month[curr_date_key]
+      if month_time ~= nil then
+        projects_total_time[project_id] = (projects_total_time[project_id] or 0) + month_time
+      end
+    end
+    curr_month = curr_month - 1
+    if curr_month == 0 then
+      curr_month = 12
+      curr_year = curr_year - 1
+    end
+  end
+
+  local curr_date_key = string.format('%02d.%d', curr_month, curr_year)
+  for project_id, project_data in pairs(filtered_projects) do
+    local month_time = project_data.by_month[curr_date_key]
+    if month_time ~= nil then
+      projects_total_time[project_id] = (projects_total_time[project_id] or 0) + month_time
+    end
+  end
+
+  vim.notify(vim.inspect(filtered_projects))
+  vim.notify(vim.inspect(projects_total_time))
+
+  return {
+    global_time = data.global_time, -- TODO: possibly only the filtered ones, or both
+    projects = filtered_projects,
+    projects_total_time = projects_total_time,
+  }
 end
 
 M.get_recent_stats = function(days)
