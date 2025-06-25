@@ -93,7 +93,7 @@ M.start_session = function()
 end
 
 M.end_session = function()
-  local get_current_timestamp = require('dev-chronicles.utils').current_timestamp()
+  local get_current_timestamp = require('dev-chronicles.utils').current_timestamp
   local options = require('dev-chronicles.config').options
 
   if not session.is_tracking or not session.project_id or not session.start_time then
