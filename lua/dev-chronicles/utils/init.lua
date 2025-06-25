@@ -33,9 +33,9 @@ end
 
 M.is_project = function(cwd)
   -- assumes all paths are absolute and expanded, and all dirs end with a slash
-  local config = require('dev-chronicles.config')
+  local options = require('dev-chronicles.config').options
   -- TODO: probably start from longest so that nested projects are treated correctly
-  for _, tracked_path in ipairs(config.options.tracked_dirs) do
+  for _, tracked_path in ipairs(options.tracked_dirs) do
     -- No exact matches. Only subdirectories are matched.
     if
       cwd:find(tracked_path, 1, true) == 1
@@ -93,28 +93,30 @@ M.load_data = function()
   return data
 end
 
+---Save Chronicles data
+---@param data ChroniclesData
 M.save_data = function(data)
-  local file_path = require('dev-chronicles.config').options.data_file
+  local data_file = require('dev-chronicles.config').options.data_file
   local json_content = vim.fn.json_encode(data)
 
   -- Write to temp file first, then rename for atomic operation
-  local temp_file = file_path .. '.tmp'
+  local temp_file = data_file .. '.tmp'
   local ok = pcall(vim.fn.writefile, { json_content }, temp_file)
 
   if ok then
-    vim.fn.rename(temp_file, file_path)
+    vim.fn.rename(temp_file, data_file)
   end
 end
 
 ---Returns current unix timestamp
 ---@return integer
-function M.current_timestamp()
+M.current_timestamp = function()
   return os.time()
 end
 
 ---Returns the current month as a string in this format: 'MM.YYYY'
 ---@return string
-function M.get_current_month()
+M.get_current_month = function()
   return tostring(os.date('%m.%Y'))
 end
 
@@ -122,7 +124,7 @@ end
 ---and year from it, turning them to integers.
 ---@param month_year_str string Date in format: 'MM.YYYY'
 ---@return integer, integer: month, year
-local function extract_month_year(month_year_str)
+M.extract_month_year = function(month_year_str)
   local month, year = month_year_str:match('(%d%d)%.(%d%d%d%d)')
   month = tonumber(month)
   year = tonumber(year)
@@ -138,7 +140,7 @@ end
 ---@return string
 M.get_previous_month = function(offset)
   offset = offset or 1
-  local month, year = extract_month_year(M.get_current_month())
+  local month, year = M.extract_month_year(M.get_current_month())
 
   month = month - offset
   while month <= 0 do
@@ -154,7 +156,7 @@ end
 ---@param month_year_str string Date in format: 'MM.YYYY'
 ---@return integer unix timestamp
 M.convert_month_str_to_timestamp = function(month_year_str)
-  local month, year = extract_month_year(month_year_str)
+  local month, year = M.extract_month_year(month_year_str)
   return os.time({ year = year, month = month, day = 1, hour = 0, min = 0, sec = 0 })
 end
 
