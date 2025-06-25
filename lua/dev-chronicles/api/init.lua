@@ -64,4 +64,8 @@ function M.dashboard(dashboard_type, start, end_)
   vim.api.nvim_buf_set_option(buf, 'readonly', true)
 end
 
+M.get_session_info = function()
+  vim.notify(vim.inspect(require('dev-chronicles.core').get_session_info()))
+end
+
 return M

@@ -24,6 +24,8 @@ M.init = function()
       api.dashboard(dashboard.DashboardType.Default)
     elseif args[1] == 'all' then
       api.dashboard(dashboard.DashboardType.All)
+    elseif args[1] == 'info' then
+      api.get_session_info()
     elseif args[1] == 'exit' then
       api.exit()
     elseif #args == 1 then
@@ -39,7 +41,7 @@ M.init = function()
         end_ = args[2],
       }
     else
-      vim.notify('Usage: :DevChronicles [all|exit|start [end]]')
+      vim.notify('Usage: :DevChronicles [all|start [end]|info|exit]')
     end
   end, {
     nargs = '*',
