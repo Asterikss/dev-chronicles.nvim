@@ -14,10 +14,6 @@ local M = {}
 ---@field tracking_start number
 ---@field projects Projects
 
-M.get_data_file_path = function()
-  return require('dev-chronicles.config').data_path
-end
-
 M.expand = function(path)
   local expanded = vim.fn.expand(path)
   if expanded ~= '/' and expanded:sub(-1) ~= '/' then
@@ -60,7 +56,7 @@ end
 
 ---@return ChroniclesData | nil
 M.load_data = function()
-  local file_path = M.get_data_file_path()
+  local file_path = require('dev-chronicles.config').options.data_file
 
   if vim.fn.filereadable(file_path) == 0 then
     return {
@@ -98,7 +94,7 @@ M.load_data = function()
 end
 
 M.save_data = function(data)
-  local file_path = M.get_data_file_path()
+  local file_path = require('dev-chronicles.config').options.data_file
   local json_content = vim.fn.json_encode(data)
 
   -- Write to temp file first, then rename for atomic operation

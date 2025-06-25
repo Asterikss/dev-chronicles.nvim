@@ -31,16 +31,18 @@ M.setup = function(opts)
     M.options.tracked_paths[i] = utils.expand(M.options.tracked_paths[i])
   end
 
-  if vim.fn.isabsolutepath(M.options.data_file) == 1 then
-    M.data_path = M.options.data_file
-  else
-    M.data_path = vim.fn.stdpath('data') .. '/' .. M.options.data_file
+  if vim.fn.isabsolutepath(M.options.data_file) ~= 1 then
+    M.options.data_file = vim.fn.stdpath('data') .. '/' .. M.options.data_file
   end
 
-  if vim.fn.isabsolutepath(M.options.log_file) == 1 then
-    M.options.log_file = M.options.log_file
-  else
+  if vim.fn.isabsolutepath(M.options.log_file) ~= 1 then
     M.options.log_file = vim.fn.stdpath('data') .. '/' .. M.options.log_file
+  else
+  end
+
+  if M.options.n_months_default_dashboard < 1 then
+    vim.notify('DevChronicles: n_months_default_dashboard should be greter than 0')
+    return
   end
 
   require('dev-chronicles.core').init()
