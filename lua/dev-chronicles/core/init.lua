@@ -1,5 +1,11 @@
 local M = {}
 
+---@class Session
+---@field project_id string | nil
+---@field start_time integer | nil
+---@field is_tracking boolean
+
+---@type Session
 local session = {
   project_id = nil,
   start_time = nil,
@@ -9,30 +15,31 @@ local session = {
 M.init = function()
   local dashboard = require('dev-chronicles.core.dashboard')
   local curr_month = require('dev-chronicles.utils').get_current_month()
+  local api = require('dev-chronicles')
 
   vim.api.nvim_create_user_command('DevChronicles', function(opts)
     local args = opts.fargs
 
     if #args == 0 then
-      require('dev-chronicles').dashboard(dashboard.DashboardType.Default)
+      api.dashboard(dashboard.DashboardType.Default)
     elseif args[1] == 'all' then
-      require('dev-chronicles').dashboard(dashboard.DashboardType.All)
+      api.dashboard(dashboard.DashboardType.All)
     elseif args[1] == 'exit' then
-      require('dev-chronicles').exit()
+      api.exit()
     elseif #args == 1 then
-      require('dev-chronicles').dashboard {
+      api.dashboard {
         dashboard.DashboardType.Custom,
         start = args[1],
         end_ = args[1],
       }
     elseif #args == 2 then
-      require('dev-chronicles').dashboard {
+      api.dashboard {
         dashboard.DashboardType.Custom,
         start = args[1],
         end_ = args[2],
       }
     else
-      print('Usage: :DevChronicles [all|exit|start [end]]')
+      vim.notify('Usage: :DevChronicles [all|exit|start [end]]')
     end
   end, {
     nargs = '*',
@@ -49,10 +56,10 @@ M.init = function()
     end,
   })
 
-  M.setup_autocmds()
+  M._setup_autocmds()
 end
 
-M.setup_autocmds = function()
+M._setup_autocmds = function()
   local group = vim.api.nvim_create_augroup('DevChronicles', { clear = true })
 
   vim.api.nvim_create_autocmd('VimEnter', {
@@ -84,18 +91,18 @@ M.start_session = function()
 end
 
 M.end_session = function()
-  local utils = require('dev-chronicles.utils')
-  local config = require('dev-chronicles.config')
+  local get_current_timestamp = require('dev-chronicles.utils').current_timestamp()
+  local options = require('dev-chronicles.config').options
 
   if not session.is_tracking or not session.project_id or not session.start_time then
     return
   end
 
-  local end_time = utils.current_timestamp()
+  local end_time = get_current_timestamp()
   local session_duration = end_time - session.start_time
 
   -- Only record if session is longer than minimum session length
-  if session_duration >= config.options.min_session_time then
+  if session_duration >= options.min_session_time then
     M.record_session(session.project_id, session_duration, end_time)
   end
 
@@ -137,6 +144,7 @@ M.record_session = function(project_id, duration, end_time)
   utils.save_data(data_or_error)
 end
 
+---@return Session
 M.get_session_info = function()
   return vim.deepcopy(session)
 end
