@@ -4,7 +4,9 @@ local defaults = {
   tracked_dirs = {},
   tracked_paths = {},
   min_session_time = 180,
+  n_months_default_dashboard = 2,
   data_file = 'dev-chronicles.json',
+  log_file = 'log.dev-chronicles.log',
 }
 
 M.options = {}
@@ -33,6 +35,12 @@ M.setup = function(opts)
     M.data_path = M.options.data_file
   else
     M.data_path = vim.fn.stdpath('data') .. '/' .. M.options.data_file
+  end
+
+  if vim.fn.isabsolutepath(M.options.log_file) == 1 then
+    M.options.log_file = M.options.log_file
+  else
+    M.options.log_file = vim.fn.stdpath('data') .. '/' .. M.options.log_file
   end
 
   require('dev-chronicles.core').init()

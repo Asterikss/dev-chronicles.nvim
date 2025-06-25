@@ -222,6 +222,9 @@ M.get_recent_stats = function(days)
   days = days or 30
   local utils = require('dev-chronicles.utils')
   local data = utils.load_data()
+  if not data then
+    return
+  end
   local cutoff_time = utils.current_timestamp() - (days * 86400) -- 24 * 60 * 60
 
   local recent_projects = {}

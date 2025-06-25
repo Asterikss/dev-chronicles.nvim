@@ -52,7 +52,7 @@ M.init = function()
     )
       local split = vim.split(cmd_line, '%s+')
       if #split == 2 then
-        return { 'all', 'exit', curr_month }
+        return { 'all', curr_month, 'info', 'exit' }
       end
       return { curr_month }
     end,
@@ -115,21 +115,15 @@ end
 
 M.record_session = function(project_id, duration, end_time)
   local utils = require('dev-chronicles.utils')
-  local data_or_error = utils.load_data()
-
-  if type(data_or_error) == 'string' then
-    local f = io.open(vim.fn.stdpath('data') .. '/log.dev-chronicles.log', 'a')
-    if f then
-      f:write('Error recording a session: ' .. data_or_error)
-      f:close()
-    end
+  local data = utils.load_data()
+  if not data then
     return
   end
 
-  data_or_error.global_time = data_or_error.global_time + duration
+  data.global_time = data.global_time + duration
 
-  if not data_or_error.projects[project_id] then
-    data_or_error.projects[project_id] = {
+  if not data.projects[project_id] then
+    data.projects[project_id] = {
       total_time = 0,
       first_worked = end_time,
       last_worked = end_time,
@@ -137,13 +131,13 @@ M.record_session = function(project_id, duration, end_time)
     }
   end
 
-  local project = data_or_error.projects[project_id]
+  local project = data.projects[project_id]
   local curr_month = utils.get_current_month()
   project.total_time = project.total_time + duration
   project.last_worked = end_time
   project.by_month[curr_month] = (project.by_month[curr_month] or 0) + duration
 
-  utils.save_data(data_or_error)
+  utils.save_data(data)
 end
 
 ---@return Session

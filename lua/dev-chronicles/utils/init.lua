@@ -44,6 +44,7 @@ M.is_project = function(cwd)
   return false, nil
 end
 
+---@return ChroniclesData | nil
 M.load_data = function()
   local file_path = M.get_data_file_path()
 
@@ -57,12 +58,26 @@ M.load_data = function()
 
   local ok, content = pcall(vim.fn.readfile, file_path)
   if not ok then
-    return 'Failed to read data file'
+    local err = 'Error loading data from disk: Failed to read the data file'
+    vim.notify('DevChronicles: ' .. err)
+    local f = io.open(require('dev-chronicles.config').options.log_file, 'a')
+    if f then
+      f:write(err)
+      f:close()
+    end
+    return nil
   end
 
   local ok_decode, data = pcall(vim.fn.json_decode, table.concat(content, '\n'))
   if not ok_decode then
-    return 'Could not decode json data'
+    local err = 'Error loading data from disk: Could not decode json'
+    vim.notify('DevChronicles: ' .. err)
+    local f = io.open(require('dev-chronicles.config').options.log_file, 'a')
+    if f then
+      f:write(err)
+      f:close()
+    end
+    return nil
   end
 
   return data
