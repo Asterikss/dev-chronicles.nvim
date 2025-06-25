@@ -134,13 +134,20 @@ M.extract_month_year = function(month_year_str)
   return month, year
 end
 
----Returns the previous month as a string in format: 'MM.YYYY'. Offset can
----be passed to change how many months back to go (default 1).
----@param offset integer | nil How many months back to go (default 1)
+---Returns the previous month to `start_month` as a string. Both formated as:
+---'MM.YYYY'. Offset can be passed to change how many months back to go
+---(default 1).
+---@param start_month string From which month to offset ('MM.YYYY')
+---@param offset? integer How many months back to go (default 1)
 ---@return string
-M.get_previous_month = function(offset)
+M.get_previous_month = function(start_month, offset)
   offset = offset or 1
-  local month, year = M.extract_month_year(M.get_current_month())
+  if offset < 0 then
+    vim.notify('Offset, when getting previous month, cannot be smaller than 0')
+    offset = 1
+  end
+
+  local month, year = M.extract_month_year(start_month)
 
   month = month - offset
   while month <= 0 do
