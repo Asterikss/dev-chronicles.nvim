@@ -37,16 +37,6 @@ M.setup_highlights = function()
   end
 end
 
-local function format_time(seconds)
-  if seconds < 60 then
-    return string.format('%ds', seconds)
-  end
-  if seconds < 3600 then
-    return string.format('%.1fm', seconds / 60)
-  end
-  return string.format('%.1fh', seconds / 3600)
-end
-
 local function get_project_name(project_id)
   return project_id:match('([^/]+)/?$') or project_id
 end
@@ -65,6 +55,7 @@ local function generate_bar(height, color_name)
 end
 
 M.create_dashboard_content = function(stats, win_width, win_height)
+  local format_time = require('dev-chronicles.utils').format_time
   local lines = {}
   local highlights = {}
 

@@ -186,4 +186,23 @@ M.convert_month_str_to_timestamp = function(month_year_str, end_of_month)
   return os.time({ year = year, month = month, day = 1, hour = 0, min = 0, sec = 0 })
 end
 
+---Return seconds as a formatted string
+---@param seconds integer Seconds
+---@param max_hours? boolean Should the maximal unit be hours (default true)
+---@return string
+M.format_time = function(seconds, max_hours)
+  if max_hours == nil then
+    max_hours = true
+  end
+  if seconds < 60 then
+    return string.format('%ds', seconds)
+  end
+  if seconds < 3600 then
+    return string.format('%.1fm', seconds / 60)
+  end
+  if max_hours or seconds < 86400 then
+    return string.format('%.1fh', seconds / 3600)
+  end
+  return string.format('%d days', seconds / 86400)
+end
 return M
