@@ -159,11 +159,30 @@ M.get_previous_month = function(start_month, offset)
 end
 
 ---Accepts a month-year string in format: 'MM.YYYY' and transforms it into a
----unix timestamp
+---unix timestamp. If `last_of_month` is true, returns the last possible timestamp
+---within that month.
 ---@param month_year_str string Date in format: 'MM.YYYY'
+---@param end_of_month? boolean Should the end of month timestamp be returned
 ---@return integer unix timestamp
-M.convert_month_str_to_timestamp = function(month_year_str)
+M.convert_month_str_to_timestamp = function(month_year_str, end_of_month)
   local month, year = M.extract_month_year(month_year_str)
+  if end_of_month then
+    -- Get the first day of the next month, then subtract one second
+    local next_month = month + 1
+    local next_year = year
+    if next_month > 12 then
+      next_month = 1
+      next_year = year + 1
+    end
+    return os.time({
+      year = next_year,
+      month = next_month,
+      day = 1,
+      hour = 0,
+      min = 0,
+      sec = 0,
+    }) - 1
+  end
   return os.time({ year = year, month = month, day = 1, hour = 0, min = 0, sec = 0 })
 end
 
