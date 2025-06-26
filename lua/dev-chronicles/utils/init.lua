@@ -205,4 +205,42 @@ M.format_time = function(seconds, max_hours)
   end
   return string.format('%d days', seconds / 86400)
 end
+
+---Format the time period between `start_month_year` and `end_month_year`. If
+---`end_month_year` is the current month, the period ends at the current date
+---and time.
+---The result is formatted as:
+---  - 'MM-MM.YYYY (duration)' if both months are in the same year
+---  - 'MM.YYYY-MM.YYYY (duration)' if the months are in different years
+---where 'duration' is the time between the two dates, formatted as s/h/d.
+---@param start_month_year string 'MM.YYYY'
+---@param end_month_year string 'MM.YYYY'
+---@return string: Formatted period string
+M.get_time_period_str = function(start_month_year, end_month_year)
+  local start_month_timestamp = M.convert_month_str_to_timestamp(start_month_year)
+
+  local end_month_timestamp
+  if M.get_current_month() == end_month_year then
+    end_month_timestamp = M.get_current_timestamp()
+  else
+    end_month_timestamp = M.convert_month_str_to_timestamp(end_month_year, true)
+  end
+
+  local time_period_str = M.format_time(end_month_timestamp - start_month_timestamp, false)
+  time_period_str = ' (' .. time_period_str .. ')'
+
+  local _, start_year = M.extract_month_year(start_month_year)
+  local _, end_year = M.extract_month_year(end_month_year)
+
+  if start_year == end_year then
+    return string.sub(start_month_year, 1, 2)
+      .. '-'
+      .. string.sub(end_month_year, 1, 2)
+      .. '.'
+      .. start_year
+      .. time_period_str
+  end
+  return start_month_year .. '-' .. end_month_year .. time_period_str
+end
+
 return M
