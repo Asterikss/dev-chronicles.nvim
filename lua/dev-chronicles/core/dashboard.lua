@@ -206,13 +206,14 @@ end
 
 ---Get the filtered project stats depending on the DashboardType
 ---@param dashboard_type DashboardType Default | Custom | All
----@param start? string  Start month
----@param end_? string  End month
+---@param start? string  Start month 'MM.YYYY'
+---@param end_? string  End month 'MM.YYYY'
+---@return Stats
 M.get_stats = function(dashboard_type, start, end_)
   local utils = require('dev-chronicles.utils')
   local data = utils.load_data()
   if not data then
-    return
+    return {}
   end
 
   if dashboard_type == M.DashboardType.All then
@@ -229,10 +230,10 @@ M.get_stats = function(dashboard_type, start, end_)
 
   if not start or not end_ then
     vim.notify('When displaying custom dashboard both start and end_ date should be set')
-    return
+    return {}
   end
 
-  -- First filter out all the projects where not worked on during set period
+  -- First filter out all the projects that where not worked on during chosen period
   ---@type table<string, ProjectData>
   local filtered_projects = {}
 
@@ -241,7 +242,7 @@ M.get_stats = function(dashboard_type, start, end_)
 
   if start_timestamp > end_timestamp then
     vim.notify('DevChronicles error: start date cannot be greater than end date')
-    return
+    return {}
   end
 
   for project_id, project_data in pairs(data.projects) do
@@ -255,11 +256,14 @@ M.get_stats = function(dashboard_type, start, end_)
     return {}
   end
 
-  -- Collect total time for each project in the chosen time period from the filtered projects
-  ---@type table<string, integer>
-  local projects_total_time = {}
+  -- Collect total time for each project in the chosen time period and
+  -- last_worked time from the filtered projects
+  ---@type Stats.ParsedProjects
+  local projects_filtered_parsed = {}
+  local global_time_filtered = 0
 
-  local start_month, start_year = utils.extract_month_year(start)
+  -- start_month -> Month before the target month to account for the loop not being inclusive
+  local start_month, start_year = utils.extract_month_year(utils.get_previous_month(start))
   local curr_month, curr_year = utils.extract_month_year(end_)
 
   while not (start_month == curr_month and start_year == curr_year) do
@@ -267,7 +271,13 @@ M.get_stats = function(dashboard_type, start, end_)
     for project_id, project_data in pairs(filtered_projects) do
       local month_time = project_data.by_month[curr_date_key]
       if month_time ~= nil then
-        projects_total_time[project_id] = (projects_total_time[project_id] or 0) + month_time
+        if not projects_filtered_parsed[project_id] then
+          projects_filtered_parsed[project_id] =
+            { total_time = 0, last_worked = project_data.last_worked }
+        end
+        local filtered_project = projects_filtered_parsed[project_id]
+        filtered_project.total_time = filtered_project.total_time + month_time
+        global_time_filtered = global_time_filtered + month_time
       end
     end
     curr_month = curr_month - 1
@@ -277,21 +287,13 @@ M.get_stats = function(dashboard_type, start, end_)
     end
   end
 
-  local curr_date_key = string.format('%02d.%d', curr_month, curr_year)
-  for project_id, project_data in pairs(filtered_projects) do
-    local month_time = project_data.by_month[curr_date_key]
-    if month_time ~= nil then
-      projects_total_time[project_id] = (projects_total_time[project_id] or 0) + month_time
-    end
-  end
-
-  vim.notify(vim.inspect(filtered_projects))
-  vim.notify(vim.inspect(projects_total_time))
-
   return {
-    global_time = data.global_time, -- TODO: possibly only the filtered ones, or both
-    projects = filtered_projects,
-    projects_total_time = projects_total_time,
+    global_time = data.global_time,
+    global_time_filtered = global_time_filtered,
+    projects_filtered = filtered_projects,
+    projects_filtered_parsed = projects_filtered_parsed,
+    start_date = start,
+    end_date = end_,
   }
 end
 
@@ -302,7 +304,7 @@ M.get_recent_stats = function(days)
   if not data then
     return
   end
-  local cutoff_time = utils.current_timestamp() - (days * 86400) -- 24 * 60 * 60
+  local cutoff_time = utils.get_current_timestamp() - (days * 86400) -- 24 * 60 * 60
 
   local recent_projects = {}
   for project_id, project_data in pairs(data.projects) do

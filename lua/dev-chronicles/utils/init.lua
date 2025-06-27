@@ -110,11 +110,11 @@ end
 
 ---Returns current unix timestamp
 ---@return integer
-M.current_timestamp = function()
+M.get_current_timestamp = function()
   return os.time()
 end
 
----Returns the current month as a string in this format: 'MM.YYYY'
+---Returns the current month as a string: 'MM.YYYY'
 ---@return string
 M.get_current_month = function()
   return tostring(os.date('%m.%Y'))
