@@ -8,15 +8,21 @@ local defaults = {
   log_file = 'log.dev-chronicles.log',
   dashboard = {
     sort = true,
+    sort_by_last_worked_not_total_time = true,
     ascending = true,
     n_months_by_default = 2,
+    proj_total_time_as_hours_max = true,
+    total_time_as_hours_max = true,
   },
 }
 
 ---@class DashboardOptions
 ---@field sort boolean Whether to sort the projects
+---@field sort_by_last_worked_not_total_time boolean Whether to sort using last worked time instead of total worked time
 ---@field ascending boolean Whether to sort in ascending order
 ---@field n_months_by_default integer Number of months for default dashboard
+---@field proj_total_time_as_hours_max boolean Format total time for each project as at most hours
+---@field total_time_as_hours_max boolean Format total time as at most hours
 
 ---@class DevChroniclesOptions
 ---@field tracked_dirs string[] List of dirs to track

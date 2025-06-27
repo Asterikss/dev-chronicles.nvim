@@ -6,6 +6,25 @@ M.DashboardType = {
   All = 3,
 }
 
+---@alias DashboardType
+---| '"Default"'
+---| '"Custom"'
+---| '"All"'
+
+---@class Stats.ParsedProjectsData
+---@field total_time integer
+---@field last_worked integer
+
+---@alias Stats.ParsedProjects table<string, Stats.ParsedProjectsData>
+
+---@class Stats
+---@field global_time integer
+---@field global_time_filtered integer
+---@field projects_filtered Projects
+---@field projects_filtered_parsed Stats.ParsedProjects
+---@field start_date string
+---@field end_date string
+
 local colors = {
   'DevChroniclesRed',
   'DevChroniclesBlue',
@@ -37,7 +56,7 @@ M.setup_highlights = function()
   end
 end
 
-local function get_project_name(project_id)
+M._get_project_name = function(project_id)
   return project_id:match('([^/]+)/?$') or project_id
 end
 
@@ -54,10 +73,24 @@ local function generate_bar(height, color_name)
   return bar_lines, color_name
 end
 
+---Creates lines and highlights for the dashboard
+---@param stats Stats
+---@param win_width integer
+---@param win_height integer
+---@return table, table: Lines, Highlights
 M.create_dashboard_content = function(stats, win_width, win_height)
-  local format_time = require('dev-chronicles.utils').format_time
   local lines = {}
   local highlights = {}
+
+  if next(stats) == nil then
+    table.insert(lines, '')
+    table.insert(lines, 'No recent projects found (Loser).')
+    table.insert(lines, 'Start coding in your tracked directories!')
+    return lines, highlights
+  end
+
+  local utils = require('dev-chronicles.utils')
+  local dashboard_opts = require('dev-chronicles.config').options.dashboard
 
   -- Reserve space for UI elements
   local header_height = 3
@@ -66,52 +99,77 @@ M.create_dashboard_content = function(stats, win_width, win_height)
   local chart_width = win_width - 4 -- margins
 
   -- Header
-  table.insert(lines, string.format('Total Time: %s', format_time(stats.global_time)))
+  local left_header = string.format(
+    'Ξ Total Time: %s',
+    utils.format_time(stats.global_time_filtered, dashboard_opts.total_time_as_hours_max)
+  )
+  local right_header = utils.get_time_period_str(stats.start_date, stats.end_date)
+  local header_padding = win_width - #left_header - #right_header
+  table.insert(lines, left_header .. string.rep(' ', header_padding) .. right_header)
   table.insert(lines, '')
   table.insert(lines, string.rep('─', win_width))
 
   table.insert(highlights, { line = 1, col = 0, end_col = -1, hl_group = 'DevChroniclesTitle' })
 
-  -- Prepare project data
-  local projects = {}
-  for project_id, project_data in pairs(stats.projects) do
-    table.insert(projects, {
-      id = project_id,
-      name = get_project_name(project_id),
-      time = project_data.total_time,
-      data = project_data,
+  -- Turn into an array, so that it can be sorted and traversed in order, and calculate max_time
+  ---@type table<integer, {id: string, time: integer, last_worked: integer}>
+  local arr_projects = {}
+  local max_time = 0
+
+  for parsed_project_id, parsed_project_data in pairs(stats.projects_filtered_parsed) do
+    if parsed_project_data.total_time > max_time then
+      max_time = parsed_project_data.total_time
+    end
+    table.insert(arr_projects, {
+      id = parsed_project_id,
+      time = parsed_project_data.total_time,
+      last_worked = parsed_project_data.last_worked,
     })
   end
 
-  -- Sort by time (descending)
-  table.sort(projects, function(a, b)
-    return a.time > b.time
-  end)
+  if dashboard_opts.sort then
+    local by_last_worked = dashboard_opts.sort_by_last_worked_not_total_time
+    local asc = dashboard_opts.ascending
 
-  if #projects == 0 then
-    table.insert(lines, '')
-    table.insert(lines, 'No recent projects found.')
-    table.insert(lines, 'Start coding in your tracked directories!')
-    return lines, highlights
+    table.sort(arr_projects, function(a, b)
+      if by_last_worked then
+        if asc then
+          return a.last_worked < b.last_worked
+        else
+          return a.last_worked > b.last_worked
+        end
+      else
+        if asc then
+          return a.time < b.time
+        else
+          return a.time > b.time
+        end
+      end
+    end)
   end
 
   -- Calculate bar dimensions
-  local max_time = projects[1].time
   local bar_spacing = 2
-  local max_bar_width = math.floor((chart_width - (#projects - 1) * bar_spacing) / #projects)
-  local bar_width = math.min(8, math.max(3, max_bar_width))
-  local total_chart_width = #projects * bar_width + (#projects - 1) * bar_spacing
+  local max_bar_width =
+    math.floor((chart_width - (#arr_projects - 1) * bar_spacing) / #arr_projects)
+  -- TODO: possibly cuttoff projects if samller than x to account for project
+  -- names that make sense. Then just hard compare the #projects. This is hard
+  -- with sorting being togglebale and asceding too
+  -- local bar_width = math.min(8, max_bar_width)
+  local bar_width = math.min(10, max_bar_width)
+  local total_chart_width = #arr_projects * bar_width + (#arr_projects - 1) * bar_spacing
   local chart_start_col = math.floor((win_width - total_chart_width) / 2)
 
   -- Create bars data
   local bars_data = {}
-  for i, project in ipairs(projects) do
+  for i, project in ipairs(arr_projects) do
     local bar_height = math.max(1, math.floor((project.time / max_time) * (chart_height - 4)))
     local color = colors[((i - 1) % #colors) + 1]
     local bar_lines, bar_color = generate_bar(bar_height, color)
 
     table.insert(bars_data, {
-      project = project,
+      project_name = M._get_project_name(project.id),
+      project_time = project.time,
       height = bar_height,
       lines = bar_lines,
       color = bar_color,
@@ -123,12 +181,14 @@ M.create_dashboard_content = function(stats, win_width, win_height)
   -- Add time labels above bars
   local time_line = string.rep(' ', win_width)
   for _, bar in ipairs(bars_data) do
-    local time_str = format_time(bar.project.time)
+    local time_str = utils.format_time(bar.project_time)
     local label_start = bar.start_col + math.floor((bar.width - #time_str) / 2)
     if label_start >= 0 and label_start + #time_str <= win_width then
-      time_line = time_line:sub(1, label_start) .. time_str .. time_line:sub(label_start + #time_str + 1)
+      time_line = time_line:sub(1, label_start)
+        .. time_str
+        .. time_line:sub(label_start + #time_str + 1)
       table.insert(highlights, {
-        line = #lines + 1,
+        line = #lines + 1, -- Line stays the same - always the next one
         col = label_start,
         end_col = label_start + #time_str,
         hl_group = 'DevChroniclesTime',
@@ -139,12 +199,14 @@ M.create_dashboard_content = function(stats, win_width, win_height)
   table.insert(lines, '')
 
   -- Generate bar chart lines
-  local max_bar_height = math.max(
-    1,
-    math.max(unpack(vim.tbl_map(function(b)
-      return b.height
-    end, bars_data)))
-  )
+  local max_bar_height = (chart_height - 4)
+  -- TODO: Does not seem this is needed if highest bar takes max hight
+  -- local max_bar_height = math.max(
+  --   1,
+  --   math.max(unpack(vim.tbl_map(function(b)
+  --     return b.height
+  --   end, bars_data)))
+  -- )
 
   for row = max_bar_height, 1, -1 do
     local line = string.rep(' ', win_width)
@@ -152,7 +214,7 @@ M.create_dashboard_content = function(stats, win_width, win_height)
     for _, bar in ipairs(bars_data) do
       if row <= bar.height then
         local char_idx = bar.height - row + 1
-        local char = bar.lines[char_idx] or bar.lines[1]
+        local char = bar.lines[char_idx] or bar.lines[1] -- or not needed?
 
         -- Fill the bar width with the character
         for col = 0, bar.width - 1 do
@@ -177,15 +239,18 @@ M.create_dashboard_content = function(stats, win_width, win_height)
 
   -- Add baseline
   table.insert(lines, string.rep('─', win_width))
-  table.insert(highlights, { line = #lines, col = 0, end_col = -1, hl_group = 'DevChroniclesLabel' })
+  table.insert(
+    highlights,
+    { line = #lines, col = 0, end_col = -1, hl_group = 'DevChroniclesLabel' }
+  )
 
   -- Add project names
   local names_line = string.rep(' ', win_width)
   for _, bar in ipairs(bars_data) do
-    local name = bar.project.name
+    local name = bar.project_name
     -- Truncate name if too long for bar width
     if #name > bar.width then
-      name = name:sub(1, bar.width - 1) .. '…'
+      name = name:sub(1, bar.width - 1) .. '.' -- '…'
     end
 
     local name_start = bar.start_col + math.floor((bar.width - #name) / 2)
