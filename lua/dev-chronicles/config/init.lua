@@ -7,28 +7,41 @@ local defaults = {
   data_file = 'dev-chronicles.json',
   log_file = 'log.dev-chronicles.log',
   dashboard = {
+    column_width = 10,
     sort = true,
     sort_by_last_worked_not_total_time = true,
     ascending = true,
     n_months_by_default = 2,
     proj_total_time_as_hours_max = true,
     total_time_as_hours_max = true,
+    dashboard_all = {
+      sort = true,
+      sort_by_last_worked_not_total_time = false,
+      ascending = true,
+    },
   },
 }
 
----@class DashboardOptions
+---@class chronicles.Options.Dashboard.All
+---@field sort boolean Whether to sort the projects when displaying all chronicles data
+---@field sort_by_last_worked_not_total_time boolean Whether to sort using last worked time instead of total worked time when displaying all chronicles data
+---@field ascending boolean Whether to sort in ascending order when displaying all chronicles data
+
+---@class chronicles.Options.Dashboard
+---@field column_width integer width of each column
 ---@field sort boolean Whether to sort the projects
 ---@field sort_by_last_worked_not_total_time boolean Whether to sort using last worked time instead of total worked time
 ---@field ascending boolean Whether to sort in ascending order
 ---@field n_months_by_default integer Number of months for default dashboard
 ---@field proj_total_time_as_hours_max boolean Format total time for each project as at most hours
 ---@field total_time_as_hours_max boolean Format total time as at most hours
+---@field dashboard_all chronicles.Options.Dashboard.All
 
----@class DevChroniclesOptions
+---@class chronicles.Options
 ---@field tracked_dirs string[] List of dirs to track
 ---@field tracked_paths string[] List of paths to track
 ---@field min_session_time integer Minimum session time in seconds
----@field dashboard DashboardOptions
+---@field dashboard chronicles.Options.Dashboard
 ---@field data_file string Path to the data file
 ---@field log_file string Path to the log file
 M.options = {}
@@ -36,7 +49,7 @@ M.options = {}
 M.setup = function(opts)
   local utils = require('dev-chronicles.utils')
 
-  ---@type DevChroniclesOptions
+  ---@type chronicles.Options
   local merged = vim.tbl_deep_extend('force', defaults, opts or {})
 
   if type(merged.tracked_dirs) == 'string' then

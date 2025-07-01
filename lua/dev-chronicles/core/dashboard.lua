@@ -42,8 +42,9 @@ end
 ---@param stats Stats
 ---@param win_width integer
 ---@param win_height integer
+---@param dashboard_type DashboardType
 ---@return table, table: Lines, Highlights
-M.create_dashboard_content = function(stats, win_width, win_height)
+M.create_dashboard_content = function(stats, win_width, win_height, dashboard_type)
   local string_utils = require('dev-chronicles.utils.strings')
   local lines = {}
   local highlights = {}
@@ -93,10 +94,14 @@ M.create_dashboard_content = function(stats, win_width, win_height)
     })
   end
 
-  if dashboard_opts.sort then
-    local by_last_worked = dashboard_opts.sort_by_last_worked_not_total_time
-    local asc = dashboard_opts.ascending
+  local correct_dashboard_sorting_opts = (
+    dashboard_type == require('dev-chronicles.api').DashboardType.All
+    and dashboard_opts.dashboard_all
+  ) or dashboard_opts
 
+  if correct_dashboard_sorting_opts.sort then
+    local by_last_worked = correct_dashboard_sorting_opts.sort_by_last_worked_not_total_time
+    local asc = correct_dashboard_sorting_opts.ascending
     table.sort(arr_projects, function(a, b)
       if by_last_worked then
         if asc then
