@@ -6,8 +6,7 @@ local M = {}
 ---@field first_worked number
 ---@field last_worked number
 
----@class Projects
----@field [string] ProjectData
+---@alias Projects table<string, ProjectData>
 
 ---@class ChroniclesData
 ---@field global_time number
@@ -61,7 +60,7 @@ M.load_data = function()
   if vim.fn.filereadable(file_path) == 0 then
     return {
       global_time = 0,
-      tracking_start = M.current_timestamp(),
+      tracking_start = M.get_current_timestamp(),
       projects = {},
     }
   end
@@ -114,10 +113,14 @@ M.get_current_timestamp = function()
   return os.time()
 end
 
----Returns the current month as a string: 'MM.YYYY'
+---Returns the month as a string in the format 'MM.YYYY'.
+---If a timestamp is provided, returns the month for that timestamp;
+---otherwise, returns the current month.
+---@param timestamp? integer
 ---@return string
-M.get_current_month = function()
-  return tostring(os.date('%m.%Y'))
+M.get_month_str = function(timestamp)
+  ---@type string
+  return os.date('%m.%Y', timestamp)
 end
 
 ---Accepts a month-year string in format: 'MM.YYYY' and extracts month
@@ -212,7 +215,7 @@ end
 ---The result is formatted as:
 ---  - 'MM-MM.YYYY (duration)' if both months are in the same year
 ---  - 'MM.YYYY-MM.YYYY (duration)' if the months are in different years
----where 'duration' is the time between the two dates, formatted as s/h/d.
+---where 'duration' is the time between the two dates, formatted as s/m/h/d.
 ---@param start_month_year string 'MM.YYYY'
 ---@param end_month_year string 'MM.YYYY'
 ---@return string: Formatted period string
@@ -220,7 +223,7 @@ M.get_time_period_str = function(start_month_year, end_month_year)
   local start_month_timestamp = M.convert_month_str_to_timestamp(start_month_year)
 
   local end_month_timestamp
-  if M.get_current_month() == end_month_year then
+  if M.get_month_str() == end_month_year then
     end_month_timestamp = M.get_current_timestamp()
   else
     end_month_timestamp = M.convert_month_str_to_timestamp(end_month_year, true)

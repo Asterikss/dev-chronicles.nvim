@@ -288,7 +288,7 @@ M.get_stats = function(dashboard_type, start, end_)
   local options = require('dev-chronicles.config').options
 
   if dashboard_type == M.DashboardType.Default then
-    local curr_month = utils.get_current_month()
+    local curr_month = utils.get_month_str()
     start = utils.get_previous_month(curr_month, options.dashboard.n_months_by_default - 1)
     end_ = curr_month
   end

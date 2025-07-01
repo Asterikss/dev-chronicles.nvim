@@ -14,7 +14,7 @@ local session = {
 
 M.init = function()
   local dashboard = require('dev-chronicles.core.dashboard')
-  local curr_month = require('dev-chronicles.utils').get_current_month()
+  local curr_month = require('dev-chronicles.utils').get_month_str()
   local api = require('dev-chronicles')
 
   vim.api.nvim_create_user_command('DevChronicles', function(opts)
@@ -132,7 +132,7 @@ M.record_session = function(project_id, duration, end_time)
   end
 
   local project = data.projects[project_id]
-  local curr_month = utils.get_current_month()
+  local curr_month = utils.get_month_str()
   project.total_time = project.total_time + duration
   project.last_worked = end_time
   project.by_month[curr_month] = (project.by_month[curr_month] or 0) + duration
