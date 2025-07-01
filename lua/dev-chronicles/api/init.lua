@@ -37,7 +37,6 @@ function M.dashboard(dashboard_type, start, end_)
   })
 
   local stats = dashboard.get_stats(dashboard_type, start, end_)
-
   local lines, highlights = dashboard.create_dashboard_content(stats, win_width, win_height)
 
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)

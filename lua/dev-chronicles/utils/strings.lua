@@ -100,4 +100,11 @@ M.str_sub = function(str, i, j)
   return str:sub(s + 1, e)
 end
 
+---Extract prject name from its id
+---@param project_id string
+---@return string
+M.get_project_name = function(project_id)
+  return project_id:match('([^/]+)/?$') or project_id
+end
+
 return M

@@ -25,10 +25,6 @@ local colors = {
   'DevChroniclesPurple',
 }
 
-M._get_project_name = function(project_id)
-  return project_id:match('([^/]+)/?$') or project_id
-end
-
 local function generate_bar(height, color_name)
   local bar_lines = {}
   local patterns = { '/', '\\' }
@@ -48,6 +44,7 @@ end
 ---@param win_height integer
 ---@return table, table: Lines, Highlights
 M.create_dashboard_content = function(stats, win_width, win_height)
+  local string_utils = require('dev-chronicles.utils.strings')
   local lines = {}
   local highlights = {}
 
@@ -129,7 +126,14 @@ M.create_dashboard_content = function(stats, win_width, win_height)
   local total_chart_width = #arr_projects * bar_width + (#arr_projects - 1) * bar_spacing
   local chart_start_col = math.floor((win_width - total_chart_width) / 2)
 
-  -- Create bars data
+  ---@class BarsData
+  ---@field project_name string
+  ---@field project_time integer
+  ---@field height  integer
+  ---@field lines table
+  ---@field color string
+  ---@field start_col integer
+  ---@field width integer
   local bars_data = {}
   for i, project in ipairs(arr_projects) do
     local bar_height = math.max(1, math.floor((project.time / max_time) * (chart_height - 4)))
@@ -137,7 +141,7 @@ M.create_dashboard_content = function(stats, win_width, win_height)
     local bar_lines, bar_color = generate_bar(bar_height, color)
 
     table.insert(bars_data, {
-      project_name = M._get_project_name(project.id),
+      project_name = string_utils.get_project_name(project.id),
       project_time = project.time,
       height = bar_height,
       lines = bar_lines,
