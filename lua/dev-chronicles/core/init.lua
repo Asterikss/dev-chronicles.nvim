@@ -1,11 +1,9 @@
 local M = {}
 
 ---@class Session
----@field project_id string | nil
----@field start_time integer | nil
+---@field project_id? string
+---@field start_time? integer
 ---@field is_tracking boolean
-
----@type Session
 local session = {
   project_id = nil,
   start_time = nil,
@@ -13,9 +11,9 @@ local session = {
 }
 
 M.init = function()
-  local dashboard = require('dev-chronicles.core.dashboard')
+  local DashboardType = require('dev-chronicles.api').DashboardType
   local curr_month = require('dev-chronicles.utils').get_month_str()
-  local api = require('dev-chronicles')
+  local api = require('dev-chronicles.api')
 
   vim.api.nvim_create_user_command('DevChronicles', function(opts)
     local args = opts.fargs
@@ -87,24 +85,20 @@ M.start_session = function()
 
   if is_project then
     session.project_id = project_id
-    session.start_time = utils.current_timestamp()
+    session.start_time = utils.get_current_timestamp()
     session.is_tracking = true
   end
 end
 
 M.end_session = function()
-  local get_current_timestamp = require('dev-chronicles.utils').current_timestamp
-  local options = require('dev-chronicles.config').options
-
   if not session.is_tracking or not session.project_id or not session.start_time then
     return
   end
 
-  local end_time = get_current_timestamp()
+  local end_time = require('dev-chronicles.utils').get_current_timestamp()
   local session_duration = end_time - session.start_time
 
-  -- Only record if session is longer than minimum session length
-  if session_duration >= options.min_session_time then
+  if session_duration >= require('dev-chronicles.config').options.min_session_time then
     M.record_session(session.project_id, session_duration, end_time)
   end
 
@@ -113,6 +107,9 @@ M.end_session = function()
   session.is_tracking = false
 end
 
+---@param project_id string Project id
+---@param duration integer Duration in seconds
+---@param end_time integer End timestamp
 M.record_session = function(project_id, duration, end_time)
   local utils = require('dev-chronicles.utils')
   local data = utils.load_data()

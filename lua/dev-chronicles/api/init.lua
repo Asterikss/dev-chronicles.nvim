@@ -1,9 +1,15 @@
 local M = {}
 
+M.DashboardType = {
+  Default = 'Default',
+  Custom = 'Custom',
+  All = 'All',
+}
+
 ---Create DevChronicles dashboard
 ---@param dashboard_type DashboardType
----@param start string | nil
----@param end_ string | nil
+---@param start? string 'MM.YYYY'
+---@param end_? string 'MM.YYYY'
 function M.dashboard(dashboard_type, start, end_)
   local dashboard = require('dev-chronicles.core.dashboard')
 
@@ -62,6 +68,7 @@ function M.dashboard(dashboard_type, start, end_)
   vim.api.nvim_buf_set_option(buf, 'filetype', 'dev-chronicles-dashboard')
   vim.api.nvim_buf_set_option(buf, 'modifiable', false)
   vim.api.nvim_buf_set_option(buf, 'readonly', true)
+  vim.api.nvim_win_set_cursor(win, { 2, 1 })
 end
 
 M.get_session_info = function()

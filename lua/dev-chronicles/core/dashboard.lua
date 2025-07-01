@@ -1,16 +1,5 @@
 local M = {}
 
-M.DashboardType = {
-  Default = 1,
-  Custom = 2,
-  All = 3,
-}
-
----@alias DashboardType
----| '"Default"'
----| '"Custom"'
----| '"All"'
-
 ---@class Stats.ParsedProjectsData
 ---@field total_time integer
 ---@field last_worked integer
@@ -294,7 +283,7 @@ M.get_stats = function(dashboard_type, start, end_)
 
   local options = require('dev-chronicles.config').options
 
-  if dashboard_type == M.DashboardType.Default then
+  if dashboard_type == require('dev-chronicles.api').DashboardType.Default then
     local curr_month = utils.get_month_str()
     start = utils.get_previous_month(curr_month, options.dashboard.n_months_by_default - 1)
     end_ = curr_month
