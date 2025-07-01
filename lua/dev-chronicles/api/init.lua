@@ -13,7 +13,7 @@ M.DashboardType = {
 function M.dashboard(dashboard_type, start, end_)
   local dashboard = require('dev-chronicles.core.dashboard')
 
-  dashboard.setup_highlights()
+  require('dev-chronicles.core.highlights').setup_highlights()
 
   local screen_width = vim.o.columns
   local screen_height = vim.o.lines
