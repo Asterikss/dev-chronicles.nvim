@@ -269,9 +269,9 @@ M.create_dashboard_content = function(stats, win_width, win_height)
   return lines, highlights
 end
 
----Get the filtered project stats depending on the DashboardType
----@param dashboard_type DashboardType Default | Custom | All
----@param start? string  Start month 'MM.YYYY'
+---Get desired project stats depending on the DashboardType
+---@param dashboard_type DashboardType
+---@param start? string  Starting month 'MM.YYYY'
 ---@param end_? string  End month 'MM.YYYY'
 ---@return Stats
 M.get_stats = function(dashboard_type, start, end_)
@@ -281,8 +281,15 @@ M.get_stats = function(dashboard_type, start, end_)
     return {}
   end
 
-  if dashboard_type == M.DashboardType.All then
-    return data
+  if dashboard_type == require('dev-chronicles.api').DashboardType.All then
+    return {
+      global_time = data.global_time,
+      global_time_filtered = data.global_time,
+      projects_filtered = data.projects,
+      projects_filtered_parsed = data.projects,
+      start_date = utils.get_month_str(data.tracking_start),
+      end_date = utils.get_month_str(),
+    }
   end
 
   local options = require('dev-chronicles.config').options
