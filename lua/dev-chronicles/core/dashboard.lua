@@ -223,26 +223,55 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
   )
 
   -- Add project names
-  local names_line = string.rep(' ', win_width)
+  local max_lines_pnames = 0
+  ---@type table<string, table<string>>
+  local formatted_names = {}
+
   for _, bar in ipairs(bars_data) do
-    local name = bar.project_name
-    -- Truncate name if too long for bar width
-    if #name > bar.width then
-      name = name:sub(1, bar.width - 1) .. '.' -- '…'
+    local project_names_tbl = string_utils.format_project_name(bar.project_name, bar.width)
+    formatted_names[bar.project_name] = project_names_tbl
+    max_lines_pnames = math.max(max_lines_pnames, #project_names_tbl)
+  end
+
+  for line_idx = 1, max_lines_pnames do
+    local line_chars = {}
+    for i = 1, win_width do
+      line_chars[i] = ' '
     end
 
-    local name_start = bar.start_col + math.floor((bar.width - #name) / 2)
-    if name_start >= 0 and name_start + #name <= win_width then
-      names_line = names_line:sub(1, name_start) .. name .. names_line:sub(name_start + #name + 1)
-      table.insert(highlights, {
-        line = #lines + 1,
-        col = name_start,
-        end_col = name_start + #name,
-        hl_group = bar.color,
-      })
+    local hl_bytes_shift = 0
+
+    for _, bar in ipairs(bars_data) do
+      local project_names_tbl = formatted_names[bar.project_name]
+      local name_part = project_names_tbl[line_idx]
+
+      if name_part then
+        -- The number of display columns the string will occupy in the terminal
+        local name_display_width = vim.fn.strdisplaywidth(name_part)
+        local name_start = bar.start_col + math.floor((bar.width - name_display_width) / 2)
+        local n_bytes_name = #name_part
+
+        -- How many Unicode codepoints (characters) are in the string.
+        for i = 1, vim.str_utfindex(name_part) do
+          local char = string_utils.str_sub(name_part, i, i)
+          local pos = name_start + i
+          line_chars[pos] = char
+        end
+
+        -- Highlights still operate on bytes, so we use hl_bytes_shift to combat that
+        table.insert(highlights, {
+          line = #lines + 1,
+          col = name_start + hl_bytes_shift,
+          end_col = name_start + hl_bytes_shift + n_bytes_name,
+          hl_group = bar.color,
+        })
+
+        hl_bytes_shift = hl_bytes_shift + n_bytes_name - name_display_width
+      end
     end
+
+    table.insert(lines, table.concat(line_chars))
   end
-  table.insert(lines, names_line)
 
   return lines, highlights
 end
