@@ -112,4 +112,107 @@ M.sort_and_filter_projects_to_fit = function(
   return arr_projects_filtered
 end
 
+M._generate_bar = function(height, color_name)
+  local bar_lines = {}
+  local patterns = { '/', '\\' }
+
+  for i = 1, height do
+    -- Alternate between / and \ for crosshatch effect
+    local char = patterns[(i % 2) + 1]
+    table.insert(bar_lines, char)
+  end
+
+  return bar_lines, color_name
+end
+
+---@param arr_projects chronicles.Dashboard.ProjectArray
+---@param max_time integer
+---@param chart_height integer
+---@param chart_start_col integer
+---@param bar_width integer
+---@param bar_spacing integer
+---@return chronicles.Dashboard.BarsData
+M.create_bars_data = function(
+  arr_projects,
+  max_time,
+  chart_height,
+  chart_start_col,
+  bar_width,
+  bar_spacing
+)
+  local string_utils = require('dev-chronicles.utils.strings')
+
+  local bars_data = {}
+  for i, project in ipairs(arr_projects) do
+    local bar_height = math.max(1, math.floor((project.time / max_time) * (chart_height - 4)))
+    local color = M._colors[((i - 1) % #M._colors) + 1]
+    local bar_lines, bar_color = M._generate_bar(bar_height, color)
+
+    table.insert(bars_data, {
+      project_name = string_utils.get_project_name(project.id),
+      project_time = project.time,
+      height = bar_height,
+      lines = bar_lines,
+      color = bar_color,
+      start_col = chart_start_col + (i - 1) * (bar_width + bar_spacing),
+      width = bar_width,
+    })
+  end
+
+  return bars_data
+end
+
+---@param lines any
+---@param highlights any
+---@param bars_data chronicles.Dashboard.BarsData
+---@param win_width any
+---@param color_proj_times_like_bars any
+M.set_time_labels_above_bars = function(
+  lines,
+  highlights,
+  bars_data,
+  win_width,
+  color_proj_times_like_bars
+)
+  local utils = require('dev-chronicles.utils')
+  local highlights_insert_positon = #lines + 1
+
+  local time_line = {}
+  for i = 1, win_width do
+    time_line[i] = ' '
+  end
+
+  for _, bar in ipairs(bars_data) do
+    local time_str = utils.format_time(bar.project_time)
+    local len_time_str = #time_str
+    local label_start = bar.start_col + math.floor((bar.width - len_time_str) / 2)
+    if label_start >= 0 and label_start + len_time_str <= win_width then
+      for i = 1, len_time_str do
+        time_line[label_start + i] = time_str:sub(i, i)
+      end
+      if color_proj_times_like_bars then
+        table.insert(highlights, {
+          line = highlights_insert_positon,
+          col = label_start,
+          end_col = label_start + len_time_str,
+          hl_group = bar.color,
+        })
+      end
+    end
+  end
+
+  table.insert(lines, table.concat(time_line))
+
+  if not color_proj_times_like_bars then
+    table.insert(highlights, {
+      line = highlights_insert_positon,
+      col = 0,
+      end_col = win_width,
+      hl_group = 'DevChroniclesTime',
+    })
+  end
+
+  table.insert(lines, '')
+end
+
 return M
