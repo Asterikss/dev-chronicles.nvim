@@ -1,5 +1,16 @@
 local M = {}
 
+M._colors = {
+  'DevChroniclesRed',
+  'DevChroniclesBlue',
+  'DevChroniclesGreen',
+  'DevChroniclesYellow',
+  'DevChroniclesMagenta',
+  'DevChroniclesCyan',
+  'DevChroniclesOrange',
+  'DevChroniclesPurple',
+}
+
 ---Calculates number of projects to keep and the chart starting column
 ---@param bar_width integer
 ---@param bar_spacing integer
@@ -131,7 +142,7 @@ end
 ---@param chart_start_col integer
 ---@param bar_width integer
 ---@param bar_spacing integer
----@return chronicles.Dashboard.BarsData
+---@return chronicles.Dashboard.BarsData, integer
 M.create_bars_data = function(
   arr_projects,
   max_time,
@@ -143,13 +154,19 @@ M.create_bars_data = function(
   local string_utils = require('dev-chronicles.utils.strings')
 
   local bars_data = {}
+  local max_lines_proj_names = 0
+
   for i, project in ipairs(arr_projects) do
     local bar_height = math.max(1, math.floor((project.time / max_time) * (chart_height - 4)))
     local color = M._colors[((i - 1) % #M._colors) + 1]
     local bar_lines, bar_color = M._generate_bar(bar_height, color)
 
+    local project_name = string_utils.get_project_name(project.id)
+    local project_name_tbl = string_utils.format_project_name(project_name, bar_width)
+    max_lines_proj_names = math.max(max_lines_proj_names, #project_name_tbl)
+
     table.insert(bars_data, {
-      project_name = string_utils.get_project_name(project.id),
+      project_name_tbl = project_name_tbl,
       project_time = project.time,
       height = bar_height,
       lines = bar_lines,
@@ -159,7 +176,7 @@ M.create_bars_data = function(
     })
   end
 
-  return bars_data
+  return bars_data, max_lines_proj_names
 end
 
 ---@param lines any
@@ -213,6 +230,63 @@ M.set_time_labels_above_bars = function(
   end
 
   table.insert(lines, '')
+end
+
+M.set_hline_lines_highlights = function(lines, highlights, win_width, hl_group)
+  table.insert(lines, string.rep('▔', win_width)) -- '─'
+  table.insert(
+    highlights,
+    { line = #lines, col = 0, end_col = -1, hl_group = hl_group or 'DevChroniclesLabel' }
+  )
+end
+
+M.set_project_names_lines_highlights = function(
+  lines,
+  highlights,
+  bars_data,
+  max_lines_proj_names,
+  win_width
+)
+  local string_utils = require('dev-chronicles.utils.strings')
+
+  for line_idx = 1, max_lines_proj_names do
+    local line_chars = {}
+    for i = 1, win_width do
+      line_chars[i] = ' '
+    end
+
+    local hl_bytes_shift = 0
+
+    for _, bar in ipairs(bars_data) do
+      local name_part = bar.project_name_tbl[line_idx]
+
+      if name_part then
+        -- The number of display columns the string will occupy in the terminal
+        local name_display_width = vim.fn.strdisplaywidth(name_part)
+        local name_start = bar.start_col + math.floor((bar.width - name_display_width) / 2)
+        local n_bytes_name = #name_part
+
+        -- str_utfindex -> How many Unicode codepoints (characters) are in the string.
+        for i = 1, vim.str_utfindex(name_part) do
+          local char = string_utils.str_sub(name_part, i, i)
+          local pos = name_start + i
+          line_chars[pos] = char
+        end
+
+        -- Highlights still operate on bytes, so we use hl_bytes_shift to combat that
+        table.insert(highlights, {
+          line = #lines + 1,
+          col = name_start + hl_bytes_shift,
+          end_col = name_start + hl_bytes_shift + n_bytes_name,
+          hl_group = bar.color,
+        })
+
+        hl_bytes_shift = hl_bytes_shift + n_bytes_name - name_display_width
+      end
+    end
+
+    table.insert(lines, table.concat(line_chars))
+  end
 end
 
 return M
