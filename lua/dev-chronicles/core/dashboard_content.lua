@@ -123,17 +123,33 @@ M.sort_and_filter_projects_to_fit = function(
   return arr_projects_filtered
 end
 
-M._generate_bar = function(height, color_name)
-  local bar_lines = {}
-  local patterns = { '/', '\\' }
+---Unrolls provided bar representation pattern to match `bar_width`. If it
+---fails, returns the fallback bar representation consisting of `@`
+---@param pattern string[]
+---@param bar_width integer
+---@return string[]
+M.construct_bar_string_tbl_representation = function(pattern, bar_width)
+  local bar_representation = {}
 
-  for i = 1, height do
-    -- Alternate between / and \ for crosshatch effect
-    local char = patterns[(i % 2) + 1]
-    table.insert(bar_lines, char)
+  for _, row_chars in ipairs(pattern) do
+    local display_width = vim.fn.strdisplaywidth(row_chars)
+    local n_to_fill_bar_width = bar_width / display_width
+    if n_to_fill_bar_width ~= math.floor(n_to_fill_bar_width) then
+      vim.notify(
+        'provided bar_chars row characters: '
+          .. row_chars
+          .. ' cannot be smoothly expanded to bar_width='
+          .. tostring(bar_width)
+          .. ' given their display_width='
+          .. tostring(display_width)
+          .. '. Falling back to @ bar representation'
+      )
+      return { string.rep('@', bar_width) }
+    end
+    table.insert(bar_representation, string.rep(row_chars, n_to_fill_bar_width))
   end
 
-  return bar_lines, color_name
+  return bar_representation
 end
 
 ---@param arr_projects chronicles.Dashboard.ProjectArray
