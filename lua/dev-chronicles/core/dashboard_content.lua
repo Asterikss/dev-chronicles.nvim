@@ -248,6 +248,63 @@ M.set_time_labels_above_bars = function(
   table.insert(lines, '')
 end
 
+---@param lines string[]
+---@param highlights table<integer>
+---@param bars_data chronicles.Dashboard.BarData[]
+---@param realized_bar_repr string[]
+---@param bar_rows_codepoints integer[]
+---@param max_bar_height integer
+---@param win_width integer
+M.set_bars_lines_highlights = function(
+  lines,
+  highlights,
+  bars_data,
+  realized_bar_repr,
+  bar_rows_codepoints,
+  max_bar_height,
+  win_width
+)
+  local str_sub = require('dev-chronicles.utils.strings').str_sub
+  local len_bar_repr = #realized_bar_repr
+  local bar_repr_row_index = 0
+
+  for row = max_bar_height, 1, -1 do
+    bar_repr_row_index = (bar_repr_row_index % len_bar_repr) + 1
+
+    local line_chars = vim.split(string.rep(' ', win_width), '', true)
+    local hl_bytes_shift = 0
+
+    for _, bar in ipairs(bars_data) do
+      if row <= bar.height then
+        local bar_row_str = realized_bar_repr[bar_repr_row_index]
+
+        for i = 1, bar_rows_codepoints[bar_repr_row_index] do
+          local idx = bar.start_col + i
+          local char = str_sub(bar_row_str, i, i)
+          line_chars[idx] = char
+        end
+
+        local n_bytes_bar_row_str = #bar_row_str
+
+        -- bar.start_col does not account for multibyte characters and
+        -- highlights operate on bytes, so we use hl_bytes_shift to combat that
+        table.insert(highlights, {
+          line = #lines + 1,
+          col = bar.start_col + hl_bytes_shift,
+          end_col = bar.start_col + n_bytes_bar_row_str + hl_bytes_shift,
+          hl_group = bar.color,
+        })
+
+        -- bar.width equals vim.fn.strdisplaywidth(bar_row_str), enforced in
+        -- M.construct_bar_string_tbl_representation
+        hl_bytes_shift = hl_bytes_shift + n_bytes_bar_row_str - bar.width
+      end
+    end
+
+    table.insert(lines, table.concat(line_chars))
+  end
+end
+
 M.set_hline_lines_highlights = function(lines, highlights, win_width, hl_group)
   table.insert(lines, string.rep('▔', win_width)) -- '─'
   table.insert(
