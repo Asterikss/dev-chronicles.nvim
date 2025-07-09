@@ -31,6 +31,14 @@ M.calc_chart_stats = function(bar_width, bar_spacing, max_chart_width, n_project
   return n_projects_to_keep, chart_start_col
 end
 
+---Adds 3 line header
+---@param lines string[]
+---@param highlights table<integer>
+---@param start_date string 'MM.YYY'
+---@param end_date string  'MM.YYY'
+---@param win_width integer
+---@param global_time_filtered integer
+---@param total_time_as_hours_max boolean
 M.set_header_lines_highlights = function(
   lines,
   highlights,
@@ -52,15 +60,15 @@ M.set_header_lines_highlights = function(
   table.insert(lines, string.rep('─', win_width))
 
   table.insert(highlights, { line = 1, col = 0, end_col = -1, hl_group = 'DevChroniclesTitle' })
+  table.insert(highlights, { line = 3, col = 0, end_col = -1, hl_group = 'DevChroniclesTitle' })
 end
 
 ---Parse projects into an array, so that it can be sorted and traversed in
----order, and calculate max_time
----@param projects_filtered_parsed any
----@return table<integer, { id: string, time: integer, last_worked: integer }>
----@return integer
+---order, and calculate maximum time across projects
+---@param projects_filtered_parsed chronicles.Dashboard.Stats.ParsedProjects
+---@return chronicles.Dashboard.FinalProjectData[], integer
 M.parse_projects_calc_max_time = function(projects_filtered_parsed)
-  ---@type table<integer, {id: string, time: integer, last_worked: integer}>
+  ---@type chronicles.Dashboard.FinalProjectData[]
   local arr_projects = {}
   local max_time = 0
 
@@ -78,13 +86,13 @@ M.parse_projects_calc_max_time = function(projects_filtered_parsed)
   return arr_projects, max_time
 end
 
-M.sort_and_filter_projects_to_fit = function(
-  arr_projects,
-  n_projects_to_keep,
-  sort,
-  by_last_worked,
-  asc
-)
+---@param arr_projects chronicles.Dashboard.FinalProjectData[]
+---@param n_projects_to_keep integer
+---@param sort boolean
+---@param by_last_worked boolean
+---@param asc boolean
+---@return chronicles.Dashboard.FinalProjectData[]
+M.sort_and_cutoff_projects = function(arr_projects, n_projects_to_keep, sort, by_last_worked, asc)
   if sort then
     table.sort(arr_projects, function(a, b)
       if by_last_worked then
@@ -111,7 +119,7 @@ M.sort_and_filter_projects_to_fit = function(
   local arr_projects_filtered = {}
 
   if asc then
-    for i = math.max(1, len_arr_projects - n_projects_to_keep), len_arr_projects do
+    for i = math.max(1, len_arr_projects - n_projects_to_keep + 1), len_arr_projects do
       table.insert(arr_projects_filtered, arr_projects[i])
     end
   else
@@ -124,12 +132,14 @@ M.sort_and_filter_projects_to_fit = function(
 end
 
 ---Unrolls provided bar representation pattern to match `bar_width`. If it
----fails, returns the fallback bar representation consisting of `@`
+---fails, returns the fallback bar representation consisting of `@`. Also return
+---codepoints counts for all the rows
 ---@param pattern string[]
 ---@param bar_width integer
----@return string[]
+---@return string[], integer[]
 M.construct_bar_string_tbl_representation = function(pattern, bar_width)
-  local bar_representation = {}
+  local realized_bar_repr = {}
+  local bar_rows_codepoints = {}
 
   for _, row_chars in ipairs(pattern) do
     local display_width = vim.fn.strdisplaywidth(row_chars)
@@ -144,29 +154,35 @@ M.construct_bar_string_tbl_representation = function(pattern, bar_width)
           .. tostring(display_width)
           .. '. Falling back to @ bar representation'
       )
-      return { string.rep('@', bar_width) }
+      return { string.rep('@', bar_width) }, { bar_width }
     end
-    table.insert(bar_representation, string.rep(row_chars, n_to_fill_bar_width))
+    local row = string.rep(row_chars, n_to_fill_bar_width)
+    local _, codepointidx = vim.str_utfindex(row)
+    table.insert(realized_bar_repr, row)
+    table.insert(bar_rows_codepoints, codepointidx)
   end
 
-  return bar_representation
+  return realized_bar_repr, bar_rows_codepoints
 end
 
----@param arr_projects chronicles.Dashboard.ProjectArray
+---@param arr_projects chronicles.Dashboard.FinalProjectData[]
 ---@param max_time integer
 ---@param chart_height integer
 ---@param chart_start_col integer
 ---@param bar_width integer
 ---@param bar_spacing integer
----@return chronicles.Dashboard.BarsData, integer
+---@param let_proj_names_extend_bars_by_one boolean
+---@return chronicles.Dashboard.BarData[], integer
 M.create_bars_data = function(
   arr_projects,
   max_time,
   chart_height,
   chart_start_col,
   bar_width,
-  bar_spacing
+  bar_spacing,
+  let_proj_names_extend_bars_by_one
 )
+  -- TODO: return max bar hegiht
   local string_utils = require('dev-chronicles.utils.strings')
 
   local bars_data = {}
@@ -175,18 +191,19 @@ M.create_bars_data = function(
   for i, project in ipairs(arr_projects) do
     local bar_height = math.max(1, math.floor((project.time / max_time) * (chart_height - 4)))
     local color = M._colors[((i - 1) % #M._colors) + 1]
-    local bar_lines, bar_color = M._generate_bar(bar_height, color)
 
     local project_name = string_utils.get_project_name(project.id)
-    local project_name_tbl = string_utils.format_project_name(project_name, bar_width)
+    local project_name_tbl = string_utils.format_project_name(
+      project_name,
+      bar_width + (let_proj_names_extend_bars_by_one and 2 or 0)
+    )
     max_lines_proj_names = math.max(max_lines_proj_names, #project_name_tbl)
 
     table.insert(bars_data, {
       project_name_tbl = project_name_tbl,
       project_time = project.time,
       height = bar_height,
-      lines = bar_lines,
-      color = bar_color,
+      color = color,
       start_col = chart_start_col + (i - 1) * (bar_width + bar_spacing),
       width = bar_width,
     })
@@ -195,11 +212,11 @@ M.create_bars_data = function(
   return bars_data, max_lines_proj_names
 end
 
----@param lines any
----@param highlights any
----@param bars_data chronicles.Dashboard.BarsData
----@param win_width any
----@param color_proj_times_like_bars any
+---@param lines string[]
+---@param highlights table<integer>
+---@param bars_data chronicles.Dashboard.BarData[]
+---@param win_width integer
+---@param color_proj_times_like_bars boolean
 M.set_time_labels_above_bars = function(
   lines,
   highlights,
@@ -210,10 +227,7 @@ M.set_time_labels_above_bars = function(
   local utils = require('dev-chronicles.utils')
   local highlights_insert_positon = #lines + 1
 
-  local time_line = {}
-  for i = 1, win_width do
-    time_line[i] = ' '
-  end
+  local time_line = vim.split(string.rep(' ', win_width), '')
 
   for _, bar in ipairs(bars_data) do
     local time_str = utils.format_time(bar.project_time)
@@ -271,7 +285,7 @@ M.set_bars_lines_highlights = function(
   for row = max_bar_height, 1, -1 do
     bar_repr_row_index = (bar_repr_row_index % len_bar_repr) + 1
 
-    local line_chars = vim.split(string.rep(' ', win_width), '', true)
+    local line_chars = vim.split(string.rep(' ', win_width), '')
     local hl_bytes_shift = 0
 
     for _, bar in ipairs(bars_data) do
@@ -306,21 +320,33 @@ M.set_bars_lines_highlights = function(
 end
 
 M.set_hline_lines_highlights = function(lines, highlights, win_width, hl_group)
-  table.insert(lines, string.rep('▔', win_width)) -- '─'
+  table.insert(lines, string.rep('▔', win_width))
   table.insert(
     highlights,
     { line = #lines, col = 0, end_col = -1, hl_group = hl_group or 'DevChroniclesLabel' }
   )
 end
 
+---@param lines string[]
+---@param highlights string[]
+---@param bars_data chronicles.Dashboard.BarData[]
+---@param max_lines_proj_names integer
+---@param let_proj_names_extend_bars_by_one boolean
+---@param win_width integer
 M.set_project_names_lines_highlights = function(
   lines,
   highlights,
   bars_data,
   max_lines_proj_names,
+  let_proj_names_extend_bars_by_one,
   win_width
 )
   local string_utils = require('dev-chronicles.utils.strings')
+
+  -- local name_offset = 0
+  -- if let_proj_names_extend_bars_by_one then
+  --   name_offset = 1
+  -- end
 
   for line_idx = 1, max_lines_proj_names do
     local line_chars = {}
@@ -336,17 +362,25 @@ M.set_project_names_lines_highlights = function(
       if name_part then
         -- The number of display columns the string will occupy in the terminal
         local name_display_width = vim.fn.strdisplaywidth(name_part)
-        local name_start = bar.start_col + math.floor((bar.width - name_display_width) / 2)
+        local name_start
+        if let_proj_names_extend_bars_by_one then
+          name_start = bar.start_col - 1 + math.floor((bar.width + 2 - name_display_width) / 2)
+        else
+          name_start = bar.start_col + math.floor((bar.width - name_display_width) / 2)
+        end
         local n_bytes_name = #name_part
 
         -- str_utfindex -> How many Unicode codepoints (characters) are in the string.
+        -- It actually returns two numbers. First one is used for the loop, but it does
+        -- not seems to matter here which one is used
         for i = 1, vim.str_utfindex(name_part) do
           local char = string_utils.str_sub(name_part, i, i)
           local pos = name_start + i
           line_chars[pos] = char
         end
 
-        -- Highlights still operate on bytes, so we use hl_bytes_shift to combat that
+        -- bar.start_col (name_start) does not account for multibyte characters and
+        -- highlights operate on bytes, so we use hl_bytes_shift to combat that
         table.insert(highlights, {
           line = #lines + 1,
           col = name_start + hl_bytes_shift,
