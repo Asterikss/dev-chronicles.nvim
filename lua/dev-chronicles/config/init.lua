@@ -5,6 +5,7 @@ local defaults = {
   tracked_dirs = {},
   exclude_subdirs_relative = {},
   exclude_dirs_absolute = {},
+  sort_tracked_parent_dirs = false,
   min_session_time = 180,
   data_file = 'dev-chronicles.json',
   log_file = 'log.dev-chronicles.log',
@@ -70,6 +71,7 @@ local defaults = {
 ---@field tracked_dirs string[] List of paths to track
 ---@field exclude_subdirs_relative table<string, boolean> List of subdirs to exclude from tracked_parent_dirs subdirs
 ---@field exclude_dirs_absolute string[] List of absolute dirs to exclude (tracked_parent_dirs can have two different dirs that have two subdirs of the same name)
+---@field sort_tracked_parent_dirs boolean If paths are not supplied from longest to shortest, then they need to be sorted like that
 ---@field min_session_time integer Minimum session time in seconds
 ---@field dashboard chronicles.Options.Dashboard
 ---@field data_file string Path to the data file
@@ -82,23 +84,31 @@ M.setup = function(opts)
   ---@type chronicles.Options
   local merged = vim.tbl_deep_extend('force', defaults, opts or {})
 
-  if type(merged.tracked_dirs) == 'string' then
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    merged.tracked_dirs = { merged.tracked_dirs }
+  local function handle_paths_field(path_field_key, sort)
+    local paths_tbl_field = merged[path_field_key]
+    if type(paths_tbl_field) == 'string' then
+      paths_tbl_field = { paths_tbl_field }
+    end
+    for i = 1, #paths_tbl_field do
+      paths_tbl_field[i] = utils.expand(paths_tbl_field[i])
+    end
+    if sort then
+      table.sort(paths_tbl_field, function(a, b)
+        return #a > #b
+      end)
+    end
+    merged[path_field_key] = paths_tbl_field
   end
 
-  for i = 1, #merged.tracked_dirs do
-    merged.tracked_dirs[i] = utils.expand(merged.tracked_dirs[i])
-  end
+  handle_paths_field('tracked_parent_dirs', merged.sort_tracked_parent_dirs)
+  handle_paths_field('tracked_dirs')
+  handle_paths_field('exclude_dirs_absolute')
 
-  if type(merged.tracked_paths) == 'string' then
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    merged.tracked_paths = { merged.tracked_paths }
+  local exclude_subdirs_relative_map = {}
+  for _, subdir in ipairs(merged.exclude_subdirs_relative) do
+    exclude_subdirs_relative_map[subdir] = true
   end
-
-  for i = 1, #merged.tracked_paths do
-    merged.tracked_paths[i] = utils.expand(merged.tracked_paths[i])
-  end
+  merged.exclude_subdirs_relative = exclude_subdirs_relative_map
 
   if vim.fn.isabsolutepath(merged.data_file) ~= 1 then
     merged.data_file = vim.fn.stdpath('data') .. '/' .. merged.data_file
@@ -111,6 +121,20 @@ M.setup = function(opts)
 
   if merged.dashboard.n_months_by_default < 1 then
     vim.notify('DevChronicles: n_months_by_default should be greter than 0')
+    return
+  end
+
+  if merged.dashboard.bar_spacing < 0 then
+    vim.notify('DevChronicles: bar_spacing should be a positive number')
+    return
+  end
+
+  if
+    merged.dashboard.footer.let_proj_names_extend_bars_by_one and merged.dashboard.bar_spacing < 2
+  then
+    vim.notify(
+      'DevChronicles: if let_proj_names_extend_bars_by_one is set to true then bar_spacing should be at least 2'
+    )
     return
   end
 
