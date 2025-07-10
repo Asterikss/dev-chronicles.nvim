@@ -178,7 +178,7 @@ end
 
 ---@param arr_projects chronicles.Dashboard.FinalProjectData[]
 ---@param max_time integer
----@param chart_height integer
+---@param max_bar_height integer
 ---@param chart_start_col integer
 ---@param bar_width integer
 ---@param bar_spacing integer
@@ -187,20 +187,19 @@ end
 M.create_bars_data = function(
   arr_projects,
   max_time,
-  chart_height,
+  max_bar_height,
   chart_start_col,
   bar_width,
   bar_spacing,
   let_proj_names_extend_bars_by_one
 )
-  -- TODO: return max bar hegiht
   local string_utils = require('dev-chronicles.utils.strings')
 
   local bars_data = {}
   local max_lines_proj_names = 0
 
   for i, project in ipairs(arr_projects) do
-    local bar_height = math.max(1, math.floor((project.time / max_time) * (chart_height - 4)))
+    local bar_height = math.max(1, math.floor((project.time / max_time) * max_bar_height))
     local color = M._colors[((i - 1) % #M._colors) + 1]
 
     local project_name = string_utils.get_project_name(project.id)
@@ -256,7 +255,7 @@ M.set_time_labels_above_bars = function(
   ---@param bar_start_col integer
   ---@param bar_width integer
   ---@param color? string
-  ---@param highlights_insert_positon? integer
+  ---@param highlights_insert_positon integer
   local function place_label(
     target_line,
     time_to_format,

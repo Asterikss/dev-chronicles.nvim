@@ -23,6 +23,7 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
 
   local chart_height = win_height - 6 -- header_height + footer_height
   local max_chart_width = win_width - 4 -- margins
+  local max_bar_height = chart_height - 3 -- projects_time + gap + chart floor
 
   dashboard_content.set_header_lines_highlights(
     lines,
@@ -59,11 +60,19 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     correct_dashboard_sorting_opts.ascending
   )
 
+  if dashboard_opts.dynamic_bar_height_months then
+    max_bar_height = dashboard_content.calc_max_bar_height(
+      max_bar_height,
+      dashboard_opts.dynamic_bar_height_months_thresholds,
+      max_time
+    )
+  end
+
   ---@type chronicles.Dashboard.BarData[], integer
   local bars_data, max_lines_proj_names = dashboard_content.create_bars_data(
     arr_projects,
     max_time,
-    chart_height,
+    max_bar_height,
     chart_start_col,
     dashboard_opts.bar_width,
     dashboard_opts.bar_spacing,
@@ -92,7 +101,7 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     bars_data,
     realized_bar_repr,
     bar_rows_codepoints,
-    chart_height - 4,
+    max_bar_height,
     win_width
   )
 

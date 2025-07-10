@@ -27,6 +27,10 @@ local defaults = {
       { '╳' },
       { '@' },
     },
+    dynamic_bar_height_months = false,
+    dynamic_bar_height_months_thresholds = { 15, 25, 40 },
+    dynamic_bar_height_day = false,
+    dynamic_bar_height_day_thresholds = { 2, 3.5, 5 },
     sort = true,
     sort_by_last_worked_not_total_time = true,
     ascending = true,
@@ -65,6 +69,10 @@ local defaults = {
 ---@field bar_spacing integer spacing between each column
 ---@field bar_chars string[][] All the bar representation patterns
 ---@field sort boolean Whether to sort the projects
+---@field dynamic_bar_height_months boolean
+---@field dynamic_bar_height_months_thresholds integer[]
+---@field dynamic_bar_height_day boolean
+---@field dynamic_bar_height_day_thresholds integer[]
 ---@field sort_by_last_worked_not_total_time boolean Whether to sort using last worked time instead of total worked time
 ---@field ascending boolean Whether to sort in ascending order
 ---@field n_months_by_default integer Number of months for default dashboard
