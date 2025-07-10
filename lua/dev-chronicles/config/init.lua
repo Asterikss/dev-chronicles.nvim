@@ -17,6 +17,7 @@ local defaults = {
       show_global_time_for_each_project = true,
       show_global_time_only_if_different = true,
       color_global_proj_times_like_bars = false,
+      show_global_total_time = false,
     },
     bar_width = 10,
     bar_spacing = 3,

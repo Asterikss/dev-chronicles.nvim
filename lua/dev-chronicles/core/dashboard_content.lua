@@ -39,6 +39,7 @@ end
 ---@param win_width integer
 ---@param global_time_filtered integer
 ---@param total_time_as_hours_max boolean
+---@param global_total_time? integer
 M.set_header_lines_highlights = function(
   lines,
   highlights,
@@ -47,7 +48,8 @@ M.set_header_lines_highlights = function(
   win_width,
   global_time_filtered,
   total_time_as_hours_max,
-  show_current_session_time
+  show_current_session_time,
+  global_total_time
 )
   local utils = require('dev-chronicles.utils')
   local left_header = string.format(
@@ -65,9 +67,30 @@ M.set_header_lines_highlights = function(
   end
 
   local right_header = utils.get_time_period_str(start_date, end_date)
-  local header_padding = win_width - #left_header - #right_header
 
-  table.insert(lines, left_header .. string.rep(' ', header_padding) .. right_header)
+  local middle_header = global_total_time
+      and string.format('Σ Global Time: %s', utils.format_time(global_total_time))
+    or nil
+
+  local header_line
+  if middle_header then
+    local total_length = #left_header + #middle_header + #right_header
+    local available_space = win_width - total_length
+
+    local left_space = math.floor(available_space / 2)
+    local right_space = available_space - left_space
+
+    header_line = left_header
+      .. string.rep(' ', left_space)
+      .. middle_header
+      .. string.rep(' ', right_space)
+      .. right_header
+  else
+    local header_padding = win_width - #left_header - #right_header
+    header_line = left_header .. string.rep(' ', header_padding) .. right_header
+  end
+
+  table.insert(lines, header_line)
   table.insert(lines, '')
   M.set_hline_lines_highlights(lines, highlights, win_width, '─', 'DevChroniclesTitle')
   table.insert(highlights, { line = 1, col = 0, end_col = -1, hl_group = 'DevChroniclesTitle' })
@@ -83,12 +106,11 @@ M.parse_projects_calc_max_time = function(projects_filtered_parsed)
   local max_time = 0
 
   for parsed_project_id, parsed_project_data in pairs(projects_filtered_parsed) do
-    if parsed_project_data.total_time > max_time then
-      max_time = parsed_project_data.total_time
-    end
+    local project_total_time = parsed_project_data.total_time
+    max_time = math.max(max_time, project_total_time)
     table.insert(arr_projects, {
       id = parsed_project_id,
-      time = parsed_project_data.total_time,
+      time = project_total_time,
       last_worked = parsed_project_data.last_worked,
       global_time = parsed_project_data.total_global_time,
     })
@@ -471,6 +493,15 @@ M.set_project_names_lines_highlights = function(
 
     table.insert(lines, table.concat(line_chars))
   end
+end
+
+M.calc_max_bar_height = function(initial_max_bar_height, thresholds, max_time)
+  for i, threshold in ipairs(thresholds) do
+    if max_time < threshold * 3600 then
+      return math.floor((i / (#thresholds + 1)) * initial_max_bar_height)
+    end
+  end
+  return initial_max_bar_height
 end
 
 return M
