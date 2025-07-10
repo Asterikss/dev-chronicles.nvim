@@ -223,6 +223,13 @@ M.get_time_period_str = function(start_month_year, end_month_year)
   return start_month_year .. '-' .. end_month_year .. time_period_str
 end
 
+---@generic T
+---@param table T[]
+---@return T
+M.get_random_from_tbl = function(table)
+  return table[math.random(1, #table)]
+end
+
 ---Shuffles a table in-place
 ---@param tbl table[]
 M.shuffle = function(tbl)
