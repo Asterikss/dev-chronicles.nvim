@@ -39,6 +39,8 @@ local defaults = {
     ascending = true,
     n_months_by_default = 2,
     proj_total_time_as_hours_max = true,
+    random_bars_coloring = false,
+    bars_coloring_follows_sorting_in_order = true,
     footer = {
       let_proj_names_extend_bars_by_one = false,
     },
@@ -62,6 +64,9 @@ local defaults = {
 ---@field show_global_time_for_each_project boolean Should the global total project time be shown for each project
 ---@field show_global_time_only_if_different boolean
 ---@field color_global_proj_times_like_bars boolean
+---@field show_global_total_time boolean
+---@field total_time_format_str string
+---@field global_total_time_format_str string
 
 ---@class chronicles.Options.Dashboard.Footer
 ---@field let_proj_names_extend_bars_by_one boolean
@@ -80,6 +85,8 @@ local defaults = {
 ---@field ascending boolean Whether to sort in ascending order
 ---@field n_months_by_default integer Number of months for default dashboard
 ---@field proj_total_time_as_hours_max boolean Format total time for each project as at most hours
+---@field random_bars_coloring boolean
+---@field bars_coloring_follows_sorting_in_order boolean
 ---@field footer chronicles.Options.Dashboard.Footer
 ---@field dashboard_all chronicles.Options.Dashboard.All
 

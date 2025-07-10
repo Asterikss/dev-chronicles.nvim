@@ -3,12 +3,12 @@ local M = {}
 M._colors = {
   'DevChroniclesRed',
   'DevChroniclesBlue',
+  'DevChroniclesPurple',
   'DevChroniclesGreen',
   'DevChroniclesYellow',
   'DevChroniclesMagenta',
-  'DevChroniclesCyan',
+  'DevChroniclesLightPurple',
   'DevChroniclesOrange',
-  'DevChroniclesPurple',
 }
 
 ---Calculates number of projects to keep and the chart starting column
@@ -213,6 +213,8 @@ end
 ---@param bar_width integer
 ---@param bar_spacing integer
 ---@param let_proj_names_extend_bars_by_one boolean
+---@param random_bars_coloring boolean
+---@param projects_sorted_ascending boolean
 ---@return chronicles.Dashboard.BarData[], integer
 M.create_bars_data = function(
   arr_projects,
@@ -221,16 +223,42 @@ M.create_bars_data = function(
   chart_start_col,
   bar_width,
   bar_spacing,
-  let_proj_names_extend_bars_by_one
+  let_proj_names_extend_bars_by_one,
+  random_bars_coloring,
+  projects_sorted_ascending
 )
   local string_utils = require('dev-chronicles.utils.strings')
+  local shuffle = require('dev-chronicles.utils').shuffle
 
   local bars_data = {}
   local max_lines_proj_names = 0
+  local n_projects = #arr_projects
+  local colors = M._colors
+  local n_colors = #colors
+  local color_index
+
+  if random_bars_coloring then
+    colors = vim.deepcopy(M._colors)
+    shuffle(colors)
+    color_index = 1
+  end
 
   for i, project in ipairs(arr_projects) do
     local bar_height = math.max(1, math.floor((project.time / max_time) * max_bar_height))
-    local color = M._colors[((i - 1) % #M._colors) + 1]
+
+    local color
+    if random_bars_coloring then
+      -- All colors were used
+      if color_index > n_colors then
+        shuffle(colors)
+        color_index = 1
+      end
+      color = colors[color_index]
+      color_index = color_index + 1
+    else
+      color = projects_sorted_ascending and colors[((n_projects - i) % n_colors) + 1]
+        or colors[((i - 1) % n_colors) + 1]
+    end
 
     local project_name = string_utils.get_project_name(project.id)
     local project_name_tbl = string_utils.format_project_name(

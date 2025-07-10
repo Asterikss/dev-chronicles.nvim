@@ -223,4 +223,13 @@ M.get_time_period_str = function(start_month_year, end_month_year)
   return start_month_year .. '-' .. end_month_year .. time_period_str
 end
 
+---Shuffles a table in-place
+---@param tbl table[]
+M.shuffle = function(tbl)
+  for i = #tbl, 2, -1 do
+    local j = math.random(i)
+    tbl[i], tbl[j] = tbl[j], tbl[i]
+  end
+end
+
 return M

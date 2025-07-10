@@ -79,7 +79,11 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     chart_start_col,
     dashboard_opts.bar_width,
     dashboard_opts.bar_spacing,
-    dashboard_opts.footer.let_proj_names_extend_bars_by_one
+    dashboard_opts.footer.let_proj_names_extend_bars_by_one,
+    dashboard_opts.random_bars_coloring,
+    dashboard_opts.bars_coloring_follows_sorting_in_order
+        and correct_dashboard_sorting_opts.ascending
+      or not correct_dashboard_sorting_opts.ascending
   )
 
   dashboard_content.set_time_labels_above_bars(
