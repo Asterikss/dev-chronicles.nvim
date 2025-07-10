@@ -46,21 +46,31 @@ M.set_header_lines_highlights = function(
   end_date,
   win_width,
   global_time_filtered,
-  total_time_as_hours_max
+  total_time_as_hours_max,
+  show_current_session_time
 )
   local utils = require('dev-chronicles.utils')
   local left_header = string.format(
     'Ξ Total Time: %s',
     utils.format_time(global_time_filtered, total_time_as_hours_max)
   )
+
+  if show_current_session_time then
+    local session_start_time = require('dev-chronicles.core').get_session_info().start_time
+    if session_start_time then
+      local curr_timestamp = utils.get_current_timestamp()
+      local session_time = utils.format_time(curr_timestamp - session_start_time)
+      left_header = left_header .. ' (' .. session_time .. ')'
+    end
+  end
+
   local right_header = utils.get_time_period_str(start_date, end_date)
   local header_padding = win_width - #left_header - #right_header
+
   table.insert(lines, left_header .. string.rep(' ', header_padding) .. right_header)
   table.insert(lines, '')
-  table.insert(lines, string.rep('─', win_width))
-
+  M.set_hline_lines_highlights(lines, highlights, win_width, '─', 'DevChroniclesTitle')
   table.insert(highlights, { line = 1, col = 0, end_col = -1, hl_group = 'DevChroniclesTitle' })
-  table.insert(highlights, { line = 3, col = 0, end_col = -1, hl_group = 'DevChroniclesTitle' })
 end
 
 ---Parse projects into an array, so that it can be sorted and traversed in
@@ -319,8 +329,13 @@ M.set_bars_lines_highlights = function(
   end
 end
 
-M.set_hline_lines_highlights = function(lines, highlights, win_width, hl_group)
-  table.insert(lines, string.rep('▔', win_width))
+---@param lines string[]
+---@param highlights table<integer>
+---@param win_width integer
+---@param char? string
+---@param hl_group? string
+M.set_hline_lines_highlights = function(lines, highlights, win_width, char, hl_group)
+  table.insert(lines, string.rep(char or '▔', win_width))
   table.insert(
     highlights,
     { line = #lines, col = 0, end_col = -1, hl_group = hl_group or 'DevChroniclesLabel' }

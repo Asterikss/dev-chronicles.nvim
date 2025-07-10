@@ -12,6 +12,7 @@ local defaults = {
     header = {
       color_proj_times_like_bars = false,
       total_time_as_hours_max = true,
+      show_current_session_time = true,
     },
     bar_width = 10,
     bar_spacing = 3,
@@ -46,6 +47,7 @@ local defaults = {
 ---@class chronicles.Options.Dashboard.Header
 ---@field color_proj_times_like_bars boolean Whether to color project time stats the same as their bars
 ---@field total_time_as_hours_max boolean Format total time as at most hours
+---@field show_current_session_time boolean Should the current session time be shown next to total time
 
 ---@class chronicles.Options.Dashboard.Footer
 ---@field let_proj_names_extend_bars_by_one boolean
