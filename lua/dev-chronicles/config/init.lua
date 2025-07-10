@@ -1,19 +1,35 @@
 local M = {}
 
 local defaults = {
+  tracked_parent_dirs = {},
   tracked_dirs = {},
-  tracked_paths = {},
+  exclude_subdirs_relative = {},
+  exclude_dirs_absolute = {},
   min_session_time = 180,
   data_file = 'dev-chronicles.json',
   log_file = 'log.dev-chronicles.log',
   dashboard = {
-    column_width = 10,
+    header = {
+      color_proj_times_like_bars = false,
+      total_time_as_hours_max = true,
+    },
+    bar_width = 10,
+    bar_spacing = 3,
+    bar_chars = {
+      { '/', '\\' },
+      { '|' },
+      { '┼' },
+      { '╳' },
+      { '@' },
+    },
     sort = true,
     sort_by_last_worked_not_total_time = true,
     ascending = true,
     n_months_by_default = 2,
     proj_total_time_as_hours_max = true,
-    total_time_as_hours_max = true,
+    footer = {
+      let_proj_names_extend_bars_by_one = false,
+    },
     dashboard_all = {
       sort = true,
       sort_by_last_worked_not_total_time = false,
@@ -27,19 +43,31 @@ local defaults = {
 ---@field sort_by_last_worked_not_total_time boolean Whether to sort using last worked time instead of total worked time when displaying all chronicles data
 ---@field ascending boolean Whether to sort in ascending order when displaying all chronicles data
 
+---@class chronicles.Options.Dashboard.Header
+---@field color_proj_times_like_bars boolean Whether to color project time stats the same as their bars
+---@field total_time_as_hours_max boolean Format total time as at most hours
+
+---@class chronicles.Options.Dashboard.Footer
+---@field let_proj_names_extend_bars_by_one boolean
+
 ---@class chronicles.Options.Dashboard
----@field column_width integer width of each column
+---@field header chronicles.Options.Dashboard.Header
+---@field bar_width integer width of each column
+---@field bar_spacing integer spacing between each column
+---@field bar_chars string[][] All the bar representation patterns
 ---@field sort boolean Whether to sort the projects
 ---@field sort_by_last_worked_not_total_time boolean Whether to sort using last worked time instead of total worked time
 ---@field ascending boolean Whether to sort in ascending order
 ---@field n_months_by_default integer Number of months for default dashboard
 ---@field proj_total_time_as_hours_max boolean Format total time for each project as at most hours
----@field total_time_as_hours_max boolean Format total time as at most hours
+---@field footer chronicles.Options.Dashboard.Footer
 ---@field dashboard_all chronicles.Options.Dashboard.All
 
 ---@class chronicles.Options
----@field tracked_dirs string[] List of dirs to track
----@field tracked_paths string[] List of paths to track
+---@field tracked_parent_dirs string[] List of dirs to track
+---@field tracked_dirs string[] List of paths to track
+---@field exclude_subdirs_relative table<string, boolean> List of subdirs to exclude from tracked_parent_dirs subdirs
+---@field exclude_dirs_absolute string[] List of absolute dirs to exclude (tracked_parent_dirs can have two different dirs that have two subdirs of the same name)
 ---@field min_session_time integer Minimum session time in seconds
 ---@field dashboard chronicles.Options.Dashboard
 ---@field data_file string Path to the data file
