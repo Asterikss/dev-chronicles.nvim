@@ -30,29 +30,6 @@ M.unexpand = function(path)
   end
 end
 
-M.is_project = function(cwd)
-  -- assumes all paths are absolute and expanded, and all dirs end with a slash
-  local options = require('dev-chronicles.config').options
-  -- TODO: probably start from longest so that nested projects are treated correctly
-  for _, tracked_path in ipairs(options.tracked_dirs) do
-    -- No exact matches. Only subdirectories are matched.
-    if
-      cwd:find(tracked_path, 1, true) == 1
-      and #cwd > #tracked_path
-      and cwd:sub(#tracked_path, #tracked_path) == '/'
-    then
-      -- Get the first directory after tracked_path
-      local first_dir = cwd:sub(#tracked_path):match('([^/]+)')
-      if first_dir then
-        local project_id = tracked_path .. first_dir .. '/'
-        return true, M.unexpand(project_id)
-      end
-    end
-  end
-
-  return false, nil
-end
-
 ---@return ChroniclesData | nil
 M.load_data = function()
   local file_path = require('dev-chronicles.config').options.data_file

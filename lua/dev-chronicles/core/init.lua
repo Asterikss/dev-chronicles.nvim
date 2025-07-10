@@ -77,15 +77,57 @@ M._setup_autocmds = function()
   })
 end
 
-M.start_session = function()
-  local utils = require('dev-chronicles.utils')
-  local cwd = vim.fn.getcwd()
+---Determine if cwd shoud be tracked. If it should also return its id,
+---otherwise return nil. Assumes all paths are absolute and expanded, and all
+---dirs end with a slash
+---@param cwd string
+---@param options chronicles.Options
+---@return boolean, string?
+M._is_project = function(cwd, options)
+  if not cwd:match('/$') then
+    cwd = cwd .. '/'
+  end
 
-  local is_project, project_id = utils.is_project(cwd)
+  -- Because both end with a slash, if it matches, it cannot be a different dir with
+  -- the same prefix
+  for _, exclude_path in ipairs(options.exclude_dirs_absolute) do
+    if cwd:find(exclude_path, 1, true) == 1 then
+      return false, nil
+    end
+  end
+
+  for _, dir in ipairs(options.tracked_dirs) do
+    if cwd == dir then
+      return true, cwd
+    end
+  end
+
+  -- Only match subdirectories, not the tracked_parent_dirs path itself
+  for _, parent_dir in ipairs(options.tracked_parent_dirs) do
+    if cwd:find(parent_dir, 1, true) == 1 and cwd ~= parent_dir then
+      -- Get the first directory after the parent_dir
+      local first_dir = cwd:sub(#parent_dir):match('([^/]+)')
+      if first_dir then
+        if options.exclude_subdirs_relative[first_dir] then
+          return false, nil
+        end
+
+        local project_id = parent_dir .. first_dir .. '/'
+        return true, require('dev-chronicles.utils').unexpand(project_id)
+      end
+    end
+  end
+
+  return false, nil
+end
+
+M.start_session = function()
+  local is_project, project_id =
+    M._is_project(vim.fn.getcwd(), require('dev-chronicles.config').options)
 
   if is_project then
     session.project_id = project_id
-    session.start_time = utils.get_current_timestamp()
+    session.start_time = require('dev-chronicles.utils').get_current_timestamp()
     session.is_tracking = true
   end
 end
