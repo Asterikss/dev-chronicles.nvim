@@ -39,7 +39,10 @@ end
 ---@param win_width integer
 ---@param global_time_filtered integer
 ---@param total_time_as_hours_max boolean
+---@param show_current_session_time boolean
+---@param total_time_format_str string
 ---@param global_total_time? integer
+---@param global_total_time_format_str string
 M.set_header_lines_highlights = function(
   lines,
   highlights,
@@ -49,11 +52,13 @@ M.set_header_lines_highlights = function(
   global_time_filtered,
   total_time_as_hours_max,
   show_current_session_time,
-  global_total_time
+  total_time_format_str,
+  global_total_time,
+  global_total_time_format_str
 )
   local utils = require('dev-chronicles.utils')
   local left_header = string.format(
-    'Ξ Total Time: %s',
+    total_time_format_str,
     utils.format_time(global_time_filtered, total_time_as_hours_max)
   )
 
@@ -69,7 +74,10 @@ M.set_header_lines_highlights = function(
   local right_header = utils.get_time_period_str(start_date, end_date)
 
   local middle_header = global_total_time
-      and string.format('Σ Global Time: %s', utils.format_time(global_total_time))
+      and string.format(
+        global_total_time_format_str,
+        utils.format_time(global_total_time, total_time_as_hours_max)
+      )
     or nil
 
   local header_line

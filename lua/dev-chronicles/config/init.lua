@@ -18,6 +18,8 @@ local defaults = {
       show_global_time_only_if_different = true,
       color_global_proj_times_like_bars = false,
       show_global_total_time = false,
+      total_time_format_str = 'Ξ Total Time: %s',
+      global_total_time_format_str = 'Σ Global Time: %s',
     },
     bar_width = 10,
     bar_spacing = 3,

@@ -34,7 +34,9 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     stats.global_time_filtered,
     dashboard_opts.header.total_time_as_hours_max,
     dashboard_opts.header.show_current_session_time,
-    dashboard_opts.header.show_global_total_time and stats.global_time or nil
+    dashboard_opts.header.total_time_format_str,
+    dashboard_opts.header.show_global_total_time and stats.global_time or nil,
+    dashboard_opts.header.global_total_time_format_str
   )
 
   local arr_projects, max_time =
