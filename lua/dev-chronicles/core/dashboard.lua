@@ -75,7 +75,11 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     highlights,
     bars_data,
     win_width,
-    dashboard_opts.header.color_proj_times_like_bars
+    dashboard_opts.header.color_proj_times_like_bars,
+    dashboard_opts.header.show_global_time_for_each_project,
+    dashboard_opts.header.show_global_time_only_if_different,
+    dashboard_opts.header.color_global_proj_times_like_bars,
+    dashboard_type
   )
 
   local bar_repr = get_random_from_tbl(dashboard_opts.bar_chars)
@@ -106,11 +110,11 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
   return lines, highlights
 end
 
----Get desired project stats depending on the DashboardType
+---Get project stats depending on the DashboardType
 ---@param dashboard_type DashboardType
 ---@param start? string  Starting month 'MM.YYYY'
 ---@param end_? string  End month 'MM.YYYY'
----@return Stats
+---@return chronicles.Dashboard.Stats
 M.get_stats = function(dashboard_type, start, end_)
   local utils = require('dev-chronicles.utils')
   local data = utils.load_data()
@@ -122,7 +126,6 @@ M.get_stats = function(dashboard_type, start, end_)
     return {
       global_time = data.global_time,
       global_time_filtered = data.global_time,
-      projects_filtered = data.projects,
       projects_filtered_parsed = data.projects,
       start_date = utils.get_month_str(data.tracking_start),
       end_date = utils.get_month_str(),
@@ -167,7 +170,7 @@ M.get_stats = function(dashboard_type, start, end_)
 
   -- Collect total time for each project in the chosen time period and
   -- last_worked time from the filtered projects
-  ---@type Stats.ParsedProjects
+  ---@type chronicles.Dashboard.Stats.ParsedProjects
   local projects_filtered_parsed = {}
   local global_time_filtered = 0
 
@@ -181,8 +184,11 @@ M.get_stats = function(dashboard_type, start, end_)
       local month_time = project_data.by_month[curr_date_key]
       if month_time ~= nil then
         if not projects_filtered_parsed[project_id] then
-          projects_filtered_parsed[project_id] =
-            { total_time = 0, last_worked = project_data.last_worked }
+          projects_filtered_parsed[project_id] = {
+            total_time = 0,
+            last_worked = project_data.last_worked,
+            total_global_time = project_data.total_time,
+          }
         end
         local filtered_project = projects_filtered_parsed[project_id]
         filtered_project.total_time = filtered_project.total_time + month_time
@@ -199,7 +205,6 @@ M.get_stats = function(dashboard_type, start, end_)
   return {
     global_time = data.global_time,
     global_time_filtered = global_time_filtered,
-    projects_filtered = filtered_projects,
     projects_filtered_parsed = projects_filtered_parsed,
     start_date = start,
     end_date = end_,

@@ -90,6 +90,7 @@ M.parse_projects_calc_max_time = function(projects_filtered_parsed)
       id = parsed_project_id,
       time = parsed_project_data.total_time,
       last_worked = parsed_project_data.last_worked,
+      global_time = parsed_project_data.total_global_time,
     })
   end
 
@@ -216,6 +217,7 @@ M.create_bars_data = function(
       color = color,
       start_col = chart_start_col + (i - 1) * (bar_width + bar_spacing),
       width = bar_width,
+      global_project_time = project.global_time,
     })
   end
 
@@ -227,44 +229,110 @@ end
 ---@param bars_data chronicles.Dashboard.BarData[]
 ---@param win_width integer
 ---@param color_proj_times_like_bars boolean
+---@param show_global_time_for_each_project boolean
+---@param show_global_time_only_if_different boolean
+---@param color_global_proj_times_like_bars boolean
+---@param dashboard_type DashboardType
 M.set_time_labels_above_bars = function(
   lines,
   highlights,
   bars_data,
   win_width,
-  color_proj_times_like_bars
+  color_proj_times_like_bars,
+  show_global_time_for_each_project,
+  show_global_time_only_if_different,
+  color_global_proj_times_like_bars,
+  dashboard_type
 )
-  local utils = require('dev-chronicles.utils')
-  local highlights_insert_positon = #lines + 1
+  local format_time = require('dev-chronicles.utils').format_time
 
-  local time_line = vim.split(string.rep(' ', win_width), '')
+  -- If DashboardType is All, then bar.global_project_time will be nil
+  show_global_time_for_each_project = show_global_time_for_each_project
+    and dashboard_type ~= require('dev-chronicles.api').DashboardType.All
 
-  for _, bar in ipairs(bars_data) do
-    local time_str = utils.format_time(bar.project_time)
+  -- Helper function to place a formatted time string onto a character array.
+  ---@param target_line string[]
+  ---@param time_to_format integer
+  ---@param bar_start_col integer
+  ---@param bar_width integer
+  ---@param color? string
+  ---@param highlights_insert_positon? integer
+  local function place_label(
+    target_line,
+    time_to_format,
+    bar_start_col,
+    bar_width,
+    color,
+    highlights_insert_positon
+  )
+    local time_str = format_time(time_to_format)
     local len_time_str = #time_str
-    local label_start = bar.start_col + math.floor((bar.width - len_time_str) / 2)
+    local label_start = bar_start_col + math.floor((bar_width - len_time_str) / 2)
+
     if label_start >= 0 and label_start + len_time_str <= win_width then
       for i = 1, len_time_str do
-        time_line[label_start + i] = time_str:sub(i, i)
+        target_line[label_start + i] = time_str:sub(i, i)
       end
-      if color_proj_times_like_bars then
+
+      if color then
         table.insert(highlights, {
           line = highlights_insert_positon,
           col = label_start,
           end_col = label_start + len_time_str,
-          hl_group = bar.color,
+          hl_group = color,
         })
       end
     end
   end
 
-  table.insert(lines, table.concat(time_line))
+  local highlights_insert_positon = #lines + 1
+  local time_line = vim.split(string.rep(' ', win_width), '')
 
+  local global_time_line
+  if show_global_time_for_each_project then
+    global_time_line = vim.split(string.rep(' ', win_width), '')
+  end
+
+  for _, bar in ipairs(bars_data) do
+    if global_time_line then
+      if not show_global_time_only_if_different or bar.global_project_time ~= bar.project_time then
+        place_label(
+          global_time_line,
+          bar.global_project_time,
+          bar.start_col,
+          bar.width,
+          color_global_proj_times_like_bars and bar.color or nil,
+          2
+        )
+      end
+    end
+
+    place_label(
+      time_line,
+      bar.project_time,
+      bar.start_col,
+      bar.width,
+      color_proj_times_like_bars and bar.color or nil,
+      highlights_insert_positon
+    )
+  end
+
+  if global_time_line then
+    lines[2] = table.concat(global_time_line)
+    table.insert(highlights, {
+      line = 2,
+      col = 0,
+      end_col = -1,
+      hl_group = 'DevChroniclesLabel',
+    })
+  end
+
+  table.insert(lines, table.concat(time_line))
   if not color_proj_times_like_bars then
     table.insert(highlights, {
       line = highlights_insert_positon,
       col = 0,
-      end_col = win_width,
+      end_col = -1,
       hl_group = 'DevChroniclesTime',
     })
   end
@@ -357,11 +425,6 @@ M.set_project_names_lines_highlights = function(
   win_width
 )
   local string_utils = require('dev-chronicles.utils.strings')
-
-  -- local name_offset = 0
-  -- if let_proj_names_extend_bars_by_one then
-  --   name_offset = 1
-  -- end
 
   for line_idx = 1, max_lines_proj_names do
     local line_chars = {}

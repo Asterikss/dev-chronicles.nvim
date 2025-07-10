@@ -5,30 +5,44 @@
 ---| 'Custom'
 ---| 'All'
 
----@class (exact) chronicles.Dashboard.Stats.ParsedProjectsData
+---@class (exact) chronicles.Dashboard.Stats.ParsedProjectData
 ---@field total_time integer
 ---@field last_worked integer
+---@field total_global_time integer?
 
----@alias chronicles.Dashboard.Stats.ParsedProjects table<string, chronicles.Dashboard.Stats.ParsedProjectsData>
+---@alias chronicles.Dashboard.Stats.ParsedProjects table<string, chronicles.Dashboard.Stats.ParsedProjectData>
 
 ---@class (exact) chronicles.Dashboard.Stats
 ---@field global_time integer
 ---@field global_time_filtered integer
----@field projects_filtered Projects
 ---@field projects_filtered_parsed chronicles.Dashboard.Stats.ParsedProjects
 ---@field start_date string
 ---@field end_date string
 
----@class (exact) chronicles.Dashboard.BarsData
----@field project_name_tbl table<string>
+---@class (exact) chronicles.Dashboard.BarData
+---@field project_name_tbl string[]
 ---@field project_time integer
 ---@field height  integer
----@field lines table
 ---@field color string
 ---@field start_col integer
 ---@field width integer
+---@field global_project_time integer?
 
----@class (exact) chronicles.Dashboard.ProjectArray
+---@class (exact) chronicles.Dashboard.FinalProjectData
 ---@field id string
 ---@field time integer
----@field last_worked  integer
+---@field last_worked integer
+---@field global_time integer?
+
+---@class (exact) ProjectData
+---@field total_time number
+---@field by_month table<string, number>
+---@field first_worked number
+---@field last_worked number
+
+---@alias Projects table<string, ProjectData>
+
+---@class (exact) ChroniclesData
+---@field global_time number
+---@field tracking_start number
+---@field projects Projects
