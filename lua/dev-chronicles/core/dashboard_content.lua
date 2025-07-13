@@ -172,40 +172,6 @@ M.sort_and_cutoff_projects = function(arr_projects, n_projects_to_keep, sort, by
   return arr_projects_filtered
 end
 
----Unrolls provided bar representation pattern to match `bar_width`. If it
----fails, returns the fallback bar representation consisting of `@`. Also return
----codepoints counts for all the rows
----@param pattern string[]
----@param bar_width integer
----@return string[], integer[]
-M.construct_bar_string_tbl_representation = function(pattern, bar_width)
-  local realized_bar_repr = {}
-  local bar_rows_codepoints = {}
-
-  for _, row_chars in ipairs(pattern) do
-    local display_width = vim.fn.strdisplaywidth(row_chars)
-    local n_to_fill_bar_width = bar_width / display_width
-    if n_to_fill_bar_width ~= math.floor(n_to_fill_bar_width) then
-      vim.notify(
-        'provided bar_chars row characters: '
-          .. row_chars
-          .. ' cannot be smoothly expanded to bar_width='
-          .. tostring(bar_width)
-          .. ' given their display_width='
-          .. tostring(display_width)
-          .. '. Falling back to @ bar representation'
-      )
-      return { string.rep('@', bar_width) }, { bar_width }
-    end
-    local row = string.rep(row_chars, n_to_fill_bar_width)
-    local _, codepointidx = vim.str_utfindex(row)
-    table.insert(realized_bar_repr, row)
-    table.insert(bar_rows_codepoints, codepointidx)
-  end
-
-  return realized_bar_repr, bar_rows_codepoints
-end
-
 ---@param arr_projects chronicles.Dashboard.FinalProjectData[]
 ---@param max_time integer
 ---@param max_bar_height integer
@@ -402,6 +368,7 @@ end
 ---@param bars_data chronicles.Dashboard.BarData[]
 ---@param realized_bar_repr string[]
 ---@param bar_rows_codepoints integer[]
+---@param bar_rows_chars_disp_width integer[][]
 ---@param max_bar_height integer
 ---@param win_width integer
 M.set_bars_lines_highlights = function(
@@ -410,6 +377,7 @@ M.set_bars_lines_highlights = function(
   bars_data,
   realized_bar_repr,
   bar_rows_codepoints,
+  bar_rows_chars_disp_width,
   max_bar_height,
   win_width
 )
@@ -426,11 +394,20 @@ M.set_bars_lines_highlights = function(
     for _, bar in ipairs(bars_data) do
       if row <= bar.height then
         local bar_row_str = realized_bar_repr[bar_repr_row_index]
+        local chars_disp_width = bar_rows_chars_disp_width[bar_repr_row_index]
+        local pos = bar.start_col
 
         for i = 1, bar_rows_codepoints[bar_repr_row_index] do
-          local idx = bar.start_col + i
+          pos = pos + 1
           local char = str_sub(bar_row_str, i, i)
-          line_chars[idx] = char
+          line_chars[pos] = char
+
+          local char_disp_width = chars_disp_width[i]
+
+          for j = 1, char_disp_width - 1 do
+            line_chars[pos + j] = ''
+          end
+          pos = pos + char_disp_width - 1
         end
 
         local n_bytes_bar_row_str = #bar_row_str

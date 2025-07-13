@@ -19,6 +19,7 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
 
   local dashboard_content = require('dev-chronicles.core.dashboard_content')
   local dashboard_opts = require('dev-chronicles.config').options.dashboard
+  local dashboard_utils = require('dev-chronicles.utils.dashboard')
   local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
 
   local chart_height = win_height - 6 -- header_height + footer_height
@@ -99,8 +100,8 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
   )
 
   local bar_repr = get_random_from_tbl(dashboard_opts.bar_chars)
-  local realized_bar_repr, bar_rows_codepoints =
-    dashboard_content.construct_bar_string_tbl_representation(bar_repr, dashboard_opts.bar_width)
+  local realized_bar_repr, bar_rows_codepoints, bar_rows_chars_disp_width =
+    dashboard_utils.construct_bar_string_tbl_representation(bar_repr, dashboard_opts.bar_width)
 
   dashboard_content.set_bars_lines_highlights(
     lines,
@@ -108,6 +109,7 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     bars_data,
     realized_bar_repr,
     bar_rows_codepoints,
+    bar_rows_chars_disp_width,
     max_bar_height,
     win_width
   )
