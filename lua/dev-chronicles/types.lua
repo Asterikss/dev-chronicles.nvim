@@ -46,3 +46,13 @@
 ---@field global_time number
 ---@field tracking_start number
 ---@field projects Projects
+
+---@class (exact) chronicles.BarLevelRepresentation
+---@field realized_rows string[]
+---@field row_codepoint_counts integer[]
+---@field char_display_widths integer[][]
+
+---@class (exact) chronicles.BarRepresentation
+---@field header chronicles.BarLevelRepresentation
+---@field body chronicles.BarLevelRepresentation
+---@field footer chronicles.BarLevelRepresentation
