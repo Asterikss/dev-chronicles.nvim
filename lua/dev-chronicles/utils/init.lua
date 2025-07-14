@@ -1,26 +1,16 @@
 local M = {}
 
----@class ProjectData
----@field total_time number
----@field by_month table<string, number>
----@field first_worked number
----@field last_worked number
-
----@alias Projects table<string, ProjectData>
-
----@class ChroniclesData
----@field global_time number
----@field tracking_start number
----@field projects Projects
-
 M.expand = function(path)
   local expanded = vim.fn.expand(path)
-  if expanded ~= '/' and expanded:sub(-1) ~= '/' then
-    expanded = expanded .. '/'
+  if expanded:sub(-1) ~= '/' then
+    return expanded .. '/'
   end
   return expanded
 end
 
+---If the `path` contains the home directory, replace it with `~`
+---@param path string
+---@return string
 M.unexpand = function(path)
   local home = vim.loop.os_homedir()
   if path:sub(1, #home) == home then
@@ -30,7 +20,7 @@ M.unexpand = function(path)
   end
 end
 
----@return ChroniclesData | nil
+---@return ChroniclesData?
 M.load_data = function()
   local file_path = require('dev-chronicles.config').options.data_file
 
