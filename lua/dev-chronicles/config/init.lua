@@ -1,5 +1,12 @@
 local M = {}
 
+local default_vars = {
+  bar_width = 9,
+  bar_header_extends_by = 1,
+  bar_footer_extends_by = 1,
+  bar_spacing = 3,
+}
+
 local defaults = {
   tracked_parent_dirs = {},
   tracked_dirs = {},
@@ -21,10 +28,10 @@ local defaults = {
       total_time_format_str = 'Ξ Total Time: %s',
       global_total_time_format_str = 'Σ Global Time: %s',
     },
-    bar_width = 9,
-    bar_header_extends_by = 1,
-    bar_footer_extends_by = 1,
-    bar_spacing = 3,
+    bar_width = default_vars.bar_width,
+    bar_header_extends_by = default_vars.bar_header_extends_by,
+    bar_footer_extends_by = default_vars.bar_footer_extends_by,
+    bar_spacing = default_vars.bar_spacing,
     bar_chars = {
       { '/', '\\' },
       { '|' },
@@ -50,6 +57,25 @@ local defaults = {
       sort = true,
       sort_by_last_worked_not_total_time = false,
       ascending = true,
+    },
+  },
+  extra_default_dashboard_bar_chars = {
+    {
+      { ' ▼ ' },
+      {
+        '███████',
+        ' █████ ',
+        '  ███  ',
+        '  ███  ',
+        ' █████ ',
+        '███████',
+      },
+      {},
+    },
+    {
+      { ' ╔══▣◎▣══╗ ' },
+      { '║       ║' },
+      { ' ╚══▣◎▣══╝ ' },
     },
   },
 }
@@ -80,6 +106,7 @@ local defaults = {
 ---@field bar_footer_extends_by integer
 ---@field bar_spacing integer spacing between each column
 ---@field bar_chars string[][] All the bar representation patterns
+---@field use_extra_default_dashboard_bar_chars boolean
 ---@field sort boolean Whether to sort the projects
 ---@field dynamic_bar_height_months boolean
 ---@field dynamic_bar_height_months_thresholds integer[]
@@ -104,6 +131,7 @@ local defaults = {
 ---@field dashboard chronicles.Options.Dashboard
 ---@field data_file string Path to the data file
 ---@field log_file string Path to the log file
+---@field extra_default_dashboard_bar_chars string[][]
 M.options = {}
 
 M.setup = function(opts)
@@ -175,6 +203,18 @@ M.setup = function(opts)
     vim.notify(
       'DevChronicles setup error: dashboard.bar_footer_extends_by extends too much given dashboard.bar_spacing'
     )
+  end
+
+  if
+    merged.dashboard.use_extra_default_dashboard_bar_chars
+    and merged.dashboard.bar_width == default_vars.bar_width
+    and merged.dashboard.bar_header_extends_by == default_vars.bar_header_extends_by
+    and merged.dashboard.bar_footer_extends_by == default_vars.bar_footer_extends_by
+    and merged.dashboard.bar_spacing == default_vars.bar_spacing
+  then
+    for _, extra_bar_chars in ipairs(merged.extra_default_dashboard_bar_chars) do
+      table.insert(merged.dashboard.bar_chars, extra_bar_chars)
+    end
   end
 
   M.options = merged
