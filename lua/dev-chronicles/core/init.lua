@@ -1,6 +1,6 @@
 local M = {}
 
----@class Session
+---@class chronicles.Session
 ---@field project_id? string
 ---@field start_time? integer
 ---@field is_tracking boolean
@@ -65,7 +65,7 @@ M._setup_autocmds = function()
   vim.api.nvim_create_autocmd('VimEnter', {
     group = group,
     callback = function()
-      M.start_session()
+      M._start_session()
     end,
   })
 
@@ -77,38 +77,47 @@ M._setup_autocmds = function()
   })
 end
 
----Determine if cwd shoud be tracked. If it should also return its id,
----otherwise return nil. Assumes all paths are absolute and expanded, and all
+---Determines if cwd shoud be tracked. If it should, also returns its id,
+---otherwise returns nil. Assumes all paths are absolute and expanded, and all
 ---dirs end with a slash
 ---@param cwd string
----@param options chronicles.Options
+---@param tracked_parent_dirs string[]
+---@param tracked_dirs string[]
+---@param exclude_dirs_absolute string[]
+---@param exclude_subdirs_relative table<string, boolean>
 ---@return boolean, string?
-M._is_project = function(cwd, options)
+M._is_project = function(
+  cwd,
+  tracked_parent_dirs,
+  tracked_dirs,
+  exclude_dirs_absolute,
+  exclude_subdirs_relative
+)
   if not cwd:match('/$') then
     cwd = cwd .. '/'
   end
 
   -- Because both end with a slash, if it matches, it cannot be a different dir with
   -- the same prefix
-  for _, exclude_path in ipairs(options.exclude_dirs_absolute) do
+  for _, exclude_path in ipairs(exclude_dirs_absolute) do
     if cwd:find(exclude_path, 1, true) == 1 then
       return false, nil
     end
   end
 
-  for _, dir in ipairs(options.tracked_dirs) do
+  for _, dir in ipairs(tracked_dirs) do
     if cwd == dir then
       return true, cwd
     end
   end
 
   -- Only match subdirectories, not the tracked_parent_dirs path itself
-  for _, parent_dir in ipairs(options.tracked_parent_dirs) do
+  for _, parent_dir in ipairs(tracked_parent_dirs) do
     if cwd:find(parent_dir, 1, true) == 1 and cwd ~= parent_dir then
       -- Get the first directory after the parent_dir
       local first_dir = cwd:sub(#parent_dir):match('([^/]+)')
       if first_dir then
-        if options.exclude_subdirs_relative[first_dir] then
+        if exclude_subdirs_relative[first_dir] then
           return false, nil
         end
 
@@ -121,9 +130,15 @@ M._is_project = function(cwd, options)
   return false, nil
 end
 
-M.start_session = function()
-  local is_project, project_id =
-    M._is_project(vim.fn.getcwd(), require('dev-chronicles.config').options)
+M._start_session = function()
+  local opts = require('dev-chronicles.config').options
+  local is_project, project_id = M._is_project(
+    vim.fn.getcwd(),
+    opts.tracked_parent_dirs,
+    opts.tracked_dirs,
+    opts.exclude_dirs_absolute,
+    opts.exclude_subdirs_relative
+  )
 
   if is_project then
     session.project_id = project_id
@@ -179,7 +194,7 @@ M.record_session = function(project_id, duration, end_time)
   utils.save_data(data)
 end
 
----@return Session
+---@return chronicles.Session
 M.get_session_info = function()
   return vim.deepcopy(session)
 end
