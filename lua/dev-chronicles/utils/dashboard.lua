@@ -31,6 +31,11 @@ M.construct_bar_representation = function(
       width = bar_width + (return_bar_header_extends_by * 2)
     elseif j == 3 then
       width = bar_width + (return_bar_footer_extends_by * 2)
+    elseif j == 2 and next(pattern[j]) == nil then
+      vim.notify(
+        'DevChronicles Error: bar_chars BodyLevel (middle one) cannot be empty. Falling back to @ bar representation'
+      )
+      return M._construct_fallback_bar_representation(bar_width)
     end
 
     for _, row_chars in ipairs(pattern[j]) do
@@ -52,11 +57,10 @@ M.construct_bar_representation = function(
         n_to_fill_bar_width = 1
       else
         n_to_fill_bar_width = width / row_chars_display_width
-        local char_display_widths_entry = {}
 
         if n_to_fill_bar_width ~= math.floor(n_to_fill_bar_width) then
           vim.notify(
-            'provided bar_chars row characters in '
+            'DevChronicles: provided bar_chars row characters in '
               .. keys[j]
               .. ' level: '
               .. row_chars
@@ -66,27 +70,10 @@ M.construct_bar_representation = function(
               .. tostring(row_chars_display_width)
               .. '. Falling back to @ bar representation'
           )
-          for i = 1, bar_width do
-            char_display_widths_entry[i] = 1
-          end
-          bar_representation.header = {
-            realized_rows = {},
-            row_codepoint_counts = {},
-            char_display_widths = {},
-          }
-          bar_representation.body = {
-            realized_rows = { string.rep('@', bar_width) },
-            row_codepoint_counts = { bar_width },
-            char_display_widths = { char_display_widths_entry },
-          }
-          bar_representation.footer = {
-            realized_rows = {},
-            row_codepoint_counts = {},
-            char_display_widths = {},
-          }
-          return bar_representation
+          return M._construct_fallback_bar_representation(bar_width)
         end
 
+        local char_display_widths_entry = {}
         local len_tmp_char_display_widths = #tmp_char_display_widths
 
         for i = 1, #tmp_char_display_widths * n_to_fill_bar_width do
@@ -120,6 +107,32 @@ M.construct_bar_representation = function(
   -- supply multiple characters to construct a row of the bar, where each
   -- character can have a different display width and a different number of
   -- bytes.
+  return bar_representation
+end
+
+---@param bar_width integer
+---@return chronicles.BarRepresentation
+M._construct_fallback_bar_representation = function(bar_width)
+  local bar_representation = {}
+  local char_display_widths_entry = {}
+  for i = 1, bar_width do
+    char_display_widths_entry[i] = 1
+  end
+  bar_representation.header = {
+    realized_rows = {},
+    row_codepoint_counts = {},
+    char_display_widths = {},
+  }
+  bar_representation.body = {
+    realized_rows = { string.rep('@', bar_width) },
+    row_codepoint_counts = { bar_width },
+    char_display_widths = { char_display_widths_entry },
+  }
+  bar_representation.footer = {
+    realized_rows = {},
+    row_codepoint_counts = {},
+    char_display_widths = {},
+  }
   return bar_representation
 end
 

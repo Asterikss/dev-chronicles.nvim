@@ -21,7 +21,9 @@ local defaults = {
       total_time_format_str = 'Ξ Total Time: %s',
       global_total_time_format_str = 'Σ Global Time: %s',
     },
-    bar_width = 10,
+    bar_width = 9,
+    bar_header_extends_by = 1,
+    bar_footer_extends_by = 1,
     bar_spacing = 3,
     bar_chars = {
       { '/', '\\' },
@@ -42,7 +44,7 @@ local defaults = {
     random_bars_coloring = false,
     bars_coloring_follows_sorting_in_order = true,
     footer = {
-      let_proj_names_extend_bars_by_one = false,
+      let_proj_names_extend_bars_by_one = true,
     },
     dashboard_all = {
       sort = true,
@@ -74,6 +76,8 @@ local defaults = {
 ---@class chronicles.Options.Dashboard
 ---@field header chronicles.Options.Dashboard.Header
 ---@field bar_width integer width of each column
+---@field bar_header_extends_by integer
+---@field bar_footer_extends_by integer
 ---@field bar_spacing integer spacing between each column
 ---@field bar_chars string[][] All the bar representation patterns
 ---@field sort boolean Whether to sort the projects
@@ -160,6 +164,17 @@ M.setup = function(opts)
       'DevChronicles: if let_proj_names_extend_bars_by_one is set to true then bar_spacing should be at least 2'
     )
     return
+  end
+
+  if merged.dashboard.bar_header_extends_by * 2 > merged.dashboard.bar_spacing then
+    vim.notify(
+      'DevChronicles setup error: dashboard.bar_header_extends_by extends too much given dashboard.bar_spacing'
+    )
+  end
+  if merged.dashboard.bar_footer_extends_by * 2 > merged.dashboard.bar_spacing then
+    vim.notify(
+      'DevChronicles setup error: dashboard.bar_footer_extends_by extends too much given dashboard.bar_spacing'
+    )
   end
 
   M.options = merged
