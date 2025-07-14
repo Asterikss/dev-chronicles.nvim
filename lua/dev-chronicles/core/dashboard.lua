@@ -72,6 +72,14 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     )
   end
 
+  local bar_repr = get_random_from_tbl(dashboard_opts.bar_chars)
+  local bar_representation = dashboard_utils.construct_bar_representation(
+    bar_repr,
+    dashboard_opts.bar_width,
+    dashboard_opts.bar_header_extends_by,
+    dashboard_opts.bar_footer_extends_by
+  )
+
   ---@type chronicles.Dashboard.BarData[], integer
   local bars_data, max_lines_proj_names = dashboard_content.create_bars_data(
     arr_projects,
@@ -84,7 +92,8 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     dashboard_opts.random_bars_coloring,
     dashboard_opts.bars_coloring_follows_sorting_in_order
         and correct_dashboard_sorting_opts.ascending
-      or not correct_dashboard_sorting_opts.ascending
+      or not correct_dashboard_sorting_opts.ascending,
+    bar_representation.header.realized_rows
   )
 
   dashboard_content.set_time_labels_above_bars(

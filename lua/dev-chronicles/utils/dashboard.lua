@@ -9,7 +9,7 @@ local M = {}
 ---@param bar_header_extends_by integer
 ---@param bar_footer_extends_by integer
 ---@return chronicles.BarRepresentation
-M.construct_bar_string_tbl_representation = function(
+M.construct_bar_representation = function(
   pattern,
   bar_width,
   bar_header_extends_by,

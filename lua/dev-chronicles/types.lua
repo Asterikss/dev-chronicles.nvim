@@ -5,6 +5,11 @@
 ---| 'Custom'
 ---| 'All'
 
+---@alias chronicles.BarLevel
+---| 'Header'
+---| 'Body'
+---| 'Footer'
+
 ---@class (exact) chronicles.Dashboard.Stats.ParsedProjectData
 ---@field total_time integer
 ---@field last_worked integer
@@ -26,6 +31,8 @@
 ---@field color string
 ---@field start_col integer
 ---@field width integer
+---@field current_bar_level chronicles.BarLevel
+---@field curr_bar_representation_index integer
 ---@field global_project_time integer?
 
 ---@class (exact) chronicles.Dashboard.FinalProjectData

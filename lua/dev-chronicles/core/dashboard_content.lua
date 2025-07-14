@@ -181,6 +181,7 @@ end
 ---@param let_proj_names_extend_bars_by_one boolean
 ---@param random_bars_coloring boolean
 ---@param projects_sorted_ascending boolean
+---@param bar_header_realized_rows_tbl string[]
 ---@return chronicles.Dashboard.BarData[], integer
 M.create_bars_data = function(
   arr_projects,
@@ -191,7 +192,8 @@ M.create_bars_data = function(
   bar_spacing,
   let_proj_names_extend_bars_by_one,
   random_bars_coloring,
-  projects_sorted_ascending
+  projects_sorted_ascending,
+  bar_header_realized_rows_tbl
 )
   local string_utils = require('dev-chronicles.utils.strings')
   local shuffle = require('dev-chronicles.utils').shuffle
@@ -240,6 +242,9 @@ M.create_bars_data = function(
       color = color,
       start_col = chart_start_col + (i - 1) * (bar_width + bar_spacing),
       width = bar_width,
+      current_bar_level = (next(bar_header_realized_rows_tbl) ~= nil) and M.BarLevel.Header
+        or M.BarLevel.Body,
+      curr_bar_representation_index = 1,
       global_project_time = project.global_time,
     })
   end
