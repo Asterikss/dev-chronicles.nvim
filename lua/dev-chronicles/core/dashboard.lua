@@ -108,18 +108,15 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     dashboard_type
   )
 
-  local bar_repr = get_random_from_tbl(dashboard_opts.bar_chars)
-  local realized_bar_repr, bar_rows_codepoints, bar_rows_chars_disp_width =
-    dashboard_utils.construct_bar_string_tbl_representation(bar_repr, dashboard_opts.bar_width)
-
   dashboard_content.set_bars_lines_highlights(
     lines,
     highlights,
     bars_data,
-    realized_bar_repr,
-    bar_rows_codepoints,
-    bar_rows_chars_disp_width,
+    bar_representation,
+    dashboard_opts.bar_header_extends_by,
+    dashboard_opts.bar_footer_extends_by,
     max_bar_height,
+    dashboard_opts.bar_width,
     win_width
   )
 

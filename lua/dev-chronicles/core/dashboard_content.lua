@@ -11,6 +11,12 @@ M._colors = {
   'DevChroniclesOrange',
 }
 
+M.BarLevel = {
+  Header = 'Header',
+  Body = 'Body',
+  Footer = 'Footer',
+}
+
 ---Calculates number of projects to keep and the chart starting column
 ---@param bar_width integer
 ---@param bar_spacing integer
@@ -369,45 +375,91 @@ M.set_time_labels_above_bars = function(
 end
 
 ---@param lines string[]
----@param highlights table<integer>
+---@param highlights table<string, any>[]
 ---@param bars_data chronicles.Dashboard.BarData[]
----@param realized_bar_repr string[]
----@param bar_rows_codepoints integer[]
----@param bar_rows_chars_disp_width integer[][]
+---@param bar_representation chronicles.BarRepresentation
+---@param bar_header_extends_by integer
+---@param bar_footer_extends_by integer
 ---@param max_bar_height integer
+---@param bar_width integer
 ---@param win_width integer
 M.set_bars_lines_highlights = function(
   lines,
   highlights,
   bars_data,
-  realized_bar_repr,
-  bar_rows_codepoints,
-  bar_rows_chars_disp_width,
+  bar_representation,
+  bar_header_extends_by,
+  bar_footer_extends_by,
   max_bar_height,
+  bar_width,
   win_width
 )
   local str_sub = require('dev-chronicles.utils.strings').str_sub
-  local len_bar_repr = #realized_bar_repr
-  local bar_repr_row_index = 0
+  local len_bar_header_rows = #bar_representation.header.realized_rows
+  local len_bar_body_rows = #bar_representation.body.realized_rows
+  local len_bar_footer_rows = #bar_representation.footer.realized_rows
+  local blank_line_chars = vim.split(string.rep(' ', win_width), '')
 
   for row = max_bar_height, 1, -1 do
-    bar_repr_row_index = (bar_repr_row_index % len_bar_repr) + 1
-
-    local line_chars = vim.split(string.rep(' ', win_width), '')
+    local line_chars = { unpack(blank_line_chars) }
     local hl_bytes_shift = 0
 
     for _, bar in ipairs(bars_data) do
       if row <= bar.height then
-        local bar_row_str = realized_bar_repr[bar_repr_row_index]
-        local chars_disp_width = bar_rows_chars_disp_width[bar_repr_row_index]
-        local pos = bar.start_col
+        local offset
+        local pos
+        local realized_row
+        local row_codepoint_counts
+        local char_display_widths
+        local bar_representation_index
 
-        for i = 1, bar_rows_codepoints[bar_repr_row_index] do
+        if bar.current_bar_level == M.BarLevel.Header then
+          offset = bar_header_extends_by
+          pos = bar.start_col - offset
+          bar_representation_index = bar.curr_bar_representation_index
+          realized_row = bar_representation.header.realized_rows[bar_representation_index]
+          row_codepoint_counts = bar_representation.header.row_codepoint_counts
+          char_display_widths = bar_representation.header.char_display_widths
+
+          if bar_representation_index + 1 > len_bar_header_rows then
+            bar.current_bar_level = M.BarLevel.Body
+            bar.curr_bar_representation_index = 1
+          else
+            bar.curr_bar_representation_index = bar_representation_index + 1
+          end
+        elseif bar.current_bar_level == M.BarLevel.Footer or row == len_bar_footer_rows then
+          if row == len_bar_footer_rows then
+            bar_representation_index = 1
+            bar.current_bar_level = M.BarLevel.Footer
+          else
+            bar_representation_index = bar.curr_bar_representation_index
+          end
+
+          offset = bar_footer_extends_by
+          pos = bar.start_col - offset
+          realized_row = bar_representation.footer.realized_rows[bar_representation_index]
+          row_codepoint_counts = bar_representation.footer.row_codepoint_counts
+          char_display_widths = bar_representation.footer.char_display_widths
+          bar.curr_bar_representation_index = bar.curr_bar_representation_index + 1
+        elseif bar.current_bar_level == M.BarLevel.Body then
+          offset = 0
+          pos = bar.start_col
+          bar_representation_index = bar.curr_bar_representation_index
+          realized_row = bar_representation.body.realized_rows[bar_representation_index]
+          row_codepoint_counts = bar_representation.body.row_codepoint_counts
+          char_display_widths = bar_representation.body.char_display_widths
+          -- bar_representation_index should start from 0 for this to work, but
+          -- we want to calculate the next index, so we just don't add 1 to it, since
+          -- these would cancel out.
+          bar.curr_bar_representation_index = (bar_representation_index % len_bar_body_rows) + 1
+        end
+
+        for i = 1, row_codepoint_counts[bar_representation_index] do
           pos = pos + 1
-          local char = str_sub(bar_row_str, i, i)
+          local char = str_sub(realized_row, i, i)
           line_chars[pos] = char
 
-          local char_disp_width = chars_disp_width[i]
+          local char_disp_width = char_display_widths[bar_representation_index][i]
 
           for j = 1, char_disp_width - 1 do
             line_chars[pos + j] = ''
@@ -415,20 +467,23 @@ M.set_bars_lines_highlights = function(
           pos = pos + char_disp_width - 1
         end
 
-        local n_bytes_bar_row_str = #bar_row_str
+        -- TODO: I should precalculate that
+        local n_bytes_bar_row_str = #realized_row
 
         -- bar.start_col does not account for multibyte characters and
         -- highlights operate on bytes, so we use hl_bytes_shift to combat that
         table.insert(highlights, {
           line = #lines + 1,
-          col = bar.start_col + hl_bytes_shift,
-          end_col = bar.start_col + n_bytes_bar_row_str + hl_bytes_shift,
+          col = bar.start_col - offset + hl_bytes_shift,
+          end_col = bar.start_col - offset + n_bytes_bar_row_str + hl_bytes_shift,
           hl_group = bar.color,
         })
 
-        -- bar.width equals vim.fn.strdisplaywidth(bar_row_str), enforced in
-        -- M.construct_bar_string_tbl_representation
-        hl_bytes_shift = hl_bytes_shift + n_bytes_bar_row_str - bar.width
+        -- bar_width equals vim.fn.strdisplaywidth(bar_row_str) for the body
+        -- row, enforced in M.construct_bar_string_tbl_representation. If it's
+        -- not a body row, then the offset can be non zero, which represents
+        -- a bar row being wider than the body row, hence the last term.
+        hl_bytes_shift = hl_bytes_shift + n_bytes_bar_row_str - bar_width - (offset * 2)
       end
     end
 
