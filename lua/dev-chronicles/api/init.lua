@@ -68,11 +68,16 @@ function M.dashboard(dashboard_type, start, end_)
   vim.api.nvim_buf_set_option(buf, 'filetype', 'dev-chronicles-dashboard')
   vim.api.nvim_buf_set_option(buf, 'modifiable', false)
   vim.api.nvim_buf_set_option(buf, 'readonly', true)
-  vim.api.nvim_win_set_cursor(win, { 2, 1 })
+  vim.api.nvim_win_set_cursor(win, { 2, 0 })
 end
 
 M.get_session_info = function()
   vim.notify(vim.inspect(require('dev-chronicles.core').get_session_info()))
+end
+
+M.abort_session = function()
+  require('dev-chronicles.core').abort_session()
+  vim.notify('Session aborted')
 end
 
 return M

@@ -169,7 +169,7 @@ M.get_stats = function(dashboard_type, start, end_)
     return {}
   end
 
-  -- First filter out all the projects that where not worked on during chosen period
+  -- First filter out all the projects that where not worked on during the chosen period
   ---@type table<string, ProjectData>
   local filtered_projects = {}
 

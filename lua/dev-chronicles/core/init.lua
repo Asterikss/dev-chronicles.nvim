@@ -39,7 +39,7 @@ M.init = function()
         end_ = args[2],
       }
     else
-      vim.notify('Usage: :DevChronicles [all|start [end]|info|exit]')
+      vim.notify('Usage: :DevChronicles [all|start [end]|info|abort]')
     end
   end, {
     nargs = '*',
@@ -182,6 +182,12 @@ end
 ---@return Session
 M.get_session_info = function()
   return vim.deepcopy(session)
+end
+
+M.abort_session = function()
+  session.is_tracking = false
+  session.start_time = nil
+  session.project_id = nil
 end
 
 return M
