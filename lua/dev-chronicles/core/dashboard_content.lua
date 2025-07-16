@@ -264,9 +264,8 @@ end
 ---@param win_width integer
 ---@param color_proj_times_like_bars boolean
 ---@param show_global_time_for_each_project boolean
----@param show_global_time_only_if_different boolean
+---@param show_global_time_only_if_differs boolean
 ---@param color_global_proj_times_like_bars boolean
----@param dashboard_type DashboardType
 M.set_time_labels_above_bars = function(
   lines,
   highlights,
@@ -274,9 +273,8 @@ M.set_time_labels_above_bars = function(
   win_width,
   color_proj_times_like_bars,
   show_global_time_for_each_project,
-  show_global_time_only_if_different,
-  color_global_proj_times_like_bars,
-  dashboard_type
+  show_global_time_only_if_differs,
+  color_global_proj_times_like_bars
 )
   local format_time = require('dev-chronicles.utils').format_time
 
@@ -329,7 +327,10 @@ M.set_time_labels_above_bars = function(
 
   for _, bar in ipairs(bars_data) do
     if global_time_line then
-      if not show_global_time_only_if_different or bar.global_project_time ~= bar.project_time then
+      if
+        bar.global_project_time
+        and (not show_global_time_only_if_differs or bar.global_project_time ~= bar.project_time)
+      then
         place_label(
           global_time_line,
           bar.global_project_time,

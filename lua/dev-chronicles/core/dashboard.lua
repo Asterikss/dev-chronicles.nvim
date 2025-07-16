@@ -103,9 +103,8 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     win_width,
     dashboard_opts.header.color_proj_times_like_bars,
     dashboard_opts.header.show_global_time_for_each_project,
-    dashboard_opts.header.show_global_time_only_if_different,
-    dashboard_opts.header.color_global_proj_times_like_bars,
-    dashboard_type
+    dashboard_opts.header.show_global_time_only_if_differs,
+    dashboard_opts.header.color_global_proj_times_like_bars
   )
 
   dashboard_content.set_bars_lines_highlights(

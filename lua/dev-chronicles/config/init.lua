@@ -22,7 +22,7 @@ local defaults = {
       total_time_as_hours_max = true,
       show_current_session_time = true,
       show_global_time_for_each_project = true,
-      show_global_time_only_if_different = true,
+      show_global_time_only_if_differs = true,
       color_global_proj_times_like_bars = false,
       show_global_total_time = false,
       total_time_format_str = 'Ξ Total Time: %s',
@@ -90,7 +90,7 @@ local defaults = {
 ---@field total_time_as_hours_max boolean Format total time as at most hours
 ---@field show_current_session_time boolean Should the current session time be shown next to total time
 ---@field show_global_time_for_each_project boolean Should the global total project time be shown for each project
----@field show_global_time_only_if_different boolean
+---@field show_global_time_only_if_differs boolean
 ---@field color_global_proj_times_like_bars boolean
 ---@field show_global_total_time boolean
 ---@field total_time_format_str string
