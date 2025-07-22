@@ -112,68 +112,88 @@ M.get_time_period_str_days = function(n_days, start_day, end_day, verbose)
   return time_perdiod
 end
 
----Format the time period between `start_month` and `end_month`. If
----`end_month` is the current month, the period ends at the current date
----and time.
----The result is formatted as:
----  - 'MM-MM.YYYY (duration)' if both months are in the same year
----  - 'MM.YYYY-MM.YYYY (duration)' if the months are in different years
----where 'duration' is the time between the two dates, formatted as s/m/h/d.
+---Format the time period between `start_month` and `end_month`.
+---If `end_month` is the current month the period ends at the current date.
+---If `time_period_str` string is supplied, it's used for formatting instead.
+---
+---Result depends on the two boolean flags:
+---  show_date_period  – include the day range (e.g. 23.11-26.11.2025)
+---  show_time       – append the duration (e.g. 3d, 5h, ...)
+---
 ---@param start_month string 'MM.YYYY'
 ---@param end_month string 'MM.YYYY'
----@param verbose boolean
+---@param show_date_period boolean
+---@param show_time boolean
+---@param time_period_str? string
 ---@return string
-M.get_time_period_str_months = function(start_month, end_month, verbose)
-  local utils = require('dev-chronicles.utils')
+M.get_time_period_str_months = function(
+  start_month,
+  end_month,
+  show_date_period,
+  show_time,
+  time_period_str
+)
+  if time_period_str then
+    local start_ts = M.convert_month_str_to_timestamp(start_month)
+    local end_ts = M.convert_month_str_to_timestamp(end_month)
+    local earlier_date = os.date('*t', start_ts)
+    local later_date = os.date('*t', end_ts)
 
-  local time_perdiod
+    local year_diff = later_date.year - earlier_date.year
+    local month_diff = later_date.month - earlier_date.month
 
-  local month_start, year_start = M.extract_month_year(start_month)
-  local month_end, year_end = M.extract_month_year(end_month)
-
-  local day_month_str
-  if utils.get_month_str() == end_month then
-    day_month_str = M.get_day_str()
+    return string.format(time_period_str, year_diff * 12 + month_diff)
   end
 
-  if year_start == year_end then
-    if month_start == month_end then
-      if day_month_str then
-        time_perdiod = '01' .. start_month .. ' - ' .. day_month_str
+  local time_period = ''
+  local current_month = M.get_month_str()
+
+  if show_date_period then
+    local month_start, year_start = M.extract_month_year(start_month)
+    local month_end, year_end = M.extract_month_year(end_month)
+
+    -- Its presence signifies that end_month is the current month
+    local day_month_str = current_month == end_month and M.get_day_str() or nil
+
+    if year_start == year_end then
+      if month_start == month_end then
+        if day_month_str then
+          time_period = '01.' .. start_month .. ' — ' .. day_month_str
+        else
+          time_period = start_month
+        end
       else
-        time_perdiod = start_month
+        if day_month_str then
+          time_period = '01.' .. string.sub(start_month, 1, 2) .. '—' .. day_month_str
+        else
+          time_period = string.sub(start_month, 1, 2)
+            .. '—'
+            .. string.sub(end_month, 1, 2)
+            .. '.'
+            .. year_start
+        end
       end
     else
-      if day_month_str then
-        time_perdiod = '01' .. string.sub(start_month, 1, 2) .. '-' .. day_month_str
-      else
-        time_perdiod = string.sub(start_month, 1, 2)
-          .. '-'
-          .. string.sub(end_month, 1, 2)
-          .. '.'
-          .. year_start
-      end
+      time_period = start_month .. '—' .. end_month
     end
-  else
-    time_perdiod = start_month .. '-' .. end_month
   end
 
-  if verbose then
+  if show_time then
     local start_ts = M.convert_month_str_to_timestamp(start_month)
 
-    local end_ts
-    if utils.get_month_str() == end_month then
-      end_ts = utils.get_current_timestamp()
+    local end_ts = current_month == end_month and M.get_current_timestamp()
+      or M.convert_month_str_to_timestamp(end_month, true)
+
+    local total_time = M.format_time(end_ts - start_ts, false)
+
+    if show_date_period then
+      time_period = time_period .. ' (' .. total_time .. ')'
     else
-      end_ts = M.convert_month_str_to_timestamp(end_month, true)
+      time_period = total_time
     end
-
-    local total_time = utils.format_time(end_ts - start_ts, false)
-
-    time_perdiod = time_perdiod .. ' (' .. total_time .. ')'
   end
 
-  return time_perdiod
+  return time_period
 end
 
 return M
