@@ -26,6 +26,20 @@ M.extract_day_month_year = function(day_month_year_str)
   return day, month, year
 end
 
+---Accepts a month-year string in format: 'MM.YYYY' and extracts month
+---and year from it, turning them to integers.
+---@param month_year_str string Date in format: 'MM.YYYY'
+---@return integer, integer: month, year
+M.extract_month_year = function(month_year_str)
+  local month, year = month_year_str:match('(%d%d)%.(%d%d%d%d)')
+  month = tonumber(month)
+  year = tonumber(year)
+  if not month or not year then
+    error('Invalid month-year string date: ' .. tostring(month_year_str))
+  end
+  return month, year
+end
+
 ---Returns the previous day to `start_day` as a string. Both formatted as:
 ---'DD.MM.YYYY'. Offset can be passed to change how many days back to go
 ---(default 1). If 0 is passed as an offset, the same start_day is returned.
@@ -100,16 +114,45 @@ M.convert_month_str_to_timestamp = function(month_year_str, end_of_month)
   return end_of_month and (ts - 1) or ts
 end
 
-M.get_time_period_str_days = function(n_days, start_day, end_day, verbose)
-  -- TODO: don't do it like that. Make tihs bette with start_day and end_day being same year and so on
-  if n_days == 1 then
-    return start_day
+---@param n_days integer
+---@param start_day string 'DD.MM.YYYY'
+---@param end_day string 'DD.MM.YYYY'
+---@param show_date_period boolean
+---@param show_time boolean
+---@param time_period_str? string
+---@return string
+M.get_time_period_str_days = function(
+  n_days,
+  start_day,
+  end_day,
+  show_date_period,
+  show_time,
+  time_period_str
+)
+  if time_period_str then
+    return string.format(time_period_str, n_days)
   end
-  local time_perdiod = 'last ' .. n_days .. ' days'
-  if verbose then
-    return time_perdiod .. ' (' .. start_day .. ' — ' .. end_day .. ')'
+  local time_period = ''
+  if show_date_period then
+    local start_d, start_m, start_y = M.extract_day_month_year(start_day)
+    local end_d, end_m, end_y = M.extract_day_month_year(end_day)
+    if start_y == end_y and start_m == end_m then
+      -- Same month: DD-DD.MM.YYYY
+      time_period = ('%02d — %02d.%02d.%04d'):format(start_d, end_d, start_m, start_y)
+    else
+      -- Different months or years: DD.MM.YYYY - DD.MM.YYYY
+      time_period = start_day .. ' — ' .. end_day
+    end
   end
-  return time_perdiod
+
+  if show_time then
+    if show_date_period then
+      time_period = time_period .. ' (' .. n_days .. ' days)'
+    else
+      time_period = n_days .. ' days'
+    end
+  end
+  return time_period
 end
 
 ---Format the time period between `start_month` and `end_month`.
