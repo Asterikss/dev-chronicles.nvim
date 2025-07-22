@@ -1,17 +1,19 @@
 local M = {}
 
 M.DashboardType = {
-  Default = 'Default',
-  Custom = 'Custom',
+  Days = 'Days',
+  Months = 'Months',
   All = 'All',
 }
 
----Create DevChronicles dashboard
----@param dashboard_type DashboardType
----@param start? string 'MM.YYYY'
----@param end_? string 'MM.YYYY'
-function M.dashboard(dashboard_type, start, end_)
+---@param dashboard_type chronicles.DashboardType
+---@param data_file string
+---@param dashboard_type_args? chronicles.DashboardType.Args
+M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
   local dashboard = require('dev-chronicles.core.dashboard')
+  local options = require('dev-chronicles.config').options
+
+  dashboard_type_args = dashboard_type_args or {}
 
   require('dev-chronicles.core.highlights').setup_highlights()
 
@@ -21,6 +23,47 @@ function M.dashboard(dashboard_type, start, end_)
   local win_height = math.floor(screen_height * 0.8)
   local win_row = math.floor((screen_height - win_height) / 2)
   local win_col = math.floor((screen_width - win_width) / 2)
+
+  local dashboard_stats
+  local dashboard_type_options
+
+  if dashboard_type == M.DashboardType.Days then
+    dashboard_type_options = options.dashboard.dashboard_days
+    dashboard_stats = dashboard.get_dashboard_data_days(
+      data_file,
+      dashboard_type_args.start_offset,
+      dashboard_type_args.end_offset,
+      dashboard_type_options.n_days_by_default,
+      dashboard_type_options.header.show_date_period,
+      dashboard_type_options.header.show_time,
+      dashboard_type_options.header.time_period_str
+    )
+  elseif dashboard_type == M.DashboardType.All then
+    dashboard_type_options = options.dashboard.dashboard_all
+    dashboard_stats = dashboard.get_dashboard_data_all(
+      data_file,
+      dashboard_type_options.header.show_date_period,
+      dashboard_type_options.header.show_time,
+      dashboard_type_options.header.time_period_str
+    )
+  elseif dashboard_type == M.DashboardType.Months then
+    dashboard_type_options = options.dashboard.dashboard_months
+    dashboard_stats = dashboard.get_dashboard_data_months(
+      data_file,
+      dashboard_type_args.start_date,
+      dashboard_type_args.end_date,
+      options.dashboard.dashboard_months.n_months_by_default,
+      dashboard_type_options.header.show_date_period,
+      dashboard_type_options.header.show_time,
+      dashboard_type_options.header.time_period_str
+    )
+  else
+    vim.notify('Unrecognised dashboard type: ' .. dashboard_type)
+    return
+  end
+
+  local lines, highlights =
+    dashboard.create_dashboard_content(dashboard_stats, win_width, win_height, dashboard_type)
 
   local buf = vim.api.nvim_create_buf(false, true)
 
@@ -35,10 +78,6 @@ function M.dashboard(dashboard_type, start, end_)
     title = ' Dev Chronicles ',
     title_pos = 'center',
   })
-
-  local stats = dashboard.get_stats(dashboard_type, start, end_)
-  local lines, highlights =
-    dashboard.create_dashboard_content(stats, win_width, win_height, dashboard_type)
 
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
 
