@@ -22,7 +22,7 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
   local dashboard_utils = require('dev-chronicles.utils.dashboard')
   local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
 
-  local chart_height = win_height - 6 -- header_height + footer_height
+  local chart_height = win_height - 7 -- header_height + footer_height
   local max_chart_width = win_width - 4 -- margins
   local max_bar_height = chart_height - 3 -- projects_time + gap + chart floor
 

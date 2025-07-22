@@ -37,58 +37,65 @@ M.calc_chart_stats = function(bar_width, bar_spacing, max_chart_width, n_project
   return n_projects_to_keep, chart_start_col
 end
 
----Adds 3 line header
+---Adds 4 line header
 ---@param lines string[]
 ---@param highlights table<integer>
----@param start_date string 'MM.YYY'
----@param end_date string  'MM.YYY'
+---@param time_period_str string
 ---@param win_width integer
 ---@param global_time_filtered integer
 ---@param total_time_as_hours_max boolean
 ---@param show_current_session_time boolean
 ---@param total_time_format_str string
+---@param prettify boolean
 ---@param global_total_time? integer
 ---@param global_total_time_format_str string
 M.set_header_lines_highlights = function(
   lines,
   highlights,
-  start_date,
-  end_date,
+  time_period_str,
   win_width,
   global_time_filtered,
   total_time_as_hours_max,
   show_current_session_time,
   total_time_format_str,
+  prettify,
   global_total_time,
   global_total_time_format_str
 )
-  local utils = require('dev-chronicles.utils')
+  local time = require('dev-chronicles.core.time')
   local left_header = string.format(
     total_time_format_str,
-    utils.format_time(global_time_filtered, total_time_as_hours_max)
+    time.format_time(global_time_filtered, total_time_as_hours_max)
   )
 
   if show_current_session_time then
     local session_start_time = require('dev-chronicles.core').get_session_info().start_time
     if session_start_time then
-      local curr_timestamp = utils.get_current_timestamp()
-      local session_time = utils.format_time(curr_timestamp - session_start_time)
+      local curr_timestamp = time.get_current_timestamp()
+      local session_time = time.format_time(curr_timestamp - session_start_time)
       left_header = left_header .. ' (' .. session_time .. ')'
     end
   end
 
-  local right_header = utils.get_time_period_str(start_date, end_date)
+  local right_header = time_period_str
+
+  if prettify then
+    left_header = '│ ' .. left_header .. ' │'
+    right_header = '│ ' .. right_header .. ' │'
+  end
+  local len_left_header = vim.str_utfindex(left_header)
+  local len_right_header = vim.str_utfindex(right_header)
 
   local middle_header = global_total_time
       and string.format(
         global_total_time_format_str,
-        utils.format_time(global_total_time, total_time_as_hours_max)
+        time.format_time(global_total_time, total_time_as_hours_max)
       )
     or nil
 
   local header_line
   if middle_header then
-    local total_length = #left_header + #middle_header + #right_header
+    local total_length = len_left_header + #middle_header + len_right_header
     local available_space = win_width - total_length
 
     local left_space = math.floor(available_space / 2)
@@ -100,14 +107,24 @@ M.set_header_lines_highlights = function(
       .. string.rep(' ', right_space)
       .. right_header
   else
-    local header_padding = win_width - #left_header - #right_header
+    local header_padding = win_width - len_left_header - len_right_header
     header_line = left_header .. string.rep(' ', header_padding) .. right_header
   end
 
   table.insert(lines, header_line)
+  if prettify then
+    local decorator_left = '╰' .. string.rep('─', len_left_header - 2) .. '╯'
+    local decorator_right = '╰' .. string.rep('─', len_right_header - 2) .. '╯'
+    local decorator_padding = win_width - len_left_header - len_right_header
+    local decorator_line = decorator_left .. string.rep(' ', decorator_padding) .. decorator_right
+    table.insert(lines, decorator_line)
+  else
+    table.insert(lines, '')
+  end
   table.insert(lines, '')
-  M.set_hline_lines_highlights(lines, highlights, win_width, '─', 'DevChroniclesTitle')
   table.insert(highlights, { line = 1, col = 0, end_col = -1, hl_group = 'DevChroniclesTitle' })
+  table.insert(highlights, { line = 2, col = 0, end_col = -1, hl_group = 'DevChroniclesTitle' })
+  M.set_hline_lines_highlights(lines, highlights, win_width, '─', 'DevChroniclesTitle')
 end
 
 ---Parse projects into an array, so that it can be sorted and traversed in
@@ -258,6 +275,7 @@ M.create_bars_data = function(
   return bars_data, max_lines_proj_names
 end
 
+--- If global_time_line is set, then it overrides 3rd lines line
 ---@param lines string[]
 ---@param highlights table<integer>
 ---@param bars_data chronicles.Dashboard.BarData[]
@@ -276,11 +294,7 @@ M.set_time_labels_above_bars = function(
   show_global_time_only_if_differs,
   color_global_proj_times_like_bars
 )
-  local format_time = require('dev-chronicles.utils').format_time
-
-  -- If DashboardType is All, then bar.global_project_time will be nil
-  show_global_time_for_each_project = show_global_time_for_each_project
-    and dashboard_type ~= require('dev-chronicles.api').DashboardType.All
+  local format_time = require('dev-chronicles.core.time').format_time
 
   -- Helper function to place a formatted time string onto a character array.
   ---@param target_line string[]
@@ -352,10 +366,12 @@ M.set_time_labels_above_bars = function(
     )
   end
 
+  -- TODO: add this to private config
+  local global_time_line_number = 3
   if global_time_line then
-    lines[2] = table.concat(global_time_line)
+    lines[global_time_line_number] = table.concat(global_time_line)
     table.insert(highlights, {
-      line = 2,
+      line = global_time_line_number,
       col = 0,
       end_col = -1,
       hl_group = 'DevChroniclesLabel',
