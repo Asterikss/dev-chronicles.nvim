@@ -33,7 +33,7 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
       data_file,
       dashboard_type_args.start_offset,
       dashboard_type_args.end_offset,
-      dashboard_type_options.n_days_by_default,
+      dashboard_type_options.n_by_default,
       dashboard_type_options.header.show_date_period,
       dashboard_type_options.header.show_time,
       dashboard_type_options.header.time_period_str
@@ -52,7 +52,7 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
       data_file,
       dashboard_type_args.start_date,
       dashboard_type_args.end_date,
-      options.dashboard.dashboard_months.n_months_by_default,
+      options.dashboard.dashboard_months.n_by_default,
       dashboard_type_options.header.show_date_period,
       dashboard_type_options.header.show_time,
       dashboard_type_options.header.time_period_str
@@ -75,7 +75,7 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
     col = win_col,
     style = 'minimal',
     border = 'rounded',
-    title = ' Dev Chronicles ',
+    title = dashboard_type_options.header.window_title,
     title_pos = 'center',
   })
 

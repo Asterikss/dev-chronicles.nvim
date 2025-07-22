@@ -44,7 +44,7 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
     dashboard_type_opts.header.total_time_as_hours_max,
     dashboard_type_opts.header.show_current_session_time,
     dashboard_type_opts.header.total_time_format_str,
-    true,
+    dashboard_type_opts.header.prettify,
     dashboard_type_opts.header.show_global_total_time and data.global_time or nil,
     dashboard_type_opts.header.global_total_time_format_str
   )
@@ -161,38 +161,33 @@ M.get_dashboard_data_all = function(data_file, show_date_period, show_time, time
   }
 end
 
+---@param data_file string
 ---@param start_date? string
 ---@param end_date? string
----@param verbose_time_period_str boolean
+---@param n_months_by_default integer
+---@param show_date_period boolean
+---@param show_time boolean
+---@param time_period_str? string
 ---@return chronicles.Dashboard.Data?
-M.get_dashboard_data_months = function(data_file, start_date, end_date, verbose_time_period_str)
-  local utils = require('dev-chronicles.utils')
+M.get_dashboard_data_months = function(
+  data_file,
+  start_date,
+  end_date,
+  n_months_by_default,
+  show_date_period,
+  show_time,
+  time_period_str
+)
   local time = require('dev-chronicles.core.time')
   local data = require('dev-chronicles.utils.data').load_data(data_file)
   if not data then
     return nil
   end
 
-  if not start_date and not end_date then
-    -- TODO: ---@type chronicles.Dashboard.Data This technically is not
-    -- chronicles.Dashboard.Data, as now `projects_filtered_parsed` table values
-    -- will have two extra fields: by_month and by_day. It's fine for now.
-    return {
-      global_time = data.global_time,
-      global_time_filtered = data.global_time,
-      projects_filtered_parsed = data.projects,
-      time_period_str = time.get_time_period_str_months(
-        time.get_month_str(data.tracking_start),
-        time.get_month_str(),
-        verbose_time_period_str
-      ),
-    }
-  end
-
-  start_date = start_date or time.get_month_str(data.tracking_start)
-  end_date = start_date or time.get_month_str()
-  local start_ts = utils.convert_month_str_to_timestamp(start_date)
-  local end_ts = utils.convert_month_str_to_timestamp(end_date, true)
+  start_date = start_date or time.get_previous_month(time.get_month_str(), n_months_by_default)
+  end_date = end_date or time.get_month_str()
+  local start_ts = time.convert_month_str_to_timestamp(start_date)
+  local end_ts = time.convert_month_str_to_timestamp(end_date, true)
 
   if start_ts > end_ts then
     vim.notify(('DevChronicles Error: start (%s) > end (%s)'):format(start_date, end_date))
@@ -212,8 +207,8 @@ M.get_dashboard_data_months = function(data_file, start_date, end_date, verbose_
   local projects_filtered_parsed = {}
   local global_time_filtered = 0
 
-  local l_pointer_month, l_pointer_year = utils.extract_month_year(start_date)
-  local r_pointer_month, r_pointer_year = utils.extract_month_year(end_date)
+  local l_pointer_month, l_pointer_year = time.extract_month_year(start_date)
+  local r_pointer_month, r_pointer_year = time.extract_month_year(end_date)
 
   while true do
     local curr_date_key = string.format('%02d.%d', r_pointer_month, r_pointer_year)
@@ -253,7 +248,9 @@ M.get_dashboard_data_months = function(data_file, start_date, end_date, verbose_
     time_period_str = time.get_time_period_str_months(
       start_date,
       end_date,
-      verbose_time_period_str
+      show_date_period,
+      show_time,
+      time_period_str
     ),
   }
 end
