@@ -137,6 +137,30 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
 end
 
 ---@param data_file string
+---@param show_date_period boolean
+---@param show_time boolean
+---@param time_period_str? string
+M.get_dashboard_data_all = function(data_file, show_date_period, show_time, time_period_str)
+  local data = require('dev-chronicles.utils.data').load_data(data_file)
+  local time = require('dev-chronicles.core.time')
+  if not data then
+    return nil
+  end
+
+  return {
+    global_time = data.global_time,
+    global_time_filtered = data.global_time,
+    projects_filtered_parsed = data.projects,
+    time_period_str = time.get_time_period_str_months(
+      time.get_month_str(data.tracking_start),
+      time.get_month_str(),
+      show_date_period,
+      show_time,
+      time_period_str
+    ),
+  }
+end
+
 ---@param start_date? string
 ---@param end_date? string
 ---@param verbose_time_period_str boolean
