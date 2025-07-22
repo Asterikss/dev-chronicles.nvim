@@ -1,16 +1,16 @@
 local M = {}
 
 ---Creates lines and highlights for the dashboard
----@param stats chronicles.Dashboard.Stats
+---@param data chronicles.Dashboard.Data?
 ---@param win_width integer
 ---@param win_height integer
----@param dashboard_type DashboardType
+---@param dashboard_type chronicles.DashboardType
 ---@return table, table: Lines, Highlights
-M.create_dashboard_content = function(stats, win_width, win_height, dashboard_type)
+M.create_dashboard_content = function(data, win_width, win_height, dashboard_type)
   local lines = {}
   local highlights = {}
 
-  if next(stats) == nil then
+  if data == nil then
     table.insert(lines, '')
     table.insert(lines, 'No recent projects found (Loser).')
     table.insert(lines, 'Start coding in your tracked directories!')
@@ -22,6 +22,15 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
   local dashboard_utils = require('dev-chronicles.utils.dashboard')
   local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
 
+  local dashboard_type_opts
+  if dashboard_type == require('dev-chronicles.api').DashboardType.All then
+    dashboard_type_opts = dashboard_opts.dashboard_all
+  elseif dashboard_type == require('dev-chronicles.api').DashboardType.Days then
+    dashboard_type_opts = dashboard_opts.dashboard_days
+  else
+    dashboard_type_opts = dashboard_opts.dashboard_months
+  end
+
   local chart_height = win_height - 7 -- header_height + footer_height
   local max_chart_width = win_width - 4 -- margins
   local max_bar_height = chart_height - 3 -- projects_time + gap + chart floor
@@ -29,19 +38,19 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
   dashboard_content.set_header_lines_highlights(
     lines,
     highlights,
-    stats.start_date,
-    stats.end_date,
+    data.time_period_str,
     win_width,
-    stats.global_time_filtered,
-    dashboard_opts.header.total_time_as_hours_max,
-    dashboard_opts.header.show_current_session_time,
-    dashboard_opts.header.total_time_format_str,
-    dashboard_opts.header.show_global_total_time and stats.global_time or nil,
-    dashboard_opts.header.global_total_time_format_str
+    data.global_time_filtered,
+    dashboard_type_opts.header.total_time_as_hours_max,
+    dashboard_type_opts.header.show_current_session_time,
+    dashboard_type_opts.header.total_time_format_str,
+    true,
+    dashboard_type_opts.header.show_global_total_time and data.global_time or nil,
+    dashboard_type_opts.header.global_total_time_format_str
   )
 
   local arr_projects, max_time =
-    dashboard_content.parse_projects_calc_max_time(stats.projects_filtered_parsed)
+    dashboard_content.parse_projects_calc_max_time(data.projects_filtered_parsed)
 
   local n_projects_to_keep, chart_start_col = dashboard_content.calc_chart_stats(
     dashboard_opts.bar_width,
@@ -51,17 +60,12 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     win_width
   )
 
-  local correct_dashboard_sorting_opts = (
-    dashboard_type == require('dev-chronicles.api').DashboardType.All
-    and dashboard_opts.dashboard_all
-  ) or dashboard_opts
-
   arr_projects = dashboard_content.sort_and_cutoff_projects(
     arr_projects,
     n_projects_to_keep,
-    correct_dashboard_sorting_opts.sort,
-    correct_dashboard_sorting_opts.sort_by_last_worked_not_total_time,
-    correct_dashboard_sorting_opts.ascending
+    dashboard_type_opts.sorting.enable,
+    dashboard_type_opts.sorting.sort_by_last_worked_not_total_time,
+    dashboard_type_opts.sorting.ascending
   )
 
   if dashboard_opts.dynamic_bar_height_months then
@@ -90,9 +94,8 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     dashboard_opts.bar_spacing,
     dashboard_opts.footer.let_proj_names_extend_bars_by_one,
     dashboard_opts.random_bars_coloring,
-    dashboard_opts.bars_coloring_follows_sorting_in_order
-        and correct_dashboard_sorting_opts.ascending
-      or not correct_dashboard_sorting_opts.ascending,
+    dashboard_opts.bars_coloring_follows_sorting_in_order and dashboard_type_opts.sorting.ascending
+      or not dashboard_type_opts.sorting.ascending,
     bar_representation.header.realized_rows
   )
 
@@ -101,10 +104,10 @@ M.create_dashboard_content = function(stats, win_width, win_height, dashboard_ty
     highlights,
     bars_data,
     win_width,
-    dashboard_opts.header.color_proj_times_like_bars,
-    dashboard_opts.header.show_global_time_for_each_project,
-    dashboard_opts.header.show_global_time_only_if_differs,
-    dashboard_opts.header.color_global_proj_times_like_bars
+    dashboard_type_opts.header.color_proj_times_like_bars,
+    dashboard_type_opts.header.show_global_time_for_each_project,
+    dashboard_type_opts.header.show_global_time_only_if_differs,
+    dashboard_type_opts.header.color_global_proj_times_like_bars
   )
 
   dashboard_content.set_bars_lines_highlights(
