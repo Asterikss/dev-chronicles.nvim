@@ -77,21 +77,23 @@ M._setup_autocmds = function()
   })
 end
 
----Determines if cwd shoud be tracked. If it should, also returns its id,
----otherwise returns nil. Assumes all paths are absolute and expanded, and all
----dirs end with a slash.
+---Returns the id of the project if the supplied cwd should be tracked,
+---otherwise nil. Assumes all paths are absolute and expanded, and all dirs end
+---with a slash.
 ---@param cwd string
 ---@param tracked_parent_dirs string[]
 ---@param tracked_dirs string[]
 ---@param exclude_dirs_absolute string[]
 ---@param exclude_subdirs_relative table<string, boolean>
----@return boolean, string?
+---@param differentiate_projects_by_folder_not_path boolean
+---@return string?
 M._is_project = function(
   cwd,
   tracked_parent_dirs,
   tracked_dirs,
   exclude_dirs_absolute,
-  exclude_subdirs_relative
+  exclude_subdirs_relative,
+  differentiate_projects_by_folder_not_path
 )
   if not cwd:match('/$') then
     cwd = cwd .. '/'
@@ -101,13 +103,16 @@ M._is_project = function(
   -- the same prefix
   for _, exclude_path in ipairs(exclude_dirs_absolute) do
     if cwd:find(exclude_path, 1, true) == 1 then
-      return false, nil
+      return nil
     end
   end
 
   for _, dir in ipairs(tracked_dirs) do
     if cwd == dir then
-      return true, cwd
+      if differentiate_projects_by_folder_not_path then
+        return require('dev-chronicles.utils.strings').get_project_name(cwd)
+      end
+      return require('dev-chronicles.utils').unexpand(cwd)
     end
   end
 
@@ -115,7 +120,7 @@ M._is_project = function(
   -- subdirectories are matched
   for _, parent_dir in ipairs(tracked_parent_dirs) do
     if cwd == parent_dir then
-      return false, nil
+      return nil
     end
   end
 
@@ -125,53 +130,53 @@ M._is_project = function(
       local first_dir = cwd:sub(#parent_dir):match('([^/]+)')
       if first_dir then
         if exclude_subdirs_relative[first_dir] then
-          return false, nil
+          return nil
         end
 
         if differentiate_projects_by_folder_not_path then
-          return true, first_dir
+          return first_dir
         end
         local project_id = parent_dir .. first_dir .. '/'
-        return true, require('dev-chronicles.utils').unexpand(project_id)
+        return require('dev-chronicles.utils').unexpand(project_id)
       end
     end
   end
 
-  return false, nil
+  return nil
 end
 
 M._start_session = function()
   local opts = require('dev-chronicles.config').options
-  local is_project, project_id = M._is_project(
+  local project_id = M._is_project(
     vim.fn.getcwd(),
     opts.tracked_parent_dirs,
     opts.tracked_dirs,
     opts.exclude_dirs_absolute,
-    opts.exclude_subdirs_relative
+    opts.exclude_subdirs_relative,
+    opts.differentiate_projects_by_folder_not_path
   )
 
-  if is_project then
+  if project_id then
     session.project_id = project_id
-    session.start_time = require('dev-chronicles.utils').get_current_timestamp()
+    session.start_time = require('dev-chronicles.core.time').get_current_timestamp()
     session.is_tracking = true
   end
 end
 
-M.end_session = function()
+---@param data_file string
+M.end_session = function(data_file)
   if not session.is_tracking or not session.project_id or not session.start_time then
     return
   end
 
-  local end_time = require('dev-chronicles.utils').get_current_timestamp()
+  local end_time = require('dev-chronicles.core.time').get_current_timestamp()
   local session_duration = end_time - session.start_time
 
   if session_duration >= require('dev-chronicles.config').options.min_session_time then
-    M.record_session(session.project_id, session_duration, end_time)
+    M._record_session(session.project_id, session_duration, end_time, data_file)
   end
 
-  session.project_id = nil
-  session.start_time = nil
-  session.is_tracking = false
+  M.abort_session()
 end
 
 ---@param project_id string Project id
