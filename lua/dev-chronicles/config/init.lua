@@ -1,5 +1,6 @@
 local M = {}
 
+---@type chronicles.Options.DefaultVars
 local default_vars = {
   bar_width = 9,
   bar_header_extends_by = 1,
@@ -7,6 +8,55 @@ local default_vars = {
   bar_spacing = 3,
 }
 
+---@type chronicles.Options.Dashboard.Header
+local dashboard_section_header_opts = {
+  show_date_period = true,
+  show_n_days = true,
+  time_period_str = nil,
+  color_proj_times_like_bars = false,
+  color_global_proj_times_like_bars = false,
+  total_time_as_hours_max = true,
+  total_time_as_hours_min = false, -- TODO: not used yet
+  show_current_session_time = true,
+  show_global_time_for_each_project = true,
+  show_global_time_only_if_differs = true,
+  total_time_format_str = 'Total Time: %s',
+  show_global_total_time = false, -- TODO: delete
+  global_total_time_format_str = 'Σ Global Time: %s', -- TODO: delete
+  prettify = true,
+  window_title = ' Dev Chronicles ',
+}
+
+---@type chronicles.Options.Dashboard.Sorting
+local dashboard_section_sorting_opts = {
+  enable = true,
+  sort_by_last_worked_not_total_time = true,
+  ascending = true,
+}
+
+---@type chronicles.Options.Dashboard.Base
+local dashboard_section_base = {
+  header = dashboard_section_header_opts,
+  sorting = dashboard_section_sorting_opts,
+  dynamic_bar_height_thresholds = nil,
+  n_by_default = 2,
+  proj_total_time_as_hours_max = true, --TODO: not used yet
+  random_bars_coloring = false,
+  bars_coloring_follows_sorting_in_order = true,
+  bar_chars = nil,
+}
+
+local function make_dashboard_section(opts)
+  return vim.tbl_deep_extend(
+    'force',
+    dashboard_section_base,
+    { header = dashboard_section_header_opts },
+    { sorting = dashboard_section_sorting_opts },
+    opts or {}
+  )
+end
+
+---@class chronicles.Options
 local defaults = {
   tracked_parent_dirs = {},
   tracked_dirs = {},
@@ -18,49 +68,33 @@ local defaults = {
   data_file = 'dev-chronicles.json',
   log_file = 'log.dev-chronicles.log',
   dashboard = {
-    header = {
-      color_proj_times_like_bars = false,
-      total_time_as_hours_max = true,
-      show_current_session_time = true,
-      show_global_time_for_each_project = true,
-      show_global_time_only_if_differs = true,
-      color_global_proj_times_like_bars = false,
-      show_global_total_time = false,
-      total_time_format_str = 'Ξ Total Time: %s',
-      global_total_time_format_str = 'Σ Global Time: %s',
-    },
     bar_width = default_vars.bar_width,
     bar_header_extends_by = default_vars.bar_header_extends_by,
     bar_footer_extends_by = default_vars.bar_footer_extends_by,
     bar_spacing = default_vars.bar_spacing,
     bar_chars = {
-      { '/', '\\' },
-      { '|' },
-      { '┼' },
-      { '╳' },
-      { '@' },
+      { {}, { '▉' }, {} },
     },
-    dynamic_bar_height_months = false,
-    dynamic_bar_height_months_thresholds = { 15, 25, 40 },
-    dynamic_bar_height_day = false,
-    dynamic_bar_height_day_thresholds = { 2, 3.5, 5 },
-    sort = true,
-    sort_by_last_worked_not_total_time = true,
-    ascending = true,
-    n_months_by_default = 2,
-    proj_total_time_as_hours_max = true,
-    random_bars_coloring = false,
-    bars_coloring_follows_sorting_in_order = true,
+    use_extra_default_dashboard_bar_chars = true,
     footer = {
       let_proj_names_extend_bars_by_one = true,
     },
-    dashboard_all = {
-      sort = true,
-      sort_by_last_worked_not_total_time = false,
-      ascending = true,
-    },
+    dashboard_days = make_dashboard_section({
+      header = { time_period_str = 'last %s days' },
+      n_by_default = 30,
+      dynamic_bar_height_thresholds = nil, -- = { 2, 3.5, 5 },
+    }),
+    dashboard_months = make_dashboard_section({
+      n_by_default = 2,
+      dynamic_bar_height_thresholds = nil, -- = { 15, 25, 40 },
+    }),
+    dashboard_all = make_dashboard_section({
+      header = { window_title = ' Σ Dev Chronicles Σ ' },
+      sorting = { sort_by_last_worked_not_total_time = false },
+    }),
   },
   for_dev_start_time = nil,
+  parsed_exclude_subdirs_relative_map = nil,
   extra_default_dashboard_bar_chars = {
     {
       { ' ▼ ' },
@@ -79,63 +113,38 @@ local defaults = {
       { '║       ║' },
       { ' ╚══▣◎▣══╝ ' },
     },
+    {
+      {
+        '    ╔═╗    ',
+      },
+      {
+
+        '╔⏤⏤╝❀╚⏤⏤╗',
+        '╚⏤⏤╗❀╔⏤⏤╝',
+      },
+      {},
+    },
+    {
+      {
+        '   ▃▃  ︸  ',
+        '   ▌ ︷    ',
+        '▄ ▄▌▄ ▄ ▄ ▄',
+        '█████████',
+      },
+      {
+        '▌▌ .    █',
+        '▌▌  .󱇛  █',
+        '▌▌.   . █',
+        '▌▌󱇛  .  █',
+        '▌▌ .    █',
+        '▌▌    . █',
+      },
+      { ' ▌▌ 󱠞    █ ' },
+    },
   },
 }
 
----@class chronicles.Options.Dashboard.All
----@field sort boolean Whether to sort the projects when displaying all chronicles data
----@field sort_by_last_worked_not_total_time boolean Whether to sort using last worked time instead of total worked time when displaying all chronicles data
----@field ascending boolean Whether to sort in ascending order when displaying all chronicles data
-
----@class chronicles.Options.Dashboard.Header
----@field color_proj_times_like_bars boolean Whether to color project time stats the same as their bars
----@field total_time_as_hours_max boolean Format total time as at most hours
----@field show_current_session_time boolean Should the current session time be shown next to total time
----@field show_global_time_for_each_project boolean Should the global total project time be shown for each project
----@field show_global_time_only_if_differs boolean
----@field color_global_proj_times_like_bars boolean
----@field show_global_total_time boolean
----@field total_time_format_str string
----@field global_total_time_format_str string
-
----@class chronicles.Options.Dashboard.Footer
----@field let_proj_names_extend_bars_by_one boolean
-
----@class chronicles.Options.Dashboard
----@field header chronicles.Options.Dashboard.Header
----@field bar_width integer width of each column
----@field bar_header_extends_by integer
----@field bar_footer_extends_by integer
----@field bar_spacing integer spacing between each column
----@field bar_chars string[][] All the bar representation patterns
----@field use_extra_default_dashboard_bar_chars boolean
----@field sort boolean Whether to sort the projects
----@field dynamic_bar_height_months boolean
----@field dynamic_bar_height_months_thresholds integer[]
----@field dynamic_bar_height_day boolean
----@field dynamic_bar_height_day_thresholds integer[]
----@field sort_by_last_worked_not_total_time boolean Whether to sort using last worked time instead of total worked time
----@field ascending boolean Whether to sort in ascending order
----@field n_months_by_default integer Number of months for default dashboard
----@field proj_total_time_as_hours_max boolean Format total time for each project as at most hours
----@field random_bars_coloring boolean
----@field bars_coloring_follows_sorting_in_order boolean
----@field footer chronicles.Options.Dashboard.Footer
----@field dashboard_all chronicles.Options.Dashboard.All
-
----@class chronicles.Options
----@field tracked_parent_dirs string[] List of dirs to track
----@field tracked_dirs string[] List of paths to track
----@field exclude_subdirs_relative table<string, boolean> List of subdirs to exclude from tracked_parent_dirs subdirs
----@field exclude_dirs_absolute string[] List of absolute dirs to exclude (tracked_parent_dirs can have two different dirs that have two subdirs of the same name)
----@field sort_tracked_parent_dirs boolean If paths are not supplied from longest to shortest, then they need to be sorted like that
----@field min_session_time integer Minimum session time in seconds
----@field dashboard chronicles.Options.Dashboard
----@field data_file string Path to the data file
----@field log_file string Path to the log file
----@field extra_default_dashboard_bar_chars string[][]
-M.options = {}
-
+---@param opts? chronicles.Options
 M.setup = function(opts)
   local utils = require('dev-chronicles.utils')
 
@@ -144,9 +153,6 @@ M.setup = function(opts)
 
   local function handle_paths_field(path_field_key, sort)
     local paths_tbl_field = merged[path_field_key]
-    if type(paths_tbl_field) == 'string' then
-      paths_tbl_field = { paths_tbl_field }
-    end
     for i = 1, #paths_tbl_field do
       paths_tbl_field[i] = utils.expand(paths_tbl_field[i])
     end
@@ -162,11 +168,14 @@ M.setup = function(opts)
   handle_paths_field('tracked_dirs')
   handle_paths_field('exclude_dirs_absolute')
 
-  local exclude_subdirs_relative_map = {}
-  for _, subdir in ipairs(merged.exclude_subdirs_relative) do
-    exclude_subdirs_relative_map[subdir] = true
+  if not merged.parsed_exclude_subdirs_relative_map then
+    ---@type table<string, boolean>
+    local parsed_exclude_subdirs_relative_map = {}
+    for _, subdir in ipairs(merged.exclude_subdirs_relative) do
+      parsed_exclude_subdirs_relative_map[subdir] = true
+    end
+    merged.parsed_exclude_subdirs_relative_map = parsed_exclude_subdirs_relative_map
   end
-  merged.exclude_subdirs_relative = exclude_subdirs_relative_map
 
   if vim.fn.isabsolutepath(merged.data_file) ~= 1 then
     merged.data_file = vim.fn.stdpath('data') .. '/' .. merged.data_file
@@ -174,10 +183,9 @@ M.setup = function(opts)
 
   if vim.fn.isabsolutepath(merged.log_file) ~= 1 then
     merged.log_file = vim.fn.stdpath('data') .. '/' .. merged.log_file
-  else
   end
 
-  if merged.dashboard.n_months_by_default < 1 then
+  if merged.dashboard.dashboard_months.n_by_default < 1 then
     vim.notify('DevChronicles: n_months_by_default should be greter than 0')
     return
   end
@@ -219,9 +227,20 @@ M.setup = function(opts)
     end
   end
 
+  if
+    merged.dashboard.dashboard_days.n_by_default > 30
+    or merged.dashboard.dashboard_days.n_by_default < 1
+  then
+    vim.notify(
+      'DevChronicles setup error: dashboard.default_n_last_days_shown cannot be grater than 30 and smaller than 1. Setting it to 30'
+    )
+    merged.dashboard.dashboard_days.n_by_default = 30
+  end
+
+  ---@type chronicles.Options
   M.options = merged
 
-  require('dev-chronicles.core').init()
+  require('dev-chronicles.core').init(M.options.data_file)
 end
 
 return M
