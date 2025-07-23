@@ -79,7 +79,7 @@ end
 
 ---Determines if cwd shoud be tracked. If it should, also returns its id,
 ---otherwise returns nil. Assumes all paths are absolute and expanded, and all
----dirs end with a slash
+---dirs end with a slash.
 ---@param cwd string
 ---@param tracked_parent_dirs string[]
 ---@param tracked_dirs string[]
@@ -111,9 +111,16 @@ M._is_project = function(
     end
   end
 
-  -- Only match subdirectories, not the tracked_parent_dirs path itself
+  -- Treat tracked_parent_dirs as excluded paths, so that only the correct
+  -- subdirectories are matched
   for _, parent_dir in ipairs(tracked_parent_dirs) do
-    if cwd:find(parent_dir, 1, true) == 1 and cwd ~= parent_dir then
+    if cwd == parent_dir then
+      return false, nil
+    end
+  end
+
+  for _, parent_dir in ipairs(tracked_parent_dirs) do
+    if cwd:find(parent_dir, 1, true) == 1 then
       -- Get the first directory after the parent_dir
       local first_dir = cwd:sub(#parent_dir):match('([^/]+)')
       if first_dir then
