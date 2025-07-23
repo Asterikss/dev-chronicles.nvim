@@ -13,6 +13,7 @@ local defaults = {
   exclude_subdirs_relative = {},
   exclude_dirs_absolute = {},
   sort_tracked_parent_dirs = false,
+  differentiate_projects_by_folder_not_path = true,
   min_session_time = 180,
   data_file = 'dev-chronicles.json',
   log_file = 'log.dev-chronicles.log',

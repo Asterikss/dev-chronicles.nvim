@@ -21,6 +21,7 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
   local dashboard_opts = require('dev-chronicles.config').options.dashboard
   local dashboard_utils = require('dev-chronicles.utils.dashboard')
   local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
+  local differentiate_projects_by_folder_not_path = require('dev-chronicles.config').options.differentiate_projects_by_folder_not_path
 
   local dashboard_type_opts
   if dashboard_type == require('dev-chronicles.api').DashboardType.All then
@@ -96,7 +97,8 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
     dashboard_opts.random_bars_coloring,
     dashboard_opts.bars_coloring_follows_sorting_in_order and dashboard_type_opts.sorting.ascending
       or not dashboard_type_opts.sorting.ascending,
-    bar_representation.header.realized_rows
+    bar_representation.header.realized_rows,
+    differentiate_projects_by_folder_not_path
   )
 
   dashboard_content.set_time_labels_above_bars(

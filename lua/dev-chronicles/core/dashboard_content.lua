@@ -205,6 +205,7 @@ end
 ---@param random_bars_coloring boolean
 ---@param projects_sorted_ascending boolean
 ---@param bar_header_realized_rows_tbl string[]
+---@param differentiate_projects_by_folder_not_path boolean
 ---@return chronicles.Dashboard.BarData[], integer
 M.create_bars_data = function(
   arr_projects,
@@ -216,7 +217,8 @@ M.create_bars_data = function(
   let_proj_names_extend_bars_by_one,
   random_bars_coloring,
   projects_sorted_ascending,
-  bar_header_realized_rows_tbl
+  bar_header_realized_rows_tbl,
+  differentiate_projects_by_folder_not_path
 )
   local string_utils = require('dev-chronicles.utils.strings')
   local shuffle = require('dev-chronicles.utils').shuffle
@@ -251,7 +253,8 @@ M.create_bars_data = function(
         or colors[((i - 1) % n_colors) + 1]
     end
 
-    local project_name = string_utils.get_project_name(project.id)
+    local project_name = differentiate_projects_by_folder_not_path and project.id
+      or string_utils.get_project_name(project.id)
     local project_name_tbl = string_utils.format_project_name(
       project_name,
       bar_width + (let_proj_names_extend_bars_by_one and 2 or 0)

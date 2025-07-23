@@ -128,6 +128,9 @@ M._is_project = function(
           return false, nil
         end
 
+        if differentiate_projects_by_folder_not_path then
+          return true, first_dir
+        end
         local project_id = parent_dir .. first_dir .. '/'
         return true, require('dev-chronicles.utils').unexpand(project_id)
       end
