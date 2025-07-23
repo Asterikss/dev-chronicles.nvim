@@ -60,6 +60,7 @@ local defaults = {
       ascending = true,
     },
   },
+  for_dev_start_time = nil,
   extra_default_dashboard_bar_chars = {
     {
       { ' ▼ ' },

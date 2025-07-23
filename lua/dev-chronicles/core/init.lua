@@ -158,7 +158,8 @@ M._start_session = function()
 
   if project_id then
     session.project_id = project_id
-    session.start_time = require('dev-chronicles.core.time').get_current_timestamp()
+    session.start_time = opts.for_dev_start_time
+      or require('dev-chronicles.core.time').get_current_timestamp()
     session.is_tracking = true
   end
 end
@@ -209,9 +210,17 @@ M.record_session = function(project_id, duration, end_time)
   utils.save_data(data)
 end
 
----@return chronicles.Session
+---@class chronicles.SessionInfo: chronicles.Session
+---@field session_time? integer
 M.get_session_info = function()
-  return vim.deepcopy(session)
+  local time = require('dev-chronicles.core.time')
+  local session_info = vim.deepcopy(session)
+
+  if session_info.start_time then
+    session_info.session_time =
+      time.format_time(time.get_current_timestamp() - session_info.start_time)
+  end
+  return session_info
 end
 
 M.abort_session = function()
