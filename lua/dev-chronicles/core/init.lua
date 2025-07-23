@@ -10,36 +10,42 @@ local session = {
   is_tracking = false,
 }
 
-M.init = function()
-  local DashboardType = require('dev-chronicles.api').DashboardType
-  local curr_month = require('dev-chronicles.utils').get_month_str()
+---@param data_file string
+M.init = function(data_file)
+  math.randomseed(os.time())
   local api = require('dev-chronicles.api')
+  local curr_month = require('dev-chronicles.core.time').get_month_str()
 
   vim.api.nvim_create_user_command('DevChronicles', function(opts)
     local args = opts.fargs
 
     if #args == 0 then
-      api.dashboard(dashboard.DashboardType.Default)
+      api.dashboard(api.DashboardType.Days, data_file)
     elseif args[1] == 'all' then
-      api.dashboard(dashboard.DashboardType.All)
+      api.dashboard(api.DashboardType.All, data_file)
+    elseif args[1] == 'days' then
+      api.dashboard(
+        api.DashboardType.Days,
+        data_file,
+        { start_offset = args[2], end_offset = args[3] }
+      )
+    elseif args[1] == 'months' then
+      api.dashboard(
+        api.DashboardType.Months,
+        data_file,
+        { start_date = args[2], end_date = args[3] }
+      )
+    elseif args[1] == 'today' then
+      api.dashboard(api.DashboardType.Days, data_file, { start_offset = 0 })
     elseif args[1] == 'info' then
       api.get_session_info()
-    elseif args[1] == 'exit' then
-      api.exit()
-    elseif #args == 1 then
-      api.dashboard {
-        dashboard.DashboardType.Custom,
-        start = args[1],
-        end_ = args[1],
-      }
-    elseif #args == 2 then
-      api.dashboard {
-        dashboard.DashboardType.Custom,
-        start = args[1],
-        end_ = args[2],
-      }
+    elseif args[1] == 'abort' then
+      api.abort_session()
     else
-      vim.notify('Usage: :DevChronicles [all|start [end]|info|abort]')
+      vim.notify(
+        'Usage: :DevChronicles [all | days [start_offset [end_offset]] |'
+          .. 'months [start_date [end_date]] | today | info | abort]'
+      )
     end
   end, {
     nargs = '*',
@@ -49,14 +55,20 @@ M.init = function()
       _ --[[cursor_pos]]
     )
       local split = vim.split(cmd_line, '%s+')
-      if #split == 2 then
-        return { 'all', curr_month, 'info', 'exit' }
+      local n_splits = #split
+      if n_splits == 2 then
+        return { 'all', 'days', 'months', 'info', 'abort' }
+      elseif n_splits == 3 then
+        if split[2] == 'days' then
+          return { '30' }
+        elseif split[2] == 'months' then
+          return { curr_month }
+        end
       end
-      return { curr_month }
     end,
   })
 
-  M._setup_autocmds()
+  M._setup_autocmds(data_file)
 end
 
 M._setup_autocmds = function()
