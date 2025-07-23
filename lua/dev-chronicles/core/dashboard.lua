@@ -257,25 +257,91 @@ M.get_dashboard_data_months = function(
   }
 end
 
-M.get_recent_stats = function(days)
-  days = days or 30
-  local utils = require('dev-chronicles.utils')
-  local data = utils.load_data()
+---@param data_file string
+---@param start_offset? integer
+---@param end_offset? integer
+---@param n_days_by_default integer
+---@param show_date_period boolean
+---@param show_time boolean
+---@param time_period_str? string
+---@return chronicles.Dashboard.Data?
+M.get_dashboard_data_days = function(
+  data_file,
+  start_offset,
+  end_offset,
+  n_days_by_default,
+  show_date_period,
+  show_time,
+  time_period_str
+)
+  local time = require('dev-chronicles.core.time')
+  local data = require('dev-chronicles.utils.data').load_data(data_file)
   if not data then
-    return
+    return nil
   end
-  local cutoff_time = utils.get_current_timestamp() - (days * 86400) -- 24 * 60 * 60
 
-  local recent_projects = {}
-  for project_id, project_data in pairs(data.projects) do
-    if project_data.last_worked >= cutoff_time then
-      recent_projects[project_id] = project_data
+  start_offset = start_offset or n_days_by_default - 1
+  end_offset = end_offset or 0
+
+  local DAY_SEC = 86400 -- 24 * 60 * 60
+  local today = time.get_day_str()
+  local start_str = time.get_previous_day(today, start_offset)
+  local end_str = time.get_previous_day(today, end_offset)
+  local start_timestamp = time.convert_day_str_to_timestamp(start_str)
+  local end_timestamp = time.convert_day_str_to_timestamp(end_str, true)
+
+  if start_timestamp > end_timestamp then
+    vim.notify(('DevChronicles Error: start (%s) > end (%s)'):format(start_str, end_str))
+    return nil
+  end
+
+  local filtered_projects =
+    M._filter_projects_by_period(data.projects, start_timestamp, end_timestamp)
+
+  if next(filtered_projects) == nil then
+    vim.notify(('DevChronicles: no projects worked between %s and %s'):format(start_str, end_str))
+    return nil
+  end
+
+  ---@type chronicles.Dashboard.Stats.ParsedProjects
+  local projects_filtered_parsed = {}
+  local global_time_filtered = 0
+
+  for ts = start_timestamp, end_timestamp, DAY_SEC do
+    local key = os.date('%d.%m.%Y', ts)
+    for id, proj in pairs(filtered_projects) do
+      local day_time = proj.by_day[key]
+      if day_time then
+        local proj_data = projects_filtered_parsed[id]
+        if not proj_data then
+          proj_data = {
+            total_time = 0,
+            last_worked = proj.last_worked,
+            first_worked = proj.first_worked,
+            tags_map = proj.tags_map,
+            total_global_time = proj.total_time,
+          }
+          projects_filtered_parsed[id] = proj_data
+        end
+        proj_data.total_time = proj_data.total_time + day_time
+        global_time_filtered = global_time_filtered + day_time
+      end
     end
   end
 
+  ---@type chronicles.Dashboard.Data
   return {
     global_time = data.global_time,
-    projects = recent_projects,
+    global_time_filtered = global_time_filtered,
+    projects_filtered_parsed = projects_filtered_parsed,
+    time_period_str = time.get_time_period_str_days(
+      start_offset - end_offset + 1,
+      start_str,
+      end_str,
+      show_date_period,
+      show_time,
+      time_period_str
+    ),
   }
 end
 
