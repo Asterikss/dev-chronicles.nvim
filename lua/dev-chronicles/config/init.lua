@@ -11,16 +11,15 @@ local default_vars = {
 ---@type chronicles.Options.Dashboard.Header
 local dashboard_section_header_opts = {
   show_date_period = true,
-  show_n_days = true,
+  show_time = true,
   time_period_str = nil,
-  color_proj_times_like_bars = false,
-  color_global_proj_times_like_bars = false,
   total_time_as_hours_max = true,
-  total_time_as_hours_min = false, -- TODO: not used yet
+  total_time_as_hours_min = true,
   show_current_session_time = true,
   show_global_time_for_each_project = true,
   show_global_time_only_if_differs = true,
-  total_time_format_str = 'Total Time: %s',
+  color_global_proj_times_like_bars = false,
+  total_time_format_str = 'total time: %s',
   show_global_total_time = false, -- TODO: delete
   global_total_time_format_str = 'Σ Global Time: %s', -- TODO: delete
   prettify = true,
@@ -40,9 +39,13 @@ local dashboard_section_base = {
   sorting = dashboard_section_sorting_opts,
   dynamic_bar_height_thresholds = nil,
   n_by_default = 2,
-  proj_total_time_as_hours_max = true, --TODO: not used yet
+  proj_total_time_as_hours_max = true,
+  proj_total_time_as_hours_min = true,
   random_bars_coloring = false,
   bars_coloring_follows_sorting_in_order = true,
+  color_proj_times_like_bars = false,
+  min_proj_time_to_display_proj = 0,
+  window_border = nil,
   bar_chars = nil,
 }
 
@@ -65,6 +68,7 @@ local defaults = {
   sort_tracked_parent_dirs = false,
   differentiate_projects_by_folder_not_path = true,
   min_session_time = 180,
+  track_last_30_days = true,
   data_file = 'dev-chronicles.json',
   log_file = 'log.dev-chronicles.log',
   dashboard = {
@@ -86,11 +90,13 @@ local defaults = {
     }),
     dashboard_months = make_dashboard_section({
       n_by_default = 2,
+      window_border = { '╬', '═', '╬', '║', '╬', '═', '╬', '║' },
       dynamic_bar_height_thresholds = nil, -- = { 15, 25, 40 },
     }),
     dashboard_all = make_dashboard_section({
       header = { window_title = ' Σ Dev Chronicles Σ ' },
       sorting = { sort_by_last_worked_not_total_time = false },
+      window_border = { '╳', '━', '╳', '┃', '╳', '━', '╳', '┃' },
     }),
   },
   for_dev_start_time = nil,

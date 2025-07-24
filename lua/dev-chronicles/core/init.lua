@@ -219,7 +219,12 @@ M.record_session = function(project_id, duration, end_time)
   project.last_worked = end_time
   project.by_month[curr_month] = (project.by_month[curr_month] or 0) + duration
 
-  utils.save_data(data)
+  if track_last_30_days then
+    local curr_day = time.get_day_str()
+    project.by_day[curr_day] = (project.by_day[curr_day] or 0) + duration_sec
+  end
+
+  require('dev-chronicles.utils.data').save_data(data, data_file)
 end
 
 ---@class chronicles.SessionInfo: chronicles.Session

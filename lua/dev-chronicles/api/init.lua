@@ -25,6 +25,7 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
   local win_col = math.floor((screen_width - win_width) / 2)
 
   local dashboard_stats
+  ---@type chronicles.Options.Dashboard.Section
   local dashboard_type_options
 
   if dashboard_type == M.DashboardType.Days then
@@ -74,7 +75,7 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
     row = win_row,
     col = win_col,
     style = 'minimal',
-    border = 'rounded',
+    border = dashboard_type_options.window_border or 'rounded',
     title = dashboard_type_options.header.window_title,
     title_pos = 'center',
   })
