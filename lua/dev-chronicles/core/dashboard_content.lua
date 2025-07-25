@@ -400,7 +400,7 @@ end
 ---@param bar_representation chronicles.BarRepresentation
 ---@param bar_header_extends_by integer
 ---@param bar_footer_extends_by integer
----@param max_bar_height integer
+---@param vertical_space_for_bars integer
 ---@param bar_width integer
 ---@param win_width integer
 M.set_bars_lines_highlights = function(
@@ -410,7 +410,7 @@ M.set_bars_lines_highlights = function(
   bar_representation,
   bar_header_extends_by,
   bar_footer_extends_by,
-  max_bar_height,
+  vertical_space_for_bars,
   bar_width,
   win_width
 )
@@ -420,7 +420,7 @@ M.set_bars_lines_highlights = function(
   local len_bar_footer_rows = #bar_representation.footer.realized_rows
   local blank_line_chars = vim.split(string.rep(' ', win_width), '')
 
-  for row = max_bar_height, 1, -1 do
+  for row = vertical_space_for_bars, 1, -1 do
     local line_chars = { unpack(blank_line_chars) }
     local hl_bytes_shift = 0
 

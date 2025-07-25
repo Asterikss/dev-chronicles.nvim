@@ -34,8 +34,8 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
 
   local chart_height = win_height - 7 -- header_height + footer_height
   local max_chart_width = win_width - 4 -- margins
-  local max_bar_height = chart_height - 3 -- projects_time + gap + chart floor
-
+  local vertical_space_for_bars = chart_height - 3 -- projects_time + gap + chart floor
+  local max_bar_height = vertical_space_for_bars
   dashboard_content.set_header_lines_highlights(
     lines,
     highlights,
@@ -119,7 +119,7 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
     bar_representation,
     dashboard_opts.bar_header_extends_by,
     dashboard_opts.bar_footer_extends_by,
-    max_bar_height,
+    vertical_space_for_bars,
     dashboard_opts.bar_width,
     win_width
   )
