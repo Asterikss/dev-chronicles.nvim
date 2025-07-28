@@ -20,6 +20,7 @@ local dashboard_section_header_opts = {
   show_current_session_time = true,
   show_global_time_for_each_project = true,
   show_global_time_only_if_differs = true,
+  proj_global_total_time_round_hours_above_one = true,
   color_global_proj_times_like_bars = false,
   total_time_format_str = 'total time: %s',
   prettify = true,

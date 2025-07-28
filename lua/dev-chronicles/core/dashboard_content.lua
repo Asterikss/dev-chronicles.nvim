@@ -444,6 +444,10 @@ end
 ---@param show_global_time_for_each_project boolean
 ---@param show_global_time_only_if_differs boolean
 ---@param color_global_proj_times_like_bars boolean
+---@param proj_total_time_as_hours_max boolean
+---@param proj_total_time_as_hours_min boolean
+---@param proj_total_time_round_hours_above_one boolean
+---@param proj_global_total_time_round_hours_above_one boolean
 M.set_time_labels_above_bars = function(
   lines,
   highlights,
@@ -452,7 +456,11 @@ M.set_time_labels_above_bars = function(
   color_proj_times_like_bars,
   show_global_time_for_each_project,
   show_global_time_only_if_differs,
-  color_global_proj_times_like_bars
+  color_global_proj_times_like_bars,
+  proj_total_time_as_hours_max,
+  proj_total_time_as_hours_min,
+  proj_total_time_round_hours_above_one,
+  proj_global_total_time_round_hours_above_one
 )
   local format_time = require('dev-chronicles.core.time').format_time
 
@@ -463,15 +471,22 @@ M.set_time_labels_above_bars = function(
   ---@param bar_width integer
   ---@param color? string
   ---@param highlights_insert_positon integer
+  ---@param round_hours_above_one boolean
   local function place_label(
     target_line,
     time_to_format,
     bar_start_col,
     bar_width,
     color,
-    highlights_insert_positon
+    highlights_insert_positon,
+    round_hours_above_one
   )
-    local time_str = format_time(time_to_format)
+    local time_str = format_time(
+      time_to_format,
+      proj_total_time_as_hours_max,
+      proj_total_time_as_hours_min,
+      round_hours_above_one
+    )
     local len_time_str = #time_str
     local label_start = bar_start_col + math.floor((bar_width - len_time_str) / 2)
 
@@ -511,7 +526,8 @@ M.set_time_labels_above_bars = function(
           bar.start_col,
           bar.width,
           color_global_proj_times_like_bars and bar.color or nil,
-          2
+          3,
+          proj_global_total_time_round_hours_above_one
         )
       end
     end
@@ -522,7 +538,8 @@ M.set_time_labels_above_bars = function(
       bar.start_col,
       bar.width,
       color_proj_times_like_bars and bar.color or nil,
-      highlights_insert_positon
+      highlights_insert_positon,
+      proj_total_time_round_hours_above_one
     )
   end
 
