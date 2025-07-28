@@ -199,6 +199,7 @@ end
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
+---@param time_period_singular_str? string
 ---@return string
 M.get_time_period_str_days = function(
   n_days,
@@ -206,29 +207,39 @@ M.get_time_period_str_days = function(
   end_day,
   show_date_period,
   show_time,
-  time_period_str
+  time_period_str,
+  time_period_singular_str
 )
+  if time_period_singular_str and n_days == 1 then
+    return string.format(time_period_singular_str, n_days)
+  end
   if time_period_str then
     return string.format(time_period_str, n_days)
   end
+
   local time_period = ''
   if show_date_period then
-    local start_d, start_m, start_y = M.extract_day_month_year(start_day)
-    local end_d, end_m, end_y = M.extract_day_month_year(end_day)
-    if start_y == end_y and start_m == end_m then
-      -- Same month: DD-DD.MM.YYYY
-      time_period = ('%02d — %02d.%02d.%04d'):format(start_d, end_d, start_m, start_y)
+    if n_days == 1 then
+      time_period = start_day
     else
-      -- Different months or years: DD.MM.YYYY - DD.MM.YYYY
-      time_period = start_day .. ' — ' .. end_day
+      local start_d, start_m, start_y = M.extract_day_month_year(start_day)
+      local end_d, end_m, end_y = M.extract_day_month_year(end_day)
+      if start_y == end_y and start_m == end_m then
+        -- Same month: DD-DD.MM.YYYY
+        time_period = ('%02d — %02d.%02d.%04d'):format(start_d, end_d, start_m, start_y)
+      else
+        -- Different months or years: DD.MM.YYYY - DD.MM.YYYY
+        time_period = start_day .. ' — ' .. end_day
+      end
     end
   end
 
   if show_time then
+    local ending = n_days == 1 and 'day' or 'days'
     if show_date_period then
-      time_period = time_period .. ' (' .. n_days .. ' days)'
+      time_period = time_period .. ' (' .. n_days .. ending .. ')'
     else
-      time_period = n_days .. ' days'
+      time_period = time_period .. ending
     end
   end
   return time_period
@@ -247,14 +258,19 @@ end
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
+---@param time_period_singular_str? string
 ---@return string
 M.get_time_period_str_months = function(
   start_month,
   end_month,
   show_date_period,
   show_time,
-  time_period_str
+  time_period_str,
+  time_period_singular_str
 )
+  if start_month == end_month and time_period_singular_str then
+    return string.format(time_period_singular_str, 1)
+  end
   if time_period_str then
     local start_ts = M.convert_month_str_to_timestamp(start_month)
     local end_ts = M.convert_month_str_to_timestamp(end_month)
@@ -286,7 +302,7 @@ M.get_time_period_str_months = function(
         end
       else
         if day_month_str then
-          time_period = '01.' .. string.sub(start_month, 1, 2) .. '—' .. day_month_str
+          time_period = '01.' .. string.sub(start_month, 1, 2) .. ' — ' .. day_month_str
         else
           time_period = string.sub(start_month, 1, 2)
             .. '—'
@@ -296,7 +312,7 @@ M.get_time_period_str_months = function(
         end
       end
     else
-      time_period = start_month .. '—' .. end_month
+      time_period = start_month .. ' — ' .. end_month
     end
   end
 
