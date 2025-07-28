@@ -276,30 +276,17 @@ end
 ---that sessoin's project data.
 ---@param projects_filtered_parsed chronicles.Dashboard.Stats.ParsedProjects
 ---@param min_proj_time_to_display_proj integer
----@param curr_session_project_id? string
----@param curr_session_time_seconds? integer
 ---@return chronicles.Dashboard.FinalProjectData[], integer
-M.parse_projects_calc_max_time = function(
-  projects_filtered_parsed,
-  min_proj_time_to_display_proj,
-  curr_session_project_id,
-  curr_session_time_seconds
-)
+M.parse_projects_calc_max_time = function(projects_filtered_parsed, min_proj_time_to_display_proj)
   ---@type chronicles.Dashboard.FinalProjectData[]
   local arr_projects = {}
   local max_time = 0
 
+  -- TODO: remove all of that
   for parsed_project_id, parsed_project_data in pairs(projects_filtered_parsed) do
     local project_total_time = parsed_project_data.total_time
     local project_total_global_time = parsed_project_data.total_global_time
     local project_last_worked = parsed_project_data.last_worked
-
-    if curr_session_time_seconds and parsed_project_id == curr_session_project_id then
-      project_total_time = project_total_time + curr_session_time_seconds
-      project_total_global_time = project_total_global_time
-        and project_total_global_time + curr_session_time_seconds
-      project_last_worked = require('dev-chronicles.core.time').get_current_timestamp()
-    end
 
     if project_total_time >= min_proj_time_to_display_proj then
       max_time = math.max(max_time, project_total_time)

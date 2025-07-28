@@ -17,6 +17,15 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
 
   local dashboard = require('dev-chronicles.core.dashboard')
   local options = require('dev-chronicles.config').options
+  local curr_session_info = require('dev-chronicles.core').get_session_info()
+  if curr_session_info.is_tracking then
+    data = require('dev-chronicles.utils.dashboard').update_chronicles_data_with_curr_session(
+      data,
+      curr_session_info.project_id,
+      curr_session_info.session_time_seconds,
+      curr_session_info.start_time
+    )
+  end
 
   dashboard_type_args = dashboard_type_args or {}
 

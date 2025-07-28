@@ -42,9 +42,7 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
 
   local arr_projects, max_time = dashboard_content.parse_projects_calc_max_time(
     data.projects_filtered_parsed,
-    dashboard_type_opts.min_proj_time_to_display_proj,
-    session_info.project_id,
-    session_info.session_time_seconds
+    dashboard_type_opts.min_proj_time_to_display_proj
   )
 
   local n_projects_to_keep, chart_start_col = dashboard_content.calc_chart_stats(

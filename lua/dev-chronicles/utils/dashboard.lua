@@ -136,4 +136,50 @@ M._construct_fallback_bar_representation = function(bar_width)
   return bar_representation
 end
 
+---@param data chronicles.ChroniclesData
+---@param curr_project_id? string
+---@param curr_session_time_seconds? integer
+---@param curr_session_start_time? integer
+---@return chronicles.ChroniclesData
+M.update_chronicles_data_with_curr_session = function(
+  data,
+  curr_project_id,
+  curr_session_time_seconds,
+  curr_session_start_time
+)
+  if not curr_project_id or not curr_session_time_seconds or not curr_session_start_time then
+    return data
+  end
+
+  local time = require('dev-chronicles.core.time')
+
+  data.global_time = data.global_time + curr_session_time_seconds
+
+  local today_key = time.get_day_str()
+  local curr_month_key = time.get_month_str()
+  local curr_timestamp = time.get_current_timestamp()
+  local current_project = data.projects[curr_project_id]
+
+  if not current_project then
+    current_project = {
+      total_time = 0,
+      by_day = {},
+      by_month = {},
+      tags_map = {},
+      first_worked = curr_session_start_time,
+      last_worked = curr_timestamp,
+    }
+    data.projects[curr_project_id] = current_project
+  end
+
+  current_project.by_day[today_key] = (current_project.by_day[today_key] or 0)
+    + curr_session_time_seconds
+  current_project.by_month[curr_month_key] = (current_project.by_month[curr_month_key] or 0)
+    + curr_session_time_seconds
+  current_project.total_time = current_project.total_time + curr_session_time_seconds
+  current_project.last_worked = curr_timestamp
+
+  return data
+end
+
 return M
