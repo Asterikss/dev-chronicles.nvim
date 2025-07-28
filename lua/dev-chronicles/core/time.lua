@@ -1,5 +1,48 @@
 local M = {}
 
+---Returns current unix timestamp
+---@return integer
+M.get_current_timestamp = function()
+  return os.time()
+end
+
+---Return seconds as a formatted time string
+---@param seconds integer Seconds
+---@param max_hours? boolean Should the maximal unit be hours (default true)
+---@param min_hours? boolean Should the minimal unit be hours (default false)
+---@param round_hours_above_one? boolean Should hours above 1 be rounded (default false)
+---@return string
+M.format_time = function(seconds, max_hours, min_hours, round_hours_above_one)
+  max_hours = (max_hours == nil) and true or max_hours
+
+  if seconds < 60 then
+    if min_hours then
+      return '0.1h'
+    end
+    return string.format('%ds', seconds)
+  end
+
+  if seconds < 3600 then
+    if min_hours then
+      return string.format('%.1fh', seconds / 3600)
+    end
+    return string.format('%dm', seconds / 60)
+  end
+
+  if max_hours or seconds < 86400 then
+    if round_hours_above_one then
+      return string.format('%dh', math.floor((seconds / 3600) + 0.5))
+    end
+    return string.format('%.1fh', seconds / 3600)
+  end
+
+  local n_days = math.floor(seconds / 86400 + 0.5)
+  if n_days == 1 then
+    return '1 day'
+  end
+  return string.format('%d days', n_days)
+end
+
 ---Returns the day as a string in the format 'DD.MM.YYYY'.
 ---If a timestamp is provided, returns the day for that timestamp;
 ---otherwise, returns today's date.
@@ -8,6 +51,16 @@ local M = {}
 M.get_day_str = function(timestamp)
   ---@type string
   return os.date('%d.%m.%Y', timestamp)
+end
+
+---Returns the month as a string in the format 'MM.YYYY'.
+---If a timestamp is provided, returns the month for that timestamp;
+---otherwise, returns the current month.
+---@param timestamp? integer
+---@return string
+M.get_month_str = function(timestamp)
+  ---@type string
+  return os.date('%m.%Y', timestamp)
 end
 
 ---Accepts a day-month-year string in format: 'DD.MM.YYYY' and extracts day,
@@ -70,6 +123,32 @@ M.get_previous_day = function(start_day, offset)
 
   ---@type string
   return os.date('%d.%m.%Y', prev_ts)
+end
+
+---Returns the previous month to `start_month` as a string. Both formated as:
+---'MM.YYYY'. Offset can be passed to change how many months back to go
+---(defaults to 1).
+---@param start_month string From which month to offset ('MM.YYYY')
+---@param offset? integer How many months back to go (default 1)
+---@return string
+M.get_previous_month = function(start_month, offset)
+  offset = offset or 1
+  if offset < 0 then
+    vim.notify(
+      'DevChronicesl Warning: Offset, when getting previous month, cannot be smaller than 0. Setting it to one'
+    )
+    offset = 1
+  end
+
+  local month, year = M.extract_month_year(start_month)
+
+  month = month - offset
+  while month <= 0 do
+    month = month + 12
+    year = year - 1
+  end
+
+  return string.format('%02d.%d', month, year)
 end
 
 ---Accepts a day-month-year string in format: 'DD.MM.YYYY' and transforms it into a
