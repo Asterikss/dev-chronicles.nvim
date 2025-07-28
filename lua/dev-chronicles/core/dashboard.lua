@@ -5,8 +5,9 @@ local M = {}
 ---@param win_width integer
 ---@param win_height integer
 ---@param dashboard_type chronicles.DashboardType
+---@param top_projects? chronicles.Dashboard.TopProjectsArray
 ---@return table, table: Lines, Highlights
-M.create_dashboard_content = function(data, win_width, win_height, dashboard_type)
+M.create_dashboard_content = function(data, win_width, win_height, dashboard_type, top_projects)
   local lines = {}
   local highlights = {}
 
@@ -94,6 +95,24 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
     differentiate_projects_by_folder_not_path
   )
 
+  dashboard_content.set_header_lines_highlights(
+    lines,
+    highlights,
+    data.time_period_str,
+    win_width,
+    data.global_time_filtered,
+    dashboard_type_opts.header.total_time_as_hours_max,
+    dashboard_type_opts.header.total_time_as_hours_min,
+    dashboard_type_opts.header.show_current_session_time,
+    dashboard_type_opts.header.total_time_format_str,
+    dashboard_type_opts.header.prettify,
+    session_info.session_time_seconds,
+    session_info.session_time,
+    top_projects,
+    dashboard_type_opts.header.top_projects,
+    project_id_to_color
+  )
+
   dashboard_content.set_time_labels_above_bars(
     lines,
     highlights,
@@ -135,7 +154,14 @@ end
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
-M.get_dashboard_data_all = function(data_file, show_date_period, show_time, time_period_str)
+---@param time_period_singular_str? string
+M.get_dashboard_data_all = function(
+  data_file,
+  show_date_period,
+  show_time,
+  time_period_str,
+  time_period_singular_str
+)
   local data = require('dev-chronicles.utils.data').load_data(data_file)
   local time = require('dev-chronicles.core.time')
   if not data then
@@ -151,7 +177,8 @@ M.get_dashboard_data_all = function(data_file, show_date_period, show_time, time
       time.get_month_str(),
       show_date_period,
       show_time,
-      time_period_str
+      time_period_str,
+      time_period_singular_str
     ),
   }
 end
@@ -163,7 +190,9 @@ end
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
----@return chronicles.Dashboard.Data?
+---@param time_period_singular_str? string
+---@param construct_most_worked_on_project_arr boolean
+---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
 M.get_dashboard_data_months = function(
   data_file,
   start_date,
@@ -171,7 +200,9 @@ M.get_dashboard_data_months = function(
   n_months_by_default,
   show_date_period,
   show_time,
-  time_period_str
+  time_period_str,
+  time_period_singular_str,
+  construct_most_worked_on_project_arr
 )
   local time = require('dev-chronicles.core.time')
   local data = require('dev-chronicles.utils.data').load_data(data_file)
@@ -257,7 +288,10 @@ end
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
----@return chronicles.Dashboard.Data?
+---@param time_period_singular_str? string
+---@param construct_most_worked_on_project_arr boolean
+---@param extend_today_to_4am boolean
+---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
 M.get_dashboard_data_days = function(
   data_file,
   start_offset,
@@ -265,7 +299,10 @@ M.get_dashboard_data_days = function(
   n_days_by_default,
   show_date_period,
   show_time,
-  time_period_str
+  time_period_str,
+  time_period_singular_str,
+  construct_most_worked_on_project_arr,
+  extend_today_to_4am
 )
   local time = require('dev-chronicles.core.time')
   local data = require('dev-chronicles.utils.data').load_data(data_file)
