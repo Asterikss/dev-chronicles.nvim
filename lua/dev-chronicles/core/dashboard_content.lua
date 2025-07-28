@@ -273,16 +273,16 @@ end
 
 ---Parse projects into an array, so that it can be sorted and traversed in
 ---order, and calculate maximum time across projects. If in a session, update
----that project's data
+---that sessoin's project data.
 ---@param projects_filtered_parsed chronicles.Dashboard.Stats.ParsedProjects
 ---@param min_proj_time_to_display_proj integer
----@param project_id? string
+---@param curr_session_project_id? string
 ---@param curr_session_time_seconds? integer
 ---@return chronicles.Dashboard.FinalProjectData[], integer
 M.parse_projects_calc_max_time = function(
   projects_filtered_parsed,
   min_proj_time_to_display_proj,
-  project_id,
+  curr_session_project_id,
   curr_session_time_seconds
 )
   ---@type chronicles.Dashboard.FinalProjectData[]
@@ -294,13 +294,13 @@ M.parse_projects_calc_max_time = function(
     local project_total_global_time = parsed_project_data.total_global_time
     local project_last_worked = parsed_project_data.last_worked
 
-    if project_total_time >= min_proj_time_to_display_proj then
-      if parsed_project_id == project_id and curr_session_time_seconds then
-        project_total_time = project_total_time + curr_session_time_seconds
-        project_total_global_time = project_total_global_time + curr_session_time_seconds
-        project_last_worked = require('dev-chronicles.core.time').get_current_timestamp()
-      end
+    if curr_session_time_seconds and parsed_project_id == curr_session_project_id then
+      project_total_time = project_total_time + curr_session_time_seconds
+      project_total_global_time = project_total_global_time + curr_session_time_seconds
+      project_last_worked = require('dev-chronicles.core.time').get_current_timestamp()
+    end
 
+    if project_total_time >= min_proj_time_to_display_proj then
       max_time = math.max(max_time, project_total_time)
 
       table.insert(arr_projects, {

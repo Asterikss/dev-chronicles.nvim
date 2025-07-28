@@ -10,7 +10,7 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
   local lines = {}
   local highlights = {}
 
-  if data == nil then
+  if not data then
     table.insert(lines, '')
     table.insert(lines, 'No recent projects found (Loser).')
     table.insert(lines, 'Start coding in your tracked directories!')
@@ -21,7 +21,9 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
   local dashboard_opts = require('dev-chronicles.config').options.dashboard
   local dashboard_utils = require('dev-chronicles.utils.dashboard')
   local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
-  local differentiate_projects_by_folder_not_path = require('dev-chronicles.config').options.differentiate_projects_by_folder_not_path
+  local differentiate_projects_by_folder_not_path =
+    require('dev-chronicles.config').options.differentiate_projects_by_folder_not_path
+  local session_info = require('dev-chronicles.core').get_session_info()
 
   local dashboard_type_opts
   if dashboard_type == require('dev-chronicles.api').DashboardType.All then
@@ -34,24 +36,15 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
 
   local chart_height = win_height - 7 -- header_height + footer_height
   local max_chart_width = win_width - 4 -- margins
-  local vertical_space_for_bars = chart_height - 3 -- projects_time + gap + chart floor
+  local vertical_space_for_bars = chart_height - 3 -- projects_time + gap 1 + chart floor
   local max_bar_height = vertical_space_for_bars
-  dashboard_content.set_header_lines_highlights(
-    lines,
-    highlights,
-    data.time_period_str,
-    win_width,
-    data.global_time_filtered,
-    dashboard_type_opts.header.total_time_as_hours_max,
-    dashboard_type_opts.header.show_current_session_time,
-    dashboard_type_opts.header.total_time_format_str,
-    dashboard_type_opts.header.prettify,
-    dashboard_type_opts.header.show_global_total_time and data.global_time or nil,
-    dashboard_type_opts.header.global_total_time_format_str
-  )
 
-  local arr_projects, max_time =
-    dashboard_content.parse_projects_calc_max_time(data.projects_filtered_parsed)
+  local arr_projects, max_time = dashboard_content.parse_projects_calc_max_time(
+    data.projects_filtered_parsed,
+    dashboard_type_opts.min_proj_time_to_display_proj,
+    session_info.project_id,
+    session_info.session_time_seconds
+  )
 
   local n_projects_to_keep, chart_start_col = dashboard_content.calc_chart_stats(
     dashboard_opts.bar_width,
@@ -69,10 +62,10 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
     dashboard_type_opts.sorting.ascending
   )
 
-  if dashboard_opts.dynamic_bar_height_months then
+  if dashboard_type_opts.dynamic_bar_height_thresholds then
     max_bar_height = dashboard_content.calc_max_bar_height(
-      max_bar_height,
-      dashboard_opts.dynamic_bar_height_months_thresholds,
+      vertical_space_for_bars,
+      dashboard_type_opts.dynamic_bar_height_thresholds,
       max_time
     )
   end
