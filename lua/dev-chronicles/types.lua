@@ -10,6 +10,15 @@
 ---| 'Body'
 ---| 'Footer'
 
+---@class chronicles.Session
+---@field project_id? string
+---@field start_time? integer
+---@field is_tracking boolean
+
+---@class chronicles.SessionInfo: chronicles.Session
+---@field session_time_seconds? integer
+---@field session_time? string
+
 ---@class (exact) chronicles.DashboardType.Args
 ---@field start_offset? integer
 ---@field end_offset? integer

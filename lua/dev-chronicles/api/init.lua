@@ -111,8 +111,9 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
   vim.api.nvim_win_set_cursor(win, { 2, 0 })
 end
 
+---@return chronicles.SessionInfo
 M.get_session_info = function()
-  vim.notify(vim.inspect(require('dev-chronicles.core').get_session_info()))
+  return require('dev-chronicles.core').get_session_info()
 end
 
 M.abort_session = function()

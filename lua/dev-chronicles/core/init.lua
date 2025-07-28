@@ -1,9 +1,6 @@
 local M = {}
 
----@class chronicles.Session
----@field project_id? string
----@field start_time? integer
----@field is_tracking boolean
+---@type chronicles.Session
 local session = {
   project_id = nil,
   start_time = nil,
@@ -227,15 +224,15 @@ M.record_session = function(project_id, duration, end_time)
   require('dev-chronicles.utils.data').save_data(data, data_file)
 end
 
----@class chronicles.SessionInfo: chronicles.Session
----@field session_time? integer
+---@return chronicles.SessionInfo
 M.get_session_info = function()
   local time = require('dev-chronicles.core.time')
   local session_info = vim.deepcopy(session)
 
   if session_info.start_time then
-    session_info.session_time =
-      time.format_time(time.get_current_timestamp() - session_info.start_time)
+    local session_time_seconds = time.get_current_timestamp() - session_info.start_time
+    session_info.session_time_seconds = session_time_seconds
+    session_info.session_time = time.format_time(session_time_seconds)
   end
   return session_info
 end
