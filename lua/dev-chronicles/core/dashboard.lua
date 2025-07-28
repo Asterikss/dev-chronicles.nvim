@@ -6,8 +6,16 @@ local M = {}
 ---@param win_height integer
 ---@param dashboard_type chronicles.DashboardType
 ---@param top_projects? chronicles.Dashboard.TopProjectsArray
+---@param curr_session_time? integer
 ---@return table, table: Lines, Highlights
-M.create_dashboard_content = function(data, win_width, win_height, dashboard_type, top_projects)
+M.create_dashboard_content = function(
+  data,
+  win_width,
+  win_height,
+  dashboard_type,
+  top_projects,
+  curr_session_time
+)
   local lines = {}
   local highlights = {}
 
@@ -24,7 +32,6 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
   local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
   local differentiate_projects_by_folder_not_path =
     require('dev-chronicles.config').options.differentiate_projects_by_folder_not_path
-  local session_info = require('dev-chronicles.core').get_session_info()
 
   local dashboard_type_opts
   if dashboard_type == require('dev-chronicles.api').DashboardType.All then

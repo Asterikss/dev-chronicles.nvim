@@ -49,7 +49,7 @@ end
 ---@param total_time_format_str string
 ---@param prettify boolean
 ---@param curr_session_time_seconds? integer
----@param curr_session_formatted_time? string
+---@param total_time_round_hours_above_one boolean
 ---@param top_projects? chronicles.Dashboard.TopProjectsArray
 ---@param top_projects_settings chronicles.Options.Dashboard.Header.TopProjects
 ---@param project_id_to_color table<string, string>
@@ -65,7 +65,7 @@ M.set_header_lines_highlights = function(
   total_time_format_str,
   prettify,
   curr_session_time_seconds,
-  curr_session_formatted_time,
+  total_time_round_hours_above_one,
   top_projects,
   top_projects_settings,
   project_id_to_color
@@ -75,13 +75,17 @@ M.set_header_lines_highlights = function(
   local left_header = string.format(
     total_time_format_str,
     time.format_time(
-      global_time_filtered + (curr_session_time_seconds or 0),
+      global_time_filtered,
       total_time_as_hours_max,
-      total_time_as_hours_min
+      total_time_as_hours_min,
+      total_time_round_hours_above_one
     )
   )
-  if show_current_session_time and curr_session_formatted_time then
-    left_header = left_header .. ' (' .. curr_session_formatted_time .. ')'
+  if show_current_session_time and curr_session_time_seconds then
+    left_header = left_header
+      .. ' ('
+      .. time.format_time(curr_session_time_seconds, true, false, false)
+      .. ')'
   end
 
   local right_header = time_period_str

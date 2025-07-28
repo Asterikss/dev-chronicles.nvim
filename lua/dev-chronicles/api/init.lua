@@ -90,7 +90,8 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
     win_width,
     win_height,
     dashboard_type,
-    top_projects
+    top_projects,
+    curr_session_info.session_time_seconds
   )
 
   local buf = vim.api.nvim_create_buf(false, true)
