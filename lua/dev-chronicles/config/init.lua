@@ -13,6 +13,7 @@ local dashboard_section_header_opts = {
   show_date_period = true,
   show_time = true,
   time_period_str = nil,
+  time_period_singular_str = nil,
   total_time_as_hours_max = true,
   total_time_as_hours_min = true,
   show_current_session_time = true,
@@ -20,10 +21,14 @@ local dashboard_section_header_opts = {
   show_global_time_only_if_differs = true,
   color_global_proj_times_like_bars = false,
   total_time_format_str = 'total time: %s',
-  show_global_total_time = false, -- TODO: delete
-  global_total_time_format_str = 'Σ Global Time: %s', -- TODO: delete
   prettify = true,
   window_title = ' Dev Chronicles ',
+  top_projects = {
+    enable = true,
+    extra_space_between_bars = false,
+    use_wide_bars = false,
+    min_top_projects_len_to_show = 1,
+  },
 }
 
 ---@type chronicles.Options.Dashboard.Sorting
@@ -68,7 +73,8 @@ local defaults = {
   sort_tracked_parent_dirs = false,
   differentiate_projects_by_folder_not_path = true,
   min_session_time = 180,
-  track_last_30_days = true,
+  track_days = true,
+  extend_today_to_4am = true,
   data_file = 'dev-chronicles.json',
   log_file = 'log.dev-chronicles.log',
   dashboard = {
@@ -84,17 +90,25 @@ local defaults = {
       let_proj_names_extend_bars_by_one = true,
     },
     dashboard_days = make_dashboard_section({
-      header = { time_period_str = 'last %s days' },
+      header = {
+        window_title = ' Dev Chronicles Days ',
+        time_period_str = 'last %s days',
+        time_period_singular_str = 'today',
+      },
       n_by_default = 30,
-      dynamic_bar_height_thresholds = nil, -- = { 2, 3.5, 5 },
+      dynamic_bar_height_thresholds = { 2, 3.5, 5 }, -- It could be a integer[] and integer[][]
     }),
     dashboard_months = make_dashboard_section({
+      header = {
+        window_title = ' Dev Chronicles Months ',
+        top_projects = { use_wide_bars = true },
+      },
       n_by_default = 2,
       window_border = { '╬', '═', '╬', '║', '╬', '═', '╬', '║' },
       dynamic_bar_height_thresholds = nil, -- = { 15, 25, 40 },
     }),
     dashboard_all = make_dashboard_section({
-      header = { window_title = ' Σ Dev Chronicles Σ ' },
+      header = { window_title = ' Dev Chronicles All ' },
       sorting = { sort_by_last_worked_not_total_time = false },
       window_border = { '╳', '━', '╳', '┃', '╳', '━', '╳', '┃' },
     }),

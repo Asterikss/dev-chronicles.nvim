@@ -1,8 +1,8 @@
 ---@meta
 
----@alias DashboardType
----| 'Default'
----| 'Custom'
+---@alias chronicles.DashboardType
+---| 'Days'
+---| 'Months'
 ---| 'All'
 
 ---@alias chronicles.BarLevel
@@ -10,12 +10,26 @@
 ---| 'Body'
 ---| 'Footer'
 
+---@class (exact) chronicles.DashboardType.Args
+---@field start_offset? integer
+---@field end_offset? integer
+---@field start_date? string
+---@field end_date? string
+
 ---@class (exact) chronicles.Dashboard.Stats.ParsedProjectData
 ---@field total_time integer
 ---@field last_worked integer
+---@field first_worked integer
+---@field tags_map table<string, any>
 ---@field total_global_time integer?
 
 ---@alias chronicles.Dashboard.Stats.ParsedProjects table<string, chronicles.Dashboard.Stats.ParsedProjectData>
+
+---@class (exact) chronicles.Dashboard.Data
+---@field global_time integer
+---@field global_time_filtered integer
+---@field projects_filtered_parsed chronicles.Dashboard.Stats.ParsedProjects
+---@field time_period_str string
 
 ---@class (exact) chronicles.Dashboard.Stats
 ---@field global_time integer
@@ -41,18 +55,20 @@
 ---@field last_worked integer
 ---@field global_time integer?
 
----@class (exact) ProjectData
+---@class (exact) chronicles.ChroniclesData.ProjectData
 ---@field total_time number
 ---@field by_month table<string, number>
+---@field by_day table<string, number>
 ---@field first_worked number
 ---@field last_worked number
+---@field tags_map table<string, any>
 
----@alias Projects table<string, ProjectData>
-
----@class (exact) ChroniclesData
----@field global_time number
----@field tracking_start number
----@field projects Projects
+---@class (exact) chronicles.ChroniclesData
+---@field global_time integer
+---@field tracking_start integer
+---@field last_data_write integer
+---@field schema_version integer
+---@field projects table<string, chronicles.ChroniclesData.ProjectData>
 
 ---@class (exact) chronicles.BarLevelRepresentation
 ---@field realized_rows string[]
@@ -64,6 +80,8 @@
 ---@field body chronicles.BarLevelRepresentation
 ---@field footer chronicles.BarLevelRepresentation
 
+---@alias chronicles.Dashboard.TopProjectsArray (string|boolean)[]
+
 -- --------------------------------------------
 -- Plugin Configuration Types
 -- --------------------------------------------
@@ -74,10 +92,17 @@
 ---@field bar_footer_extends_by integer
 ---@field bar_spacing integer
 
+---@class chronicles.Options.Dashboard.Header.TopProjects
+---@field enable boolean
+---@field extra_space_between_bars boolean
+---@field use_wide_bars boolean
+---@field min_top_projects_len_to_show integer
+
 ---@class chronicles.Options.Dashboard.Header
 ---@field show_date_period boolean
 ---@field show_time boolean
 ---@field time_period_str string?
+---@field time_period_singular_str string?
 ---@field total_time_as_hours_max boolean
 ---@field total_time_as_hours_min boolean
 ---@field show_current_session_time boolean
@@ -85,10 +110,9 @@
 ---@field show_global_time_only_if_differs boolean
 ---@field color_global_proj_times_like_bars boolean
 ---@field total_time_format_str string
----@field show_global_total_time boolean -- TODO: del?
----@field global_total_time_format_str string  -- TODO: del?
 ---@field prettify boolean
 ---@field window_title string
+---@field top_projects chronicles.Options.Dashboard.Header.TopProjects
 
 ---@class chronicles.Options.Dashboard.Sorting
 ---@field enable boolean
@@ -102,10 +126,12 @@
 ---@field n_by_default integer
 ---@field proj_total_time_as_hours_max boolean
 ---@field proj_total_time_as_hours_min boolean
+---@field proj_total_time_round_hours_above_one boolean
 ---@field random_bars_coloring boolean
 ---@field bars_coloring_follows_sorting_in_order boolean
 ---@field color_proj_times_like_bars boolean
 ---@field min_proj_time_to_display_proj integer
+---@field window_border? string[]
 ---@field bar_chars any?
 
 ---@class chronicles.Options.Dashboard.Section : chronicles.Options.Dashboard.Base
@@ -135,7 +161,8 @@
 ---@field sort_tracked_parent_dirs boolean If paths are not supplied from longest to shortest, then they need to be sorted like that
 ---@field differentiate_projects_by_folder_not_path boolean
 ---@field min_session_time integer Minimum session time in seconds
----@field track_last_30_days boolean
+---@field track_days boolean
+---@field extend_today_to_4am boolean
 ---@field dashboard chronicles.Options.Dashboard
 ---@field data_file string Path to the data file
 ---@field log_file string Path to the log file
