@@ -1,0 +1,9 @@
+{
+  "runtime": {
+    "version": "LuaJIT"
+  },
+  "diagnostics": {
+    "globals": ["vim", "describe", "it"],
+    "unusedLocalExclude": [ "_*" ]
+  }
+}
