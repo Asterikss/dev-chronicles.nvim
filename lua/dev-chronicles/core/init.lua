@@ -8,7 +8,10 @@ local session = {
 }
 
 ---@param data_file string
-M.init = function(data_file)
+---@param track_days boolean
+---@param min_session_time integer
+---@param extend_today_to_4am boolean
+M.init = function(data_file, track_days, min_session_time, extend_today_to_4am)
   math.randomseed(os.time())
   local api = require('dev-chronicles.api')
   local curr_month = require('dev-chronicles.core.time').get_month_str()
@@ -65,10 +68,14 @@ M.init = function(data_file)
     end,
   })
 
-  M._setup_autocmds(data_file)
+  M._setup_autocmds(data_file, track_days, min_session_time, extend_today_to_4am)
 end
 
-M._setup_autocmds = function()
+---@param data_file string
+---@param track_days boolean
+---@param min_session_time integer
+---@param extend_today_to_4am boolean
+M._setup_autocmds = function(data_file, track_days, min_session_time, extend_today_to_4am)
   local group = vim.api.nvim_create_augroup('DevChronicles', { clear = true })
 
   vim.api.nvim_create_autocmd('VimEnter', {
@@ -81,7 +88,7 @@ M._setup_autocmds = function()
   vim.api.nvim_create_autocmd('VimLeavePre', {
     group = group,
     callback = function()
-      M.end_session()
+      M.end_session(data_file, track_days, min_session_time, extend_today_to_4am)
     end,
   })
 end
@@ -174,51 +181,85 @@ M._start_session = function()
 end
 
 ---@param data_file string
-M.end_session = function(data_file)
-  if not session.is_tracking or not session.project_id or not session.start_time then
+---@param track_days boolean
+---@param min_session_time integer
+---@param extend_today_to_4am boolean
+M.end_session = function(data_file, track_days, min_session_time, extend_today_to_4am)
+  local session_info = M.get_session_info()
+  if
+    not session_info.is_tracking
+    or not session_info.project_id
+    or not session_info.start_time and session_info.session_time_seconds
+  then
+    -- TODO:
+    vim.notify('Dev Chronicles Error: while ending a session. Some session values that are nil')
     return
   end
 
-  local end_time = require('dev-chronicles.core.time').get_current_timestamp()
-  local session_duration = end_time - session.start_time
-
-  if session_duration >= require('dev-chronicles.config').options.min_session_time then
-    M._record_session(session.project_id, session_duration, end_time, data_file)
+  if session_info.session_time_seconds >= min_session_time then
+    M._record_session(
+      session_info.project_id,
+      session_info.session_time_seconds,
+      require('dev-chronicles.core.time').get_current_timestamp(),
+      track_days,
+      extend_today_to_4am,
+      data_file
+    )
   end
 
   M.abort_session()
 end
 
----@param project_id string Project id
----@param duration integer Duration in seconds
----@param end_time integer End timestamp
-M.record_session = function(project_id, duration, end_time)
-  local utils = require('dev-chronicles.utils')
-  local data = utils.load_data()
+---@param project_id string
+---@param duration_sec integer
+---@param end_ts integer
+---@param track_days boolean
+---@param extend_today_to_4am boolean
+---@param data_file string
+M._record_session = function(
+  project_id,
+  duration_sec,
+  end_ts,
+  track_days,
+  extend_today_to_4am,
+  data_file
+)
+  local time = require('dev-chronicles.core.time')
+  local data = require('dev-chronicles.utils.data').load_data(data_file)
   if not data then
+    vim.notify(
+      'DevChronicles Error: Recording the session failed. No data returned from load_data()'
+    )
     return
   end
 
-  data.global_time = data.global_time + duration
+  data.global_time = data.global_time + duration_sec
+  data.last_data_write = end_ts
 
   if not data.projects[project_id] then
     data.projects[project_id] = {
       total_time = 0,
-      first_worked = end_time,
-      last_worked = end_time,
+      first_worked = end_ts,
+      last_worked = end_ts,
       by_month = {},
+      by_day = {},
+      tags_map = {},
     }
   end
 
   local project = data.projects[project_id]
-  local curr_month = utils.get_month_str()
-  project.total_time = project.total_time + duration
-  project.last_worked = end_time
-  project.by_month[curr_month] = (project.by_month[curr_month] or 0) + duration
+  project.total_time = project.total_time + duration_sec
+  project.last_worked = end_ts
 
-  if track_last_30_days then
-    local curr_day = time.get_day_str()
-    project.by_day[curr_day] = (project.by_day[curr_day] or 0) + duration_sec
+  local curr_month = time.get_month_str(end_ts)
+  project.by_month[curr_month] = (project.by_month[curr_month] or 0) + duration_sec
+
+  if track_days then
+    local day_key = time.get_day_str(end_ts)
+    if extend_today_to_4am and tonumber(os.date('%H', end_ts)) <= 4 then
+      day_key = time.get_previous_day(day_key)
+    end
+    project.by_day[day_key] = (project.by_day[day_key] or 0) + duration_sec
   end
 
   require('dev-chronicles.utils.data').save_data(data, data_file)

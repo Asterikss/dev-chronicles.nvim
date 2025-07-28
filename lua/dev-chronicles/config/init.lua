@@ -262,7 +262,12 @@ M.setup = function(opts)
   ---@type chronicles.Options
   M.options = merged
 
-  require('dev-chronicles.core').init(M.options.data_file)
+  require('dev-chronicles.core').init(
+    M.options.data_file,
+    M.options.track_days,
+    M.options.min_session_time,
+    M.options.extend_today_to_4am
+  )
 end
 
 return M
