@@ -44,11 +44,15 @@ end
 ---@param win_width integer
 ---@param global_time_filtered integer
 ---@param total_time_as_hours_max boolean
+---@param total_time_as_hours_min boolean
 ---@param show_current_session_time boolean
 ---@param total_time_format_str string
 ---@param prettify boolean
----@param global_total_time? integer
----@param global_total_time_format_str string
+---@param curr_session_time_seconds? integer
+---@param curr_session_formatted_time? string
+---@param top_projects? chronicles.Dashboard.TopProjectsArray
+---@param top_projects_settings chronicles.Options.Dashboard.Header.TopProjects
+---@param project_id_to_color table<string, string>
 M.set_header_lines_highlights = function(
   lines,
   highlights,
@@ -56,25 +60,28 @@ M.set_header_lines_highlights = function(
   win_width,
   global_time_filtered,
   total_time_as_hours_max,
+  total_time_as_hours_min,
   show_current_session_time,
   total_time_format_str,
   prettify,
-  global_total_time,
-  global_total_time_format_str
+  curr_session_time_seconds,
+  curr_session_formatted_time,
+  top_projects,
+  top_projects_settings,
+  project_id_to_color
 )
   local time = require('dev-chronicles.core.time')
+
   local left_header = string.format(
     total_time_format_str,
-    time.format_time(global_time_filtered, total_time_as_hours_max)
+    time.format_time(
+      global_time_filtered + (curr_session_time_seconds or 0),
+      total_time_as_hours_max,
+      total_time_as_hours_min
+    )
   )
-
-  if show_current_session_time then
-    local session_start_time = require('dev-chronicles.core').get_session_info().start_time
-    if session_start_time then
-      local curr_timestamp = time.get_current_timestamp()
-      local session_time = time.format_time(curr_timestamp - session_start_time)
-      left_header = left_header .. ' (' .. session_time .. ')'
-    end
+  if show_current_session_time and curr_session_formatted_time then
+    left_header = left_header .. ' (' .. curr_session_formatted_time .. ')'
   end
 
   local right_header = time_period_str
@@ -83,47 +90,184 @@ M.set_header_lines_highlights = function(
     left_header = '│ ' .. left_header .. ' │'
     right_header = '│ ' .. right_header .. ' │'
   end
-  local len_left_header = vim.str_utfindex(left_header)
-  local len_right_header = vim.str_utfindex(right_header)
 
-  local middle_header = global_total_time
-      and string.format(
-        global_total_time_format_str,
-        time.format_time(global_total_time, total_time_as_hours_max)
-      )
-    or nil
+  local left_header_disp_width = vim.fn.strdisplaywidth(left_header)
+  local right_header_disp_width = vim.fn.strdisplaywidth(right_header)
+  local left_header_bytes = #left_header
 
-  local header_line
-  if middle_header then
-    local total_length = len_left_header + #middle_header + len_right_header
-    local available_space = win_width - total_length
-
-    local left_space = math.floor(available_space / 2)
-    local right_space = available_space - left_space
-
-    header_line = left_header
-      .. string.rep(' ', left_space)
-      .. middle_header
-      .. string.rep(' ', right_space)
-      .. right_header
-  else
-    local header_padding = win_width - len_left_header - len_right_header
-    header_line = left_header .. string.rep(' ', header_padding) .. right_header
-  end
-
-  table.insert(lines, header_line)
+  local decorator_left = ''
+  local decorator_right = ''
   if prettify then
-    local decorator_left = '╰' .. string.rep('─', len_left_header - 2) .. '╯'
-    local decorator_right = '╰' .. string.rep('─', len_right_header - 2) .. '╯'
-    local decorator_padding = win_width - len_left_header - len_right_header
-    local decorator_line = decorator_left .. string.rep(' ', decorator_padding) .. decorator_right
-    table.insert(lines, decorator_line)
-  else
-    table.insert(lines, '')
+    decorator_left = '╰' .. string.rep('─', left_header_disp_width - 2) .. '╯'
+    decorator_right = '╰' .. string.rep('─', right_header_disp_width - 2) .. '╯'
   end
-  table.insert(lines, '')
-  table.insert(highlights, { line = 1, col = 0, end_col = -1, hl_group = 'DevChroniclesTitle' })
-  table.insert(highlights, { line = 2, col = 0, end_col = -1, hl_group = 'DevChroniclesTitle' })
+  local decorator_left_bytes = #decorator_left
+
+  local header_line1 = nil
+  local header_line2 = nil
+  local right_header_highlight_start_col = nil
+  local decorator_right_highlight_start_col = nil
+
+  ---@type integer|nil -- I know... I don't want to calculate #top_projects twice
+  local len_top_projects = top_projects and #top_projects
+
+  if
+    top_projects
+    and len_top_projects
+    and len_top_projects >= top_projects_settings.min_top_projects_len_to_show
+  then
+    local use_wide_bars = top_projects_settings.use_wide_bars
+    local single_top_bar = use_wide_bars and '▆▆' or '▆'
+    local single_bottom_bar = use_wide_bars and '▀▀' or '▀'
+    local bar_disp_width = vim.fn.strdisplaywidth(single_top_bar)
+    local single_top_bar_bytes = #single_top_bar
+    local space_width = top_projects_settings.extra_space_between_bars and 2 or 1
+    local disp_width_per_project = bar_disp_width + space_width
+
+    -- Calculate maximum bars length that can be centered without overlapping headers
+    -- For centered bars to not overlap:
+    -- start_pos >= len_left_header and end_pos <= win_width - len_right_header
+    -- where start_pos = (win_width - bars_length) / 2 and end_pos = start_pos + bars_length
+    local max_bars_disp_width =
+      math.min(win_width - 2 * left_header_disp_width, win_width - 2 * right_header_disp_width)
+
+    local max_n_projects_by_space =
+      math.max(0, math.floor((max_bars_disp_width + space_width) / disp_width_per_project))
+
+    local n_projects_to_show = math.min(max_n_projects_by_space, len_top_projects)
+
+    if n_projects_to_show > 0 then
+      local total_bars_disp_width = n_projects_to_show * bar_disp_width
+        + (n_projects_to_show - 1) * space_width
+
+      local bars_start_pos = math.floor((win_width - total_bars_disp_width) / 2)
+
+      local top_left_padding = bars_start_pos - left_header_disp_width
+      local top_right_padding = win_width
+        - right_header_disp_width
+        - (bars_start_pos + total_bars_disp_width)
+      local bottom_left_padding = bars_start_pos - vim.fn.strdisplaywidth(decorator_left)
+      local bottom_right_padding = win_width
+        - vim.fn.strdisplaywidth(decorator_right)
+        - (bars_start_pos + total_bars_disp_width)
+
+      local top_bars_str =
+        string.rep(single_top_bar, n_projects_to_show, string.rep(' ', space_width))
+      local top_bars_str_bytes = single_top_bar_bytes * n_projects_to_show
+        + (n_projects_to_show - 1) * space_width
+      local bottom_bars_str =
+        string.rep(single_bottom_bar, n_projects_to_show, string.rep(' ', space_width))
+
+      -- Calculate starting index (truncate top_projects from left if needed)
+      local start_idx = len_top_projects - n_projects_to_show + 1
+
+      local curr_highlight_col_top = bars_start_pos + left_header_bytes - left_header_disp_width
+      local curr_highlight_col_bottom = bars_start_pos
+        + decorator_left_bytes
+        - vim.fn.strdisplaywidth(decorator_left)
+      local curr_highlight_end_col_top = curr_highlight_col_top
+      local curr_highlight_end_col_bottom = curr_highlight_col_bottom
+
+      for i = start_idx, len_top_projects do
+        local project_id = top_projects[i]
+
+        -- project_id being false signifies that no projects were worked on
+        -- during this period.
+        --
+        -- A project (project_id) that is present in top_projects could have
+        -- been removed from projects to be displayed (e.g., it would not fit on
+        -- the screen). In this situation project_id_to_color would also be
+        -- missing it, a different highlight is provided in this situation, to
+        -- signify that.
+        local color = project_id and (project_id_to_color[project_id] or 'DevChroniclesLightGray')
+          or 'DevChroniclesGrayedOut'
+
+        curr_highlight_end_col_top = curr_highlight_col_top + single_top_bar_bytes
+        curr_highlight_end_col_bottom = curr_highlight_col_bottom + single_top_bar_bytes
+
+        table.insert(highlights, {
+          line = 1,
+          col = curr_highlight_col_top,
+          end_col = curr_highlight_end_col_top,
+          hl_group = color,
+        })
+        table.insert(highlights, {
+          line = 2,
+          col = curr_highlight_col_bottom,
+          end_col = curr_highlight_end_col_bottom,
+          hl_group = color,
+        })
+
+        curr_highlight_col_top = curr_highlight_end_col_top + space_width
+        curr_highlight_col_bottom = curr_highlight_end_col_bottom + space_width
+      end
+
+      header_line1 = left_header
+        .. string.rep(' ', top_left_padding)
+        .. top_bars_str
+        .. string.rep(' ', top_right_padding)
+        .. right_header
+
+      header_line2 = decorator_left
+        .. string.rep(' ', bottom_left_padding)
+        .. bottom_bars_str
+        .. string.rep(' ', bottom_right_padding)
+        .. decorator_right
+
+      right_header_highlight_start_col = left_header_bytes
+        + top_left_padding
+        + top_bars_str_bytes
+        + top_right_padding
+      decorator_right_highlight_start_col = decorator_left_bytes
+        + bottom_left_padding
+        + top_bars_str_bytes
+        + top_right_padding
+    end
+  end
+
+  if not header_line1 then
+    -- Either top_projects is nil (not ment to be shown) or no projects from
+    -- top_projects can fit.
+    local header_padding = win_width - left_header_disp_width - right_header_disp_width
+
+    header_line1 = left_header .. string.rep(' ', header_padding) .. right_header
+    header_line2 = prettify
+        and (decorator_left .. string.rep(' ', header_padding) .. decorator_right)
+      or ''
+
+    right_header_highlight_start_col = left_header_bytes + header_padding
+    decorator_right_highlight_start_col = decorator_left_bytes + header_padding
+  end
+
+  table.insert(highlights, {
+    line = 1,
+    col = 0,
+    end_col = left_header_bytes,
+    hl_group = 'DevChroniclesTitle',
+  })
+  table.insert(highlights, {
+    line = 1,
+    col = right_header_highlight_start_col,
+    end_col = -1,
+    hl_group = 'DevChroniclesTitle',
+  })
+  if prettify then
+    table.insert(
+      highlights,
+      { line = 2, col = 0, end_col = decorator_left_bytes, hl_group = 'DevChroniclesTitle' }
+    )
+    table.insert(highlights, {
+      line = 2,
+      col = decorator_right_highlight_start_col,
+      end_col = -1,
+      hl_group = 'DevChroniclesTitle',
+    })
+  end
+
+  lines[1] = header_line1
+  lines[2] = header_line2
+  lines[3] = ''
+
   M.set_hline_lines_highlights(lines, highlights, win_width, '─', 'DevChroniclesTitle')
 end
 
