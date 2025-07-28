@@ -89,13 +89,11 @@ M.construct_bar_representation = function(
       table.insert(row_codepoint_counts, n_to_fill_bar_width * row_chars_codepoints)
     end
 
-    if keys[j] then
-      bar_representation[keys[j]] = {
-        realized_rows = realized_rows,
-        row_codepoint_counts = row_codepoint_counts,
-        char_display_widths = char_display_widths,
-      }
-    end
+    bar_representation[keys[j]] = {
+      realized_rows = realized_rows,
+      row_codepoint_counts = row_codepoint_counts,
+      char_display_widths = char_display_widths,
+    }
   end
 
   -- `bar_rows_codepoints` entries can be deduced by the length of

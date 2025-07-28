@@ -114,9 +114,11 @@
 ---@field time_period_singular_str string?
 ---@field total_time_as_hours_max boolean
 ---@field total_time_as_hours_min boolean
+---@field total_time_round_hours_above_one boolean
 ---@field show_current_session_time boolean
 ---@field show_global_time_for_each_project boolean
 ---@field show_global_time_only_if_differs boolean
+---@field proj_global_total_time_round_hours_above_one boolean
 ---@field color_global_proj_times_like_bars boolean
 ---@field total_time_format_str string
 ---@field prettify boolean
