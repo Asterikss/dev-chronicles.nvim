@@ -296,7 +296,8 @@ M.parse_projects_calc_max_time = function(
 
     if curr_session_time_seconds and parsed_project_id == curr_session_project_id then
       project_total_time = project_total_time + curr_session_time_seconds
-      project_total_global_time = project_total_global_time + curr_session_time_seconds
+      project_total_global_time = project_total_global_time
+        and project_total_global_time + curr_session_time_seconds
       project_last_worked = require('dev-chronicles.core.time').get_current_timestamp()
     end
 

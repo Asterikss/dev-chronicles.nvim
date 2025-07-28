@@ -151,22 +151,19 @@ M.create_dashboard_content = function(data, win_width, win_height, dashboard_typ
 end
 
 ---@param data_file string
+---@param data chronicles.ChroniclesData
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
 ---@param time_period_singular_str? string
 M.get_dashboard_data_all = function(
-  data_file,
+  data,
   show_date_period,
   show_time,
   time_period_str,
   time_period_singular_str
 )
-  local data = require('dev-chronicles.utils.data').load_data(data_file)
   local time = require('dev-chronicles.core.time')
-  if not data then
-    return nil
-  end
 
   return {
     global_time = data.global_time,
@@ -183,7 +180,7 @@ M.get_dashboard_data_all = function(
   }
 end
 
----@param data_file string
+---@param data chronicles.ChroniclesData
 ---@param start_date? string
 ---@param end_date? string
 ---@param n_months_by_default integer
@@ -194,7 +191,7 @@ end
 ---@param construct_most_worked_on_project_arr boolean
 ---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
 M.get_dashboard_data_months = function(
-  data_file,
+  data,
   start_date,
   end_date,
   n_months_by_default,
@@ -205,10 +202,6 @@ M.get_dashboard_data_months = function(
   construct_most_worked_on_project_arr
 )
   local time = require('dev-chronicles.core.time')
-  local data = require('dev-chronicles.utils.data').load_data(data_file)
-  if not data then
-    return nil
-  end
 
   start_date = start_date or time.get_previous_month(time.get_month_str(), n_months_by_default)
   end_date = end_date or time.get_month_str()
@@ -281,7 +274,7 @@ M.get_dashboard_data_months = function(
   }
 end
 
----@param data_file string
+---@param data chronicles.ChroniclesData
 ---@param start_offset? integer
 ---@param end_offset? integer
 ---@param n_days_by_default integer
@@ -293,7 +286,7 @@ end
 ---@param extend_today_to_4am boolean
 ---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
 M.get_dashboard_data_days = function(
-  data_file,
+  data,
   start_offset,
   end_offset,
   n_days_by_default,
@@ -305,10 +298,6 @@ M.get_dashboard_data_days = function(
   extend_today_to_4am
 )
   local time = require('dev-chronicles.core.time')
-  local data = require('dev-chronicles.utils.data').load_data(data_file)
-  if not data then
-    return nil
-  end
 
   start_offset = start_offset or n_days_by_default - 1
   end_offset = end_offset or 0

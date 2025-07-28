@@ -10,6 +10,11 @@ M.DashboardType = {
 ---@param data_file string
 ---@param dashboard_type_args? chronicles.DashboardType.Args
 M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
+  local data = require('dev-chronicles.utils.data').load_data(data_file)
+  if not data then
+    return
+  end
+
   local dashboard = require('dev-chronicles.core.dashboard')
   local options = require('dev-chronicles.config').options
 
@@ -33,7 +38,7 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
   if dashboard_type == M.DashboardType.Days then
     dashboard_type_options = options.dashboard.dashboard_days
     dashboard_stats, top_projects = dashboard.get_dashboard_data_days(
-      data_file,
+      data,
       dashboard_type_args.start_offset,
       dashboard_type_args.end_offset,
       dashboard_type_options.n_by_default,
@@ -47,7 +52,7 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
   elseif dashboard_type == M.DashboardType.All then
     dashboard_type_options = options.dashboard.dashboard_all
     dashboard_stats = dashboard.get_dashboard_data_all(
-      data_file,
+      data,
       dashboard_type_options.header.show_date_period,
       dashboard_type_options.header.show_time,
       dashboard_type_options.header.time_period_str,
@@ -56,7 +61,7 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
   elseif dashboard_type == M.DashboardType.Months then
     dashboard_type_options = options.dashboard.dashboard_months
     dashboard_stats, top_projects = dashboard.get_dashboard_data_months(
-      data_file,
+      data,
       dashboard_type_args.start_date,
       dashboard_type_args.end_date,
       dashboard_type_options.n_by_default,
