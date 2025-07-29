@@ -15,32 +15,36 @@ end
 M.format_time = function(seconds, max_hours, min_hours, round_hours_above_one)
   max_hours = (max_hours == nil) and true or max_hours
 
+  if seconds == 0 then
+    return '0'
+  end
+
   if seconds < 60 then
     if min_hours then
       return '0.1h'
     end
-    return string.format('%ds', seconds)
+    return ('%ds'):format(seconds)
   end
 
   if seconds < 3600 then
     if min_hours then
-      return string.format('%.1fh', seconds / 3600)
+      return ('%.1fh'):format(math.max(0.1, seconds / 3600))
     end
-    return string.format('%dm', seconds / 60)
+    return ('%dm'):format(seconds / 60)
   end
 
   if max_hours or seconds < 86400 then
     if round_hours_above_one then
-      return string.format('%dh', math.floor((seconds / 3600) + 0.5))
+      return ('%dh'):format(math.floor((seconds / 3600) + 0.5))
     end
-    return string.format('%.1fh', seconds / 3600)
+    return ('%.1fh'):format(seconds / 3600)
   end
 
   local n_days = math.floor(seconds / 86400 + 0.5)
   if n_days == 1 then
     return '1 day'
   end
-  return string.format('%d days', n_days)
+  return ('%d days'):format(n_days)
 end
 
 ---Returns the day as a string in the format 'DD.MM.YYYY'.
@@ -332,6 +336,12 @@ M.get_time_period_str_months = function(
   end
 
   return time_period
+end
+
+---@param ts? integer
+---@return boolean
+M.is_time_before_4am = function(ts)
+  return tonumber(os.date('%H', ts)) <= 3
 end
 
 return M
