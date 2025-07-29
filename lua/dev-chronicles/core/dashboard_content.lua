@@ -299,6 +299,7 @@ M.parse_projects_calc_max_time = function(projects_filtered_parsed, min_proj_tim
         id = parsed_project_id,
         time = project_total_time,
         last_worked = project_last_worked,
+        last_worked_for_sort = parsed_project_data.last_worked_for_sort,
         global_time = project_total_global_time,
       })
     end
@@ -318,9 +319,9 @@ M.sort_and_cutoff_projects = function(arr_projects, n_projects_to_keep, sort, by
     table.sort(arr_projects, function(a, b)
       if by_last_worked then
         if asc then
-          return a.last_worked < b.last_worked
+          return a.last_worked_for_sort < b.last_worked_for_sort
         else
-          return a.last_worked > b.last_worked
+          return a.last_worked_for_sort > b.last_worked_for_sort
         end
       else
         if asc then

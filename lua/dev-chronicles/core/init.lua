@@ -210,6 +210,7 @@ M.end_session = function(data_file, track_days, min_session_time, extend_today_t
   M.abort_session()
 end
 
+--- Never updates first_worked for an existing project, regardless of end_ts
 ---@param project_id string
 ---@param duration_sec integer
 ---@param end_ts integer
@@ -233,14 +234,21 @@ M._record_session = function(
     return
   end
 
+  local normalized_end_ts = end_ts
+  local day_key = time.get_day_str(end_ts, extend_today_to_4am)
+  if day_key ~= time.get_day_str(end_ts) then
+    normalized_end_ts = time.convert_day_str_to_timestamp(day_key, true)
+  end
+
   data.global_time = data.global_time + duration_sec
   data.last_data_write = end_ts
 
   if not data.projects[project_id] then
     data.projects[project_id] = {
       total_time = 0,
-      first_worked = end_ts,
-      last_worked = end_ts,
+      first_worked = normalized_end_ts,
+      last_worked = normalized_end_ts,
+      last_worked_for_sort = end_ts,
       by_month = {},
       by_day = {},
       tags_map = {},
@@ -249,16 +257,13 @@ M._record_session = function(
 
   local project = data.projects[project_id]
   project.total_time = project.total_time + duration_sec
-  project.last_worked = end_ts
+  project.last_worked = normalized_end_ts
+  project.last_worked_for_sort = end_ts
 
-  local curr_month = time.get_month_str(end_ts)
+  local curr_month = time.get_month_str(normalized_end_ts)
   project.by_month[curr_month] = (project.by_month[curr_month] or 0) + duration_sec
 
   if track_days then
-    local day_key = time.get_day_str(end_ts)
-    if extend_today_to_4am and tonumber(os.date('%H', end_ts)) <= 4 then
-      day_key = time.get_previous_day(day_key)
-    end
     project.by_day[day_key] = (project.by_day[day_key] or 0) + duration_sec
   end
 
