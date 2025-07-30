@@ -23,7 +23,8 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
       data,
       curr_session_info.project_id,
       curr_session_info.session_time_seconds,
-      curr_session_info.start_time
+      curr_session_info.start_time,
+      options.extend_today_to_4am
     )
   end
 

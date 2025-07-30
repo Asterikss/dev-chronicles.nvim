@@ -138,14 +138,16 @@ end
 ---@param curr_project_id? string
 ---@param curr_session_time_seconds? integer
 ---@param curr_session_start_time? integer
+---@param extend_today_to_4am boolean
 ---@return chronicles.ChroniclesData
 M.update_chronicles_data_with_curr_session = function(
   data,
   curr_project_id,
   curr_session_time_seconds,
-  curr_session_start_time
+  curr_session_start_time,
+  extend_today_to_4am
 )
-  if not curr_project_id or not curr_session_time_seconds or not curr_session_start_time then
+  if not (curr_project_id and curr_session_time_seconds and curr_session_start_time) then
     return data
   end
 
@@ -153,9 +155,9 @@ M.update_chronicles_data_with_curr_session = function(
 
   data.global_time = data.global_time + curr_session_time_seconds
 
-  local today_key = time.get_day_str()
-  local curr_month_key = time.get_month_str()
-  local curr_timestamp = time.get_current_timestamp()
+  local now_ts = time.get_current_timestamp()
+  local today_key = time.get_day_str(now_ts, extend_today_to_4am)
+  local curr_month_key = time.get_month_str(now_ts)
   local current_project = data.projects[curr_project_id]
 
   if not current_project then
@@ -165,7 +167,8 @@ M.update_chronicles_data_with_curr_session = function(
       by_month = {},
       tags_map = {},
       first_worked = curr_session_start_time,
-      last_worked = curr_timestamp,
+      last_worked = now_ts,
+      last_worked_for_sort = now_ts,
     }
     data.projects[curr_project_id] = current_project
   end
@@ -175,7 +178,8 @@ M.update_chronicles_data_with_curr_session = function(
   current_project.by_month[curr_month_key] = (current_project.by_month[curr_month_key] or 0)
     + curr_session_time_seconds
   current_project.total_time = current_project.total_time + curr_session_time_seconds
-  current_project.last_worked = curr_timestamp
+  current_project.last_worked = now_ts
+  current_project.last_worked_for_sort = now_ts
 
   return data
 end
