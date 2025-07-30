@@ -51,10 +51,16 @@ end
 ---If a timestamp is provided, returns the day for that timestamp;
 ---otherwise, returns today's date.
 ---@param timestamp? integer
+---@param extend_today_to_4am? boolean
 ---@return string
-M.get_day_str = function(timestamp)
-  ---@type string
-  return os.date('%d.%m.%Y', timestamp)
+M.get_day_str = function(timestamp, extend_today_to_4am)
+  local day_str = os.date('%d.%m.%Y', timestamp)
+  ---@cast day_str string
+
+  if extend_today_to_4am and M.is_time_before_4am(timestamp) then
+    return M.get_previous_day(day_str)
+  end
+  return day_str
 end
 
 ---Returns the month as a string in the format 'MM.YYYY'.
@@ -204,6 +210,7 @@ end
 ---@param show_time boolean
 ---@param time_period_str? string
 ---@param time_period_singular_str? string
+---@param extend_today_to_4am boolean
 ---@return string
 M.get_time_period_str_days = function(
   n_days,
@@ -212,18 +219,22 @@ M.get_time_period_str_days = function(
   show_date_period,
   show_time,
   time_period_str,
-  time_period_singular_str
+  time_period_singular_str,
+  extend_today_to_4am
 )
-  if time_period_singular_str and n_days == 1 then
-    return string.format(time_period_singular_str, n_days)
-  end
-  if time_period_str then
-    return string.format(time_period_str, n_days)
+  local is_singular = n_days == 1
+  local ends_today = end_day == M.get_day_str(nil, extend_today_to_4am)
+
+  if ends_today then
+    local template = is_singular and time_period_singular_str or time_period_str
+    if template then
+      return template:format(n_days)
+    end
   end
 
   local time_period = ''
   if show_date_period then
-    if n_days == 1 then
+    if is_singular then
       time_period = start_day
     else
       local start_d, start_m, start_y = M.extract_day_month_year(start_day)
@@ -239,7 +250,7 @@ M.get_time_period_str_days = function(
   end
 
   if show_time then
-    local ending = n_days == 1 and 'day' or 'days'
+    local ending = is_singular and ' day' or ' days'
     if show_date_period then
       time_period = time_period .. ' (' .. n_days .. ending .. ')'
     else
