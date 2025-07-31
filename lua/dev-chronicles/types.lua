@@ -10,14 +10,21 @@
 ---| 'Body'
 ---| 'Footer'
 
----@class chronicles.Session
+---@class chronicles.SessionState
 ---@field project_id? string
 ---@field start_time? integer
 ---@field is_tracking boolean
 
----@class chronicles.SessionInfo: chronicles.Session
----@field session_time_seconds? integer
----@field session_time? string
+---@class chronicles.SessionIdle
+---@field canonical_ts integer
+---@field canonical_today_str string
+
+---@class chronicles.SessionActive: chronicles.SessionIdle
+---@field project_id string
+---@field start_time integer
+---@field session_time_seconds integer
+---@field session_time_str string
+---@field now_ts integer
 
 ---@class (exact) chronicles.DashboardType.Args
 ---@field start_offset? integer

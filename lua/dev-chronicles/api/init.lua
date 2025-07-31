@@ -8,8 +8,9 @@ M.DashboardType = {
 
 ---@param dashboard_type chronicles.DashboardType
 ---@param data_file string
+---@param extend_today_to_4am boolean -- TODO: change this
 ---@param dashboard_type_args? chronicles.DashboardType.Args
-M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
+M.dashboard = function(dashboard_type, data_file, extend_today_to_4am, dashboard_type_args)
   local data = require('dev-chronicles.utils.data').load_data(data_file)
   if not data then
     return
@@ -17,14 +18,11 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
 
   local dashboard = require('dev-chronicles.core.dashboard')
   local options = require('dev-chronicles.config').options
-  local curr_session_info = require('dev-chronicles.core').get_session_info()
-  if curr_session_info.is_tracking then
+  local _, session_active = require('dev-chronicles.core').get_session_info(extend_today_to_4am)
+  if session_active then
     data = require('dev-chronicles.utils.dashboard').update_chronicles_data_with_curr_session(
       data,
-      curr_session_info.project_id,
-      curr_session_info.session_time_seconds,
-      curr_session_info.start_time,
-      options.extend_today_to_4am
+      session_active
     )
   end
 
@@ -92,7 +90,7 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
     win_height,
     dashboard_type,
     top_projects,
-    curr_session_info.session_time_seconds
+    session_active and session_active.session_time_seconds
   )
 
   local buf = vim.api.nvim_create_buf(false, true)
@@ -140,9 +138,10 @@ M.dashboard = function(dashboard_type, data_file, dashboard_type_args)
   vim.api.nvim_win_set_cursor(win, { 2, 0 })
 end
 
----@return chronicles.SessionInfo
-M.get_session_info = function()
-  return require('dev-chronicles.core').get_session_info()
+---@param extend_today_to_4am boolean
+---@return chronicles.SessionIdle, chronicles.SessionActive?
+M.get_session_info = function(extend_today_to_4am)
+  return require('dev-chronicles.core').get_session_info(extend_today_to_4am)
 end
 
 M.abort_session = function()

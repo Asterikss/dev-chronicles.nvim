@@ -1,6 +1,6 @@
 local M = {}
 
----@type chronicles.Session
+---@type chronicles.SessionState
 local session = {
   project_id = nil,
   start_time = nil,
@@ -20,40 +20,45 @@ M.init = function(data_file, track_days, min_session_time, extend_today_to_4am)
     local args = opts.fargs
 
     if #args == 0 then
-      api.dashboard(api.DashboardType.Days, data_file)
+      api.dashboard(api.DashboardType.Days, data_file, extend_today_to_4am)
     elseif args[1] == 'all' then
-      api.dashboard(api.DashboardType.All, data_file)
+      api.dashboard(api.DashboardType.All, data_file, extend_today_to_4am)
     elseif args[1] == 'days' then
       api.dashboard(
         api.DashboardType.Days,
         data_file,
-        { start_offset = args[2], end_offset = args[3] }
+        extend_today_to_4am,
+        { start_offset = tonumber(args[2]), end_offset = tonumber(args[3]) }
       )
     elseif args[1] == 'months' then
       api.dashboard(
         api.DashboardType.Months,
         data_file,
+        extend_today_to_4am,
         { start_date = args[2], end_date = args[3] }
       )
     elseif args[1] == 'today' then
-      api.dashboard(api.DashboardType.Days, data_file, { start_offset = 0 })
+      api.dashboard(api.DashboardType.Days, data_file, extend_today_to_4am, { start_offset = 0 })
+    elseif args[1] == 'week' then
+      api.dashboard(api.DashboardType.Days, data_file, extend_today_to_4am, { start_offset = 6 })
     elseif args[1] == 'info' then
-      api.get_session_info()
+      local session_idle, session_active = api.get_session_info(extend_today_to_4am)
+      vim.notify(
+        vim.inspect(
+          session_active or vim.tbl_extend('error', session_idle, { is_tracking = false })
+        )
+      )
     elseif args[1] == 'abort' then
       api.abort_session()
     else
       vim.notify(
         'Usage: :DevChronicles [all | days [start_offset [end_offset]] |'
-          .. 'months [start_date [end_date]] | today | info | abort]'
+          .. 'months [start_date [end_date]] | today | week | info | abort]'
       )
     end
   end, {
     nargs = '*',
-    complete = function(
-      _ --[[arg_lead]],
-      cmd_line,
-      _ --[[cursor_pos]]
-    )
+    complete = function(_arg_lead, cmd_line, _cursor_pos)
       local split = vim.split(cmd_line, '%s+')
       local n_splits = #split
       if n_splits == 2 then
@@ -185,26 +190,14 @@ end
 ---@param min_session_time integer
 ---@param extend_today_to_4am boolean
 M.end_session = function(data_file, track_days, min_session_time, extend_today_to_4am)
-  local session_info = M.get_session_info()
-  if
-    not session_info.is_tracking
-    or not session_info.project_id
-    or not session_info.start_time and session_info.session_time_seconds
-  then
-    -- TODO:
-    vim.notify('Dev Chronicles Error: while ending a session. Some session values that are nil')
+  local _, session_active = M.get_session_info(extend_today_to_4am)
+  if not session_active then
+    vim.notify('Dev Chronicles Error: Tried to end the session when session in not active')
     return
   end
 
-  if session_info.session_time_seconds >= min_session_time then
-    M._record_session(
-      session_info.project_id,
-      session_info.session_time_seconds,
-      require('dev-chronicles.core.time').get_current_timestamp(),
-      track_days,
-      extend_today_to_4am,
-      data_file
-    )
+  if session_active.session_time_seconds >= min_session_time then
+    M._record_session(data_file, session_active, track_days)
   end
 
   M.abort_session()
@@ -270,17 +263,52 @@ M._record_session = function(
   require('dev-chronicles.utils.data').save_data(data, data_file)
 end
 
----@return chronicles.SessionInfo
-M.get_session_info = function()
+---Return values mimic a tagged union: the first value is always a
+---`chronicles.SessionIdle`; the second value is a `chronicles.SessionActive`
+---if a session is currently being tracked, otherwise it is `nil`. This is done
+---to avoid billions of if checks everywhere. This function is the global source of
+---truth (non-pure).
+---@param extend_today_to_4am boolean
+---@return chronicles.SessionIdle, chronicles.SessionActive?
+M.get_session_info = function(extend_today_to_4am)
   local time = require('dev-chronicles.core.time')
-  local session_info = vim.deepcopy(session)
+  local session_state = session
 
-  if session_info.start_time then
-    local session_time_seconds = time.get_current_timestamp() - session_info.start_time
-    session_info.session_time_seconds = session_time_seconds
-    session_info.session_time = time.format_time(session_time_seconds)
+  local canonical_ts, canonical_today_str =
+    time.get_canonical_curr_ts_and_day_str(extend_today_to_4am)
+
+  ---@type chronicles.SessionIdle
+  local session_idle = {
+    canonical_ts = canonical_ts,
+    canonical_today_str = canonical_today_str,
+  }
+
+  if not session_state.is_tracking then
+    return session_idle, nil
   end
-  return session_info
+
+  local start_time, project_id = session_state.start_time, session_state.project_id
+  if not (start_time and project_id) then
+    error(
+      "DevChronicles Internal Error: Session's is_tracking is set to true, but its start_time or project_id is missing"
+    )
+  end
+
+  local now_ts = os.time()
+  local session_time_seconds = now_ts - start_time
+
+  ---@type chronicles.SessionActive
+  local session_active = {
+    project_id = project_id,
+    start_time = start_time,
+    session_time_seconds = session_time_seconds,
+    session_time_str = time.format_time(session_time_seconds),
+    canonical_today_str = canonical_today_str,
+    canonical_ts = canonical_ts,
+    now_ts = now_ts,
+  }
+
+  return session_idle, session_active
 end
 
 M.abort_session = function()
