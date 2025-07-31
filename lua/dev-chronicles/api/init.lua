@@ -18,7 +18,8 @@ M.dashboard = function(dashboard_type, data_file, extend_today_to_4am, dashboard
 
   local dashboard = require('dev-chronicles.core.dashboard')
   local options = require('dev-chronicles.config').options
-  local _, session_active = require('dev-chronicles.core').get_session_info(extend_today_to_4am)
+  local _, session_active =
+    require('dev-chronicles.core.state').get_session_info(extend_today_to_4am)
   if session_active then
     data = require('dev-chronicles.utils.dashboard').update_chronicles_data_with_curr_session(
       data,
@@ -141,11 +142,11 @@ end
 ---@param extend_today_to_4am boolean
 ---@return chronicles.SessionIdle, chronicles.SessionActive?
 M.get_session_info = function(extend_today_to_4am)
-  return require('dev-chronicles.core').get_session_info(extend_today_to_4am)
+  return require('dev-chronicles.core.state').get_session_info(extend_today_to_4am)
 end
 
 M.abort_session = function()
-  require('dev-chronicles.core').abort_session()
+  require('dev-chronicles.core.state').abort_session()
   vim.notify('Session aborted')
 end
 

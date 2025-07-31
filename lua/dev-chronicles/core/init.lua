@@ -1,12 +1,5 @@
 local M = {}
 
----@type chronicles.SessionState
-local session = {
-  project_id = nil,
-  start_time = nil,
-  is_tracking = false,
-}
-
 ---@param data_file string
 ---@param track_days boolean
 ---@param min_session_time integer
@@ -86,7 +79,7 @@ M._setup_autocmds = function(data_file, track_days, min_session_time, extend_tod
   vim.api.nvim_create_autocmd('VimEnter', {
     group = group,
     callback = function()
-      M._start_session()
+      require('dev-chronicles.core.state').start_session()
     end,
   })
 
@@ -166,31 +159,13 @@ M._is_project = function(
   return nil
 end
 
-M._start_session = function()
-  local opts = require('dev-chronicles.config').options
-  local project_id = M._is_project(
-    vim.fn.getcwd(),
-    opts.tracked_parent_dirs,
-    opts.tracked_dirs,
-    opts.exclude_dirs_absolute,
-    opts.exclude_subdirs_relative,
-    opts.differentiate_projects_by_folder_not_path
-  )
-
-  if project_id then
-    session.project_id = project_id
-    session.start_time = opts.for_dev_start_time
-      or require('dev-chronicles.core.time').get_current_timestamp()
-    session.is_tracking = true
-  end
-end
-
 ---@param data_file string
 ---@param track_days boolean
 ---@param min_session_time integer
 ---@param extend_today_to_4am boolean
 M.end_session = function(data_file, track_days, min_session_time, extend_today_to_4am)
-  local _, session_active = M.get_session_info(extend_today_to_4am)
+  local _, session_active =
+    require('dev-chronicles.core.state').get_session_info(extend_today_to_4am)
   if not session_active then
     vim.notify('Dev Chronicles Error: Tried to end the session when session in not active')
     return
@@ -200,7 +175,7 @@ M.end_session = function(data_file, track_days, min_session_time, extend_today_t
     M._record_session(data_file, session_active, track_days)
   end
 
-  M.abort_session()
+  require('dev-chronicles.core.state').abort_session()
 end
 
 ---@param data_file string
@@ -253,60 +228,6 @@ M._record_session = function(data_file, session_active, track_days)
   end
 
   require('dev-chronicles.utils.data').save_data(data, data_file)
-end
-
----Return values mimic a tagged union: the first value is always a
----`chronicles.SessionIdle`; the second value is a `chronicles.SessionActive`
----if a session is currently being tracked, otherwise it is `nil`. This is done
----to avoid billions of if checks everywhere. This function is the global source of
----truth (non-pure).
----@param extend_today_to_4am boolean
----@return chronicles.SessionIdle, chronicles.SessionActive?
-M.get_session_info = function(extend_today_to_4am)
-  local time = require('dev-chronicles.core.time')
-  local session_state = session
-
-  local canonical_ts, canonical_today_str =
-    time.get_canonical_curr_ts_and_day_str(extend_today_to_4am)
-
-  ---@type chronicles.SessionIdle
-  local session_idle = {
-    canonical_ts = canonical_ts,
-    canonical_today_str = canonical_today_str,
-  }
-
-  if not session_state.is_tracking then
-    return session_idle, nil
-  end
-
-  local start_time, project_id = session_state.start_time, session_state.project_id
-  if not (start_time and project_id) then
-    error(
-      "DevChronicles Internal Error: Session's is_tracking is set to true, but its start_time or project_id is missing"
-    )
-  end
-
-  local now_ts = os.time()
-  local session_time_seconds = now_ts - start_time
-
-  ---@type chronicles.SessionActive
-  local session_active = {
-    project_id = project_id,
-    start_time = start_time,
-    session_time_seconds = session_time_seconds,
-    session_time_str = time.format_time(session_time_seconds),
-    canonical_today_str = canonical_today_str,
-    canonical_ts = canonical_ts,
-    now_ts = now_ts,
-  }
-
-  return session_idle, session_active
-end
-
-M.abort_session = function()
-  session.is_tracking = false
-  session.start_time = nil
-  session.project_id = nil
 end
 
 return M
