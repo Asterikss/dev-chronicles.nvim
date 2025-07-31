@@ -320,7 +320,7 @@ M.get_dashboard_data_days = function(
 
   if start_timestamp > end_timestamp then
     vim.notify(('DevChronicles Error: start (%s) > end (%s)'):format(start_str, end_str))
-    return nil
+    return
   end
 
   local filtered_projects =
@@ -328,32 +328,49 @@ M.get_dashboard_data_days = function(
 
   if next(filtered_projects) == nil then
     vim.notify(('DevChronicles: no projects worked between %s and %s'):format(start_str, end_str))
-    return nil
+    return
   end
 
   ---@type chronicles.Dashboard.Stats.ParsedProjects
   local projects_filtered_parsed = {}
   local global_time_filtered = 0
+  local most_worked_on_project_per_day = construct_most_worked_on_project_arr and {} or nil
 
+  local i = 0
   for ts = start_timestamp, end_timestamp, DAY_SEC do
-    local key = os.date('%d.%m.%Y', ts)
-    for id, proj in pairs(filtered_projects) do
-      local day_time = proj.by_day[key]
+    i = i + 1
+    local day_max_time = 0
+    ---@type string|boolean
+    local day_max_project = false
+    local key = time.get_day_str(ts)
+
+    for project_id, project_data in pairs(filtered_projects) do
+      local day_time = project_data.by_day[key]
       if day_time then
-        local proj_data = projects_filtered_parsed[id]
-        if not proj_data then
-          proj_data = {
+        local accum_proj_data = projects_filtered_parsed[project_id]
+        if not accum_proj_data then
+          accum_proj_data = {
             total_time = 0,
-            last_worked = proj.last_worked,
-            first_worked = proj.first_worked,
-            tags_map = proj.tags_map,
-            total_global_time = proj.total_time,
+            last_worked = project_data.last_worked,
+            last_worked_canonical = project_data.last_worked_canonical,
+            first_worked = project_data.first_worked,
+            tags_map = project_data.tags_map,
+            total_global_time = project_data.total_time,
           }
-          projects_filtered_parsed[id] = proj_data
+          projects_filtered_parsed[project_id] = accum_proj_data
         end
-        proj_data.total_time = proj_data.total_time + day_time
+        accum_proj_data.total_time = accum_proj_data.total_time + day_time
         global_time_filtered = global_time_filtered + day_time
+
+        if construct_most_worked_on_project_arr and day_time > day_max_time then
+          day_max_time = day_time
+          day_max_project = project_id
+        end
       end
+    end
+
+    if construct_most_worked_on_project_arr then
+      most_worked_on_project_per_day[i] = day_max_project
     end
   end
 
@@ -368,9 +385,13 @@ M.get_dashboard_data_days = function(
       end_str,
       show_date_period,
       show_time,
-      time_period_str
+      time_period_str,
+      time_period_singular_str,
+      extend_today_to_4am
     ),
-  }
+  },
+    most_worked_on_project_per_day
+end
 end
 
 return M
