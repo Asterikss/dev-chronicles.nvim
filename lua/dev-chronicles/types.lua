@@ -36,7 +36,7 @@
 ---@field total_time integer
 ---@field first_worked integer
 ---@field last_worked integer
----@field last_worked_for_sort integer
+---@field last_worked_canonical integer
 ---@field tags_map table<string, any>
 ---@field total_global_time integer?
 
@@ -70,7 +70,7 @@
 ---@field id string
 ---@field time integer
 ---@field last_worked integer
----@field last_worked_for_sort integer
+---@field last_worked_canonical integer
 ---@field global_time integer?
 
 ---@class (exact) chronicles.ChroniclesData.ProjectData
@@ -79,7 +79,7 @@
 ---@field by_day table<string, number>
 ---@field first_worked integer
 ---@field last_worked integer
----@field last_worked_for_sort integer
+---@field last_worked_canonical integer
 ---@field tags_map table<string, any>
 
 ---@class (exact) chronicles.ChroniclesData
