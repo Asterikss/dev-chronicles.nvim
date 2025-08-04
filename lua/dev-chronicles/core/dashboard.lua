@@ -76,7 +76,10 @@ M.create_dashboard_content = function(
     )
   end
 
-  local bar_repr = get_random_from_tbl(dashboard_opts.bar_chars)
+  local bar_repr = get_random_from_tbl(
+    dashboard_type_opts.bar_chars and dashboard_type_opts.bar_chars or dashboard_opts.bar_chars
+  )
+
   local bar_representation = dashboard_utils.construct_bar_representation(
     bar_repr,
     dashboard_opts.bar_width,
@@ -84,8 +87,8 @@ M.create_dashboard_content = function(
     dashboard_opts.bar_footer_extends_by
   )
 
-  ---@type chronicles.Dashboard.BarData[], integer
-  local bars_data, max_lines_proj_names = dashboard_content.create_bars_data(
+  ---@type chronicles.Dashboard.BarData[], integer, table<string, string>
+  local bars_data, max_lines_proj_names, project_id_to_color = dashboard_content.create_bars_data(
     arr_projects,
     max_time,
     max_bar_height,
@@ -93,8 +96,9 @@ M.create_dashboard_content = function(
     dashboard_opts.bar_width,
     dashboard_opts.bar_spacing,
     dashboard_opts.footer.let_proj_names_extend_bars_by_one,
-    dashboard_opts.random_bars_coloring,
-    dashboard_opts.bars_coloring_follows_sorting_in_order and dashboard_type_opts.sorting.ascending
+    dashboard_type_opts.random_bars_coloring,
+    dashboard_type_opts.bars_coloring_follows_sorting_in_order
+        and dashboard_type_opts.sorting.ascending
       or not dashboard_type_opts.sorting.ascending,
     bar_representation.header.realized_rows,
     differentiate_projects_by_folder_not_path
@@ -111,8 +115,8 @@ M.create_dashboard_content = function(
     dashboard_type_opts.header.show_current_session_time,
     dashboard_type_opts.header.total_time_format_str,
     dashboard_type_opts.header.prettify,
-    session_info.session_time_seconds,
-    session_info.session_time,
+    curr_session_time,
+    dashboard_type_opts.header.total_time_round_hours_above_one,
     top_projects,
     dashboard_type_opts.header.top_projects,
     project_id_to_color
@@ -159,7 +163,7 @@ M.create_dashboard_content = function(
   return lines, highlights
 end
 
----@param data_file string
+-- TODO: return type
 ---@param data chronicles.ChroniclesData
 ---@param show_date_period boolean
 ---@param show_time boolean
@@ -331,9 +335,15 @@ M.get_dashboard_data_days = function(
 
   start_offset = start_offset or n_days_by_default - 1
   end_offset = end_offset or 0
+  local today = time.get_day_str()
+
+  -- TODO: Don't do this. Just use time.get_previous_day on session_active.canonical_day_str
+  if extend_today_to_4am and time.is_time_before_4am() then
+    start_offset = start_offset + 1
+    end_offset = end_offset + 1
+  end
 
   local DAY_SEC = 86400 -- 24 * 60 * 60
-  local today = time.get_day_str()
   local start_str = time.get_previous_day(today, start_offset)
   local end_str = time.get_previous_day(today, end_offset)
   local start_timestamp = time.convert_day_str_to_timestamp(start_str)
@@ -413,6 +423,20 @@ M.get_dashboard_data_days = function(
   },
     most_worked_on_project_per_day
 end
+
+--- TODO: Set it to nil inplace
+---@param projects table<string, chronicles.ChroniclesData.ProjectData>
+---@param start_ts integer
+---@param end_ts integer
+---@return table<string, chronicles.ChroniclesData.ProjectData>
+M._filter_projects_by_period = function(projects, start_ts, end_ts)
+  local filtered_projects = {}
+  for project_id, project_data in pairs(projects) do
+    if project_data.first_worked <= end_ts and project_data.last_worked_canonical >= start_ts then
+      filtered_projects[project_id] = project_data
+    end
+  end
+  return filtered_projects
 end
 
 return M
