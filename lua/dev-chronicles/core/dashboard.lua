@@ -212,14 +212,15 @@ M.get_dashboard_data_months = function(
 )
   local time = require('dev-chronicles.core.time')
 
-  start_date = start_date or time.get_previous_month(time.get_month_str(), n_months_by_default)
-  end_date = end_date or time.get_month_str()
+  local current_month = time.get_month_str()
+  start_date = start_date or time.get_previous_month(current_month, n_months_by_default - 1)
+  end_date = end_date or current_month
   local start_ts = time.convert_month_str_to_timestamp(start_date)
   local end_ts = time.convert_month_str_to_timestamp(end_date, true)
 
   if start_ts > end_ts then
     vim.notify(('DevChronicles Error: start (%s) > end (%s)'):format(start_date, end_date))
-    return nil
+    return nil, nil
   end
 
   local filtered_projects = M._filter_projects_by_period(data.projects, start_ts, end_ts)
@@ -228,44 +229,62 @@ M.get_dashboard_data_months = function(
     vim.notify(
       ('DevChronicles: no projects worked on between %s and %s'):format(start_date, end_date)
     )
-    return nil
+    return
   end
 
   ---@type chronicles.Dashboard.Stats.ParsedProjects
   local projects_filtered_parsed = {}
   local global_time_filtered = 0
+  local most_worked_on_project_per_month = construct_most_worked_on_project_arr and {} or nil
 
   local l_pointer_month, l_pointer_year = time.extract_month_year(start_date)
   local r_pointer_month, r_pointer_year = time.extract_month_year(end_date)
 
+  local i = 0
   while true do
-    local curr_date_key = string.format('%02d.%d', r_pointer_month, r_pointer_year)
+    i = i + 1
+    local month_max_time = 0
+    ---@type string|boolean
+    local month_max_project = false
+    local curr_date_key = string.format('%02d.%d', l_pointer_month, l_pointer_year)
+
     for project_id, project_data in pairs(filtered_projects) do
       local month_time = project_data.by_month[curr_date_key]
-      if month_time ~= nil then
-        if not projects_filtered_parsed[project_id] then
-          projects_filtered_parsed[project_id] = {
+      if month_time then
+        local filtered_project_data = projects_filtered_parsed[project_id]
+        if not filtered_project_data then
+          filtered_project_data = {
             total_time = 0,
             last_worked = project_data.last_worked,
+            last_worked_canonical = project_data.last_worked_canonical, -- TODO: This is not used later, remove it after fixing the types. first_worked too
             first_worked = project_data.first_worked,
             tags_map = project_data.tags_map,
             total_global_time = project_data.total_time,
           }
+          projects_filtered_parsed[project_id] = filtered_project_data
         end
-        local filtered_project = projects_filtered_parsed[project_id]
-        filtered_project.total_time = filtered_project.total_time + month_time
+        filtered_project_data.total_time = filtered_project_data.total_time + month_time
         global_time_filtered = global_time_filtered + month_time
+
+        if construct_most_worked_on_project_arr and month_time > month_max_time then
+          month_max_time = month_time
+          month_max_project = project_id
+        end
       end
+    end
+
+    if construct_most_worked_on_project_arr then
+      most_worked_on_project_per_month[i] = month_max_project
     end
 
     if l_pointer_month == r_pointer_month and l_pointer_year == r_pointer_year then
       break
     end
 
-    r_pointer_month = r_pointer_month - 1
-    if r_pointer_month == 0 then
-      r_pointer_month = 12
-      r_pointer_year = r_pointer_year - 1
+    l_pointer_month = l_pointer_month + 1
+    if l_pointer_month == 13 then
+      l_pointer_month = 1
+      l_pointer_year = l_pointer_year + 1
     end
   end
 
@@ -278,9 +297,11 @@ M.get_dashboard_data_months = function(
       end_date,
       show_date_period,
       show_time,
-      time_period_str
+      time_period_str,
+      time_period_singular_str
     ),
-  }
+  },
+    most_worked_on_project_per_month
 end
 
 ---@param data chronicles.ChroniclesData
