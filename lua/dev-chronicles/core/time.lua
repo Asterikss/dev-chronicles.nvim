@@ -1,5 +1,27 @@
 local M = {}
 
+---Returns current timestamp and current day string, respecing
+---extend_today_to_4am flag. If extend_today_to_4am being true
+---causes today's calendar day to be shifted to yesterday, then the
+---returned timestamp is shifted to be 23:59:59 of yesterday. If
+---timestamp is passed, it is used instead of os.time(). This
+---function was constructed to optimize the ammount of calls to
+---os.time(...)
+---@param extend_today_to_4am boolean
+---@param timestamp? integer
+---@return integer
+---@return string 'DD.MM.YYYY'
+M.get_canonical_curr_ts_and_day_str = function(extend_today_to_4am, timestamp)
+  local ts = timestamp or os.time()
+  local day_key = M.get_day_str(ts, extend_today_to_4am)
+
+  if extend_today_to_4am and M.is_time_before_4am(ts) then
+    ts = M.convert_day_str_to_timestamp(day_key, true)
+  end
+
+  return ts, day_key
+end
+
 ---Returns current unix timestamp
 ---@return integer
 M.get_current_timestamp = function()
@@ -54,13 +76,12 @@ end
 ---@param extend_today_to_4am? boolean
 ---@return string
 M.get_day_str = function(timestamp, extend_today_to_4am)
-  local day_str = os.date('%d.%m.%Y', timestamp)
-  ---@cast day_str string
-
-  if extend_today_to_4am and M.is_time_before_4am(timestamp) then
-    return M.get_previous_day(day_str)
+  local ts = timestamp or os.time()
+  if extend_today_to_4am and M.is_time_before_4am(ts) then
+    ts = ts - 86400 -- subtract one day in seconds
   end
-  return day_str
+  ---@type string
+  return os.date('%d.%m.%Y', ts)
 end
 
 ---Returns the month as a string in the format 'MM.YYYY'.
