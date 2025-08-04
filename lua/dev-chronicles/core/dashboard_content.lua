@@ -364,7 +364,7 @@ end
 ---@param projects_sorted_ascending boolean
 ---@param bar_header_realized_rows_tbl string[]
 ---@param differentiate_projects_by_folder_not_path boolean
----@return chronicles.Dashboard.BarData[], integer
+---@return chronicles.Dashboard.BarData[], integer, table<string, string>
 M.create_bars_data = function(
   arr_projects,
   max_time,
@@ -381,7 +381,10 @@ M.create_bars_data = function(
   local string_utils = require('dev-chronicles.utils.strings')
   local shuffle = require('dev-chronicles.utils').shuffle
 
+  ---@type chronicles.Dashboard.BarData[]
   local bars_data = {}
+  ---@type table<string, string>
+  local project_id_to_color = {}
   local max_lines_proj_names = 0
   local n_projects = #arr_projects
   local colors = M._colors
@@ -411,8 +414,11 @@ M.create_bars_data = function(
         or colors[((i - 1) % n_colors) + 1]
     end
 
-    local project_name = differentiate_projects_by_folder_not_path and project.id
-      or string_utils.get_project_name(project.id)
+    local project_id = project.id
+    project_id_to_color[project_id] = color
+
+    local project_name = differentiate_projects_by_folder_not_path and project_id
+      or string_utils.get_project_name(project_id)
     local project_name_tbl = string_utils.format_project_name(
       project_name,
       bar_width + (let_proj_names_extend_bars_by_one and 2 or 0)
@@ -433,7 +439,7 @@ M.create_bars_data = function(
     })
   end
 
-  return bars_data, max_lines_proj_names
+  return bars_data, max_lines_proj_names, project_id_to_color
 end
 
 --- If global_time_line is set, then it overrides 3rd lines line

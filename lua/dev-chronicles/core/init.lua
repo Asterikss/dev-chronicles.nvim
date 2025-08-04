@@ -98,15 +98,15 @@ end
 ---@param tracked_parent_dirs string[]
 ---@param tracked_dirs string[]
 ---@param exclude_dirs_absolute string[]
----@param exclude_subdirs_relative table<string, boolean>
+---@param parsed_exclude_subdirs_relative_map table<string, boolean>
 ---@param differentiate_projects_by_folder_not_path boolean
 ---@return string?
-M._is_project = function(
+M.is_project = function(
   cwd,
   tracked_parent_dirs,
   tracked_dirs,
   exclude_dirs_absolute,
-  exclude_subdirs_relative,
+  parsed_exclude_subdirs_relative_map,
   differentiate_projects_by_folder_not_path
 )
   if not cwd:match('/$') then
@@ -143,7 +143,7 @@ M._is_project = function(
       -- Get the first directory after the parent_dir
       local first_dir = cwd:sub(#parent_dir):match('([^/]+)')
       if first_dir then
-        if exclude_subdirs_relative[first_dir] then
+        if parsed_exclude_subdirs_relative_map[first_dir] then
           return nil
         end
 
