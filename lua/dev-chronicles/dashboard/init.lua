@@ -26,7 +26,7 @@ M.create_dashboard_content = function(
     return lines, highlights
   end
 
-  local dashboard_content = require('dev-chronicles.core.dashboard_content')
+  local dashboard_content = require('dev-chronicles.dashboard.content')
   local dashboard_opts = require('dev-chronicles.config').options.dashboard
   local dashboard_utils = require('dev-chronicles.utils.dashboard')
   local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl

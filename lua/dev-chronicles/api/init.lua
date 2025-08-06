@@ -16,7 +16,7 @@ M.dashboard = function(dashboard_type, data_file, extend_today_to_4am, dashboard
     return
   end
 
-  local dashboard = require('dev-chronicles.core.dashboard')
+  local dashboard = require('dev-chronicles.dashboard')
   local options = require('dev-chronicles.config').options
   local _, session_active =
     require('dev-chronicles.core.state').get_session_info(extend_today_to_4am)
