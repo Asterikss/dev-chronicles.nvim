@@ -16,6 +16,7 @@ M.dashboard = function(dashboard_type, data_file, extend_today_to_4am, dashboard
     return
   end
 
+  local render = require('dev-chronicles.core.render')
   local dashboard = require('dev-chronicles.dashboard')
   local options = require('dev-chronicles.config').options
   local _, session_active =
@@ -28,15 +29,6 @@ M.dashboard = function(dashboard_type, data_file, extend_today_to_4am, dashboard
   end
 
   dashboard_type_args = dashboard_type_args or {}
-
-  require('dev-chronicles.core.highlights').setup_highlights()
-
-  local screen_width = vim.o.columns
-  local screen_height = vim.o.lines
-  local win_width = math.floor(screen_width * 0.8)
-  local win_height = math.floor(screen_height * 0.8)
-  local win_row = math.floor((screen_height - win_height) / 2)
-  local win_col = math.floor((screen_width - win_width) / 2)
 
   local dashboard_stats
   ---@type chronicles.Dashboard.TopProjectsArray?
@@ -85,58 +77,24 @@ M.dashboard = function(dashboard_type, data_file, extend_today_to_4am, dashboard
     return
   end
 
+  local window_dimensions = render.get_window_dimensions(0.8, 0.8)
+
   local lines, highlights = dashboard.create_dashboard_content(
     dashboard_stats,
-    win_width,
-    win_height,
+    window_dimensions.width,
+    window_dimensions.height,
     dashboard_type,
     top_projects,
     session_active and session_active.session_time_seconds
   )
 
-  local buf = vim.api.nvim_create_buf(false, true)
-
-  local win = vim.api.nvim_open_win(buf, true, {
-    relative = 'editor',
-    width = win_width,
-    height = win_height,
-    row = win_row,
-    col = win_col,
-    style = 'minimal',
-    border = dashboard_type_options.window_border or 'rounded',
-    title = dashboard_type_options.header.window_title,
-    title_pos = 'center',
-  })
-
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-
-  local ns_id = vim.api.nvim_create_namespace('dev_chronicles_dashboard')
-  for _, hl in ipairs(highlights) do
-    vim.api.nvim_buf_add_highlight(
-      buf,
-      ns_id,
-      hl.hl_group,
-      hl.line - 1, -- Convert to 0-indexed
-      hl.col,
-      hl.end_col == -1 and -1 or hl.end_col
-    )
-  end
-
-  local opts = { buffer = buf, nowait = true, silent = true }
-  vim.keymap.set('n', 'q', function()
-    vim.api.nvim_win_close(win, true)
-  end, opts)
-  vim.keymap.set('n', '<Esc>', function()
-    vim.api.nvim_win_close(win, true)
-  end, opts)
-
-  vim.api.nvim_buf_set_name(buf, 'Dev Chronicles')
-  vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
-  vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
-  vim.api.nvim_buf_set_option(buf, 'filetype', 'dev-chronicles')
-  vim.api.nvim_buf_set_option(buf, 'modifiable', false)
-  vim.api.nvim_buf_set_option(buf, 'readonly', true)
-  vim.api.nvim_win_set_cursor(win, { 2, 0 })
+  render.render(
+    lines,
+    highlights,
+    window_dimensions,
+    dashboard_type_options.header.window_title,
+    dashboard_type_options.window_border
+  )
 end
 
 ---@param extend_today_to_4am boolean
