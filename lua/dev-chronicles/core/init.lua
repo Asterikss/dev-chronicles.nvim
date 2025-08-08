@@ -1,41 +1,41 @@
 local M = {}
 
----@param data_file string
----@param track_days boolean
----@param min_session_time integer
----@param extend_today_to_4am boolean
-M.init = function(data_file, track_days, min_session_time, extend_today_to_4am)
+---@param opts chronicles.Options
+M.init = function(opts)
+  local enums = require('dev-chronicles.core.enums')
+
   math.randomseed(os.time())
+  require('dev-chronicles.core.highlights').setup_highlights()
   local api = require('dev-chronicles.api')
   local curr_month = require('dev-chronicles.core.time').get_month_str()
 
-  vim.api.nvim_create_user_command('DevChronicles', function(opts)
-    local args = opts.fargs
+  vim.api.nvim_create_user_command('DevChronicles', function(command_opts)
+    local args = command_opts.fargs
 
     if #args == 0 then
-      api.dashboard(api.DashboardType.Days, data_file, extend_today_to_4am)
+      api.panel(enums.PanelType.Dashboard, enums.PanelSubtype.Days, nil, opts)
     elseif args[1] == 'all' then
-      api.dashboard(api.DashboardType.All, data_file, extend_today_to_4am)
+      api.panel(enums.PanelType.Dashboard, enums.PanelSubtype.All, nil, opts)
     elseif args[1] == 'days' then
-      api.dashboard(
-        api.DashboardType.Days,
-        data_file,
-        extend_today_to_4am,
-        { start_offset = tonumber(args[2]), end_offset = tonumber(args[3]) }
+      api.panel(
+        enums.PanelType.Dashboard,
+        enums.PanelSubtype.Days,
+        { start_offset = tonumber(args[2]), end_offset = tonumber(args[3]) },
+        opts
       )
     elseif args[1] == 'months' then
-      api.dashboard(
-        api.DashboardType.Months,
-        data_file,
-        extend_today_to_4am,
-        { start_date = args[2], end_date = args[3] }
+      api.panel(
+        enums.PanelType.Dashboard,
+        enums.PanelSubtype.Months,
+        { start_date = args[2], end_date = args[3] },
+        opts
       )
     elseif args[1] == 'today' then
-      api.dashboard(api.DashboardType.Days, data_file, extend_today_to_4am, { start_offset = 0 })
+      api.panel(enums.PanelType.Dashboard, enums.PanelSubtype.Days, { start_offset = 0 }, opts)
     elseif args[1] == 'week' then
-      api.dashboard(api.DashboardType.Days, data_file, extend_today_to_4am, { start_offset = 6 })
+      api.panel(enums.PanelType.Dashboard, enums.PanelSubtype.Days, { start_offset = 6 }, opts)
     elseif args[1] == 'info' then
-      local session_idle, session_active = api.get_session_info(extend_today_to_4am)
+      local session_idle, session_active = api.get_session_info(opts.extend_today_to_4am)
       vim.notify(
         vim.inspect(
           session_active or vim.tbl_extend('error', session_idle, { is_tracking = false })
@@ -66,7 +66,12 @@ M.init = function(data_file, track_days, min_session_time, extend_today_to_4am)
     end,
   })
 
-  M._setup_autocmds(data_file, track_days, min_session_time, extend_today_to_4am)
+  M._setup_autocmds(
+    opts.data_file,
+    opts.track_days,
+    opts.min_session_time,
+    opts.extend_today_to_4am
+  )
 end
 
 ---@param data_file string
@@ -135,8 +140,7 @@ M.is_project = function(
     end
   end
 
-  -- Treat tracked_parent_dirs as excluded paths, so that only the correct
-  -- subdirectories are matched
+  -- only subdirectories are matched
   for _, parent_dir in ipairs(tracked_parent_dirs) do
     if cwd == parent_dir then
       return nil
