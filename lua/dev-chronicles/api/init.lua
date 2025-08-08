@@ -22,7 +22,7 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
   local get_session_info = require('dev-chronicles.core.state').get_session_info
 
   local update_chronicles_data_with_curr_session =
-    require('dev-chronicles.utils.dashboard').update_chronicles_data_with_curr_session
+    require('dev-chronicles.core.session_ops').update_chronicles_data_with_curr_session
 
   panel_subtype_args = panel_subtype_args or {}
 
