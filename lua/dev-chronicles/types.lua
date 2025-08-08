@@ -1,5 +1,17 @@
 ---@meta
 
+---@alias chronicles.Panel.Type
+---| 'Dashboard'
+---| 'Timeline'
+---| 'Stats'
+---| 'All'
+
+---@alias chronicles.Panel.Subtype
+---| 'Days'
+---| 'Months'
+---| 'Years'
+---| 'All'
+
 ---@alias chronicles.DashboardType
 ---| 'Days'
 ---| 'Months'
@@ -100,6 +112,19 @@
 ---@field footer chronicles.BarLevelRepresentation
 
 ---@alias chronicles.Dashboard.TopProjectsArray (string|boolean)[]
+
+---@class chronicles.WindowDimensions
+---@field width integer
+---@field height integer
+---@field row integer
+---@field col integer
+
+---@class chronicles.Panel.Data
+---@field lines string[]
+---@field highlights table
+---@field window_dimensions chronicles.WindowDimensions
+---@field window_title? string
+---@field window_border? string[]
 
 -- --------------------------------------------
 -- Plugin Configuration Types
