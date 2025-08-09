@@ -9,7 +9,7 @@ local session = {
 
 ---@param opts chronicles.Options
 M.start_session = function(opts)
-  local project_id = require('dev-chronicles.core').is_project(
+  local project_id, project_name = require('dev-chronicles.core').is_project(
     vim.fn.getcwd(),
     opts.tracked_parent_dirs,
     opts.tracked_dirs,
@@ -18,8 +18,9 @@ M.start_session = function(opts)
     opts.differentiate_projects_by_folder_not_path
   )
 
-  if project_id then
+  if project_id and project_name then
     session.project_id = project_id
+    session.project_name = project_name
     session.start_time = opts.for_dev_start_time or os.time()
     session.is_tracking = true
   end
@@ -51,8 +52,9 @@ M.get_session_info = function(extend_today_to_4am)
     return session_idle, nil
   end
 
-  local start_time, project_id = session_state.start_time, session_state.project_id
-  if not (start_time and project_id) then
+  local start_time, project_id, project_name =
+    session_state.start_time, session_state.project_id, session_state.project_name
+  if not (start_time and project_id and project_name) then
     error(
       "DevChronicles Internal Error: Session's is_tracking is set to true, but its start_time or project_id is missing"
     )
@@ -64,6 +66,7 @@ M.get_session_info = function(extend_today_to_4am)
   ---@type chronicles.SessionActive
   local session_active = {
     project_id = project_id,
+    project_name = project_name,
     start_time = start_time,
     session_time_seconds = session_time_seconds,
     session_time_str = time.format_time(session_time_seconds),

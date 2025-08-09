@@ -29,6 +29,7 @@
 
 ---@class chronicles.SessionActive: chronicles.SessionIdle
 ---@field project_id string
+---@field project_name string
 ---@field start_time integer
 ---@field session_time_seconds integer
 ---@field session_time_str string

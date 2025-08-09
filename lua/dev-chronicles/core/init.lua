@@ -110,7 +110,7 @@ end
 ---@param exclude_dirs_absolute string[]
 ---@param parsed_exclude_subdirs_relative_map table<string, boolean>
 ---@param differentiate_projects_by_folder_not_path boolean
----@return string?
+---@return string?, string?
 M.is_project = function(
   cwd,
   tracked_parent_dirs,
@@ -119,6 +119,9 @@ M.is_project = function(
   parsed_exclude_subdirs_relative_map,
   differentiate_projects_by_folder_not_path
 )
+  local unexpand = require('dev-chronicles.utils').unexpand
+  local get_project_name = require('dev-chronicles.utils.strings').get_project_name
+
   if not cwd:match('/$') then
     cwd = cwd .. '/'
   end
@@ -127,23 +130,22 @@ M.is_project = function(
   -- the same prefix
   for _, exclude_path in ipairs(exclude_dirs_absolute) do
     if cwd:find(exclude_path, 1, true) == 1 then
-      return nil
+      return
     end
   end
 
   for _, dir in ipairs(tracked_dirs) do
     if cwd == dir then
-      if differentiate_projects_by_folder_not_path then
-        return require('dev-chronicles.utils.strings').get_project_name(cwd)
-      end
-      return require('dev-chronicles.utils').unexpand(cwd)
+      local project_name = get_project_name(cwd)
+      return (differentiate_projects_by_folder_not_path and project_name or unexpand(cwd)),
+        project_name
     end
   end
 
   -- only subdirectories are matched
   for _, parent_dir in ipairs(tracked_parent_dirs) do
     if cwd == parent_dir then
-      return nil
+      return
     end
   end
 
@@ -153,19 +155,15 @@ M.is_project = function(
       local first_dir = cwd:sub(#parent_dir):match('([^/]+)')
       if first_dir then
         if parsed_exclude_subdirs_relative_map[first_dir] then
-          return nil
+          return
         end
 
-        if differentiate_projects_by_folder_not_path then
-          return first_dir
-        end
         local project_id = parent_dir .. first_dir .. '/'
-        return require('dev-chronicles.utils').unexpand(project_id)
+        return (differentiate_projects_by_folder_not_path and first_dir or unexpand(project_id)),
+          first_dir
       end
     end
   end
-
-  return nil
 end
 
 return M
