@@ -78,7 +78,7 @@ end
 M.get_day_str = function(timestamp, extend_today_to_4am)
   local ts = timestamp or os.time()
   if extend_today_to_4am and M.is_time_before_4am(ts) then
-    ts = ts - 86400 -- subtract one day in seconds
+    ts = ts - 86400
   end
   ---@type string
   return os.date('%d.%m.%Y', ts)

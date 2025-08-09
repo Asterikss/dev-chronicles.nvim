@@ -19,6 +19,7 @@
 
 ---@class chronicles.SessionState
 ---@field project_id? string
+---@field project_name? string
 ---@field start_time? integer
 ---@field is_tracking boolean
 

@@ -60,7 +60,6 @@ end
 
 M.abort_session = function()
   require('dev-chronicles.core.state').abort_session()
-  vim.notify('Session aborted')
 end
 
 return M

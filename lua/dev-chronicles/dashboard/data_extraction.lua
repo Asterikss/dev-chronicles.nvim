@@ -1,258 +1,17 @@
 local M = {}
 
----@param panel_subtype chronicles.Panel.Subtype
----@param data chronicles.ChroniclesData
----@param opts chronicles.Options
----@param panel_subtype_args chronicles.Panel.Subtype.Args
----@param session_idle chronicles.SessionIdle
----@param session_time_seconds? integer
----@return chronicles.Panel.Data?
-function M.dashboard(
-  panel_subtype,
-  data,
-  opts,
-  panel_subtype_args,
-  session_idle,
-  session_time_seconds
-)
-  local dashboard_data_extraction = require('dev-chronicles.dashboard.data_extraction')
-  local PanelSubtype = require('dev-chronicles.core.enums').PanelSubtype
-  local get_window_dimensions = require('dev-chronicles.utils').get_window_dimensions
-
-  local dashboard_stats
-  ---@type chronicles.Dashboard.TopProjectsArray?
-  local top_projects = nil
-  ---@type chronicles.Options.Dashboard.Section
-  local dashboard_type_options
-
-  if panel_subtype == PanelSubtype.Days then
-    dashboard_type_options = opts.dashboard.dashboard_days
-    dashboard_stats, top_projects = dashboard_data_extraction.get_dashboard_data_days(
-      data,
-      session_idle.canonical_today_str,
-      panel_subtype_args.start_offset,
-      panel_subtype_args.end_offset,
-      dashboard_type_options.n_by_default,
-      dashboard_type_options.header.show_date_period,
-      dashboard_type_options.header.show_time,
-      dashboard_type_options.header.time_period_str,
-      dashboard_type_options.header.time_period_singular_str,
-      dashboard_type_options.header.top_projects.enable
-    )
-  elseif panel_subtype == PanelSubtype.All then
-    dashboard_type_options = opts.dashboard.dashboard_all
-    dashboard_stats = dashboard_data_extraction.get_dashboard_data_all(
-      data,
-      session_idle.canonical_month_str,
-      session_idle.canonical_today_str,
-      dashboard_type_options.header.show_date_period,
-      dashboard_type_options.header.show_time,
-      dashboard_type_options.header.time_period_str,
-      dashboard_type_options.header.time_period_singular_str
-    )
-  elseif panel_subtype == PanelSubtype.Months then
-    dashboard_type_options = opts.dashboard.dashboard_months
-    dashboard_stats, top_projects = dashboard_data_extraction.get_dashboard_data_months(
-      data,
-      session_idle.canonical_month_str,
-      session_idle.canonical_today_str,
-      panel_subtype_args.start_date,
-      panel_subtype_args.end_date,
-      dashboard_type_options.n_by_default,
-      dashboard_type_options.header.show_date_period,
-      dashboard_type_options.header.show_time,
-      dashboard_type_options.header.time_period_str,
-      dashboard_type_options.header.time_period_singular_str,
-      dashboard_type_options.header.top_projects.enable
-    )
-  else
-    vim.notify('Unrecognised panel subtype for dashboard: ' .. panel_subtype)
-    return
-  end
-
-  local window_dimensions = get_window_dimensions(0.8, 0.8)
-
-  local lines, highlights = M.create_dashboard_content(
-    dashboard_stats,
-    dashboard_type_options,
-    window_dimensions.width,
-    window_dimensions.height,
-    top_projects,
-    session_time_seconds
-  )
-
-  ---@type chronicles.Panel.Data
-  return {
-    lines = lines,
-    highlights = highlights,
-    window_dimensions = window_dimensions,
-    window_title = dashboard_type_options.header.window_title,
-    window_boarder = dashboard_type_options.window_border,
-  }
-end
-
----Creates lines and highlights tables for the dashboard panel
----@param data chronicles.Dashboard.Data?
----@param dashboard_type_opts chronicles.Options.Dashboard.Section
----@param win_width integer
----@param win_height integer
----@param top_projects? chronicles.Dashboard.TopProjectsArray
----@param curr_session_time? integer
----@return string[], table: Lines, Highlights
-M.create_dashboard_content = function(
-  data,
-  dashboard_type_opts,
-  win_width,
-  win_height,
-  top_projects,
-  curr_session_time
-)
-  local lines = {}
-  local highlights = {}
-
-  if not data then
-    table.insert(lines, '')
-    table.insert(lines, 'No recent projects found (Loser).')
-    table.insert(lines, 'Start coding in your tracked directories!')
-    return lines, highlights
-  end
-
-  local dashboard_content = require('dev-chronicles.dashboard.content')
-  local dashboard_opts = require('dev-chronicles.config').get_opts().dashboard
-  local dashboard_utils = require('dev-chronicles.utils.dashboard')
-  local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
-  local differentiate_projects_by_folder_not_path =
-    require('dev-chronicles.config').get_opts().differentiate_projects_by_folder_not_path
-
-  local chart_height = win_height - 7 -- header_height + footer_height
-  local max_chart_width = win_width - 4 -- margins
-  local vertical_space_for_bars = chart_height - 3 -- projects_time + gap 1 + chart floor
-  local max_bar_height = vertical_space_for_bars
-
-  local arr_projects, max_time = dashboard_content.parse_projects_calc_max_time(
-    data.projects_filtered_parsed,
-    dashboard_type_opts.min_proj_time_to_display_proj
-  )
-
-  local n_projects_to_keep, chart_start_col = dashboard_content.calc_chart_stats(
-    dashboard_opts.bar_width,
-    dashboard_opts.bar_spacing,
-    max_chart_width,
-    #arr_projects,
-    win_width
-  )
-
-  arr_projects = dashboard_content.sort_and_cutoff_projects(
-    arr_projects,
-    n_projects_to_keep,
-    dashboard_type_opts.sorting.enable,
-    dashboard_type_opts.sorting.sort_by_last_worked_not_total_time,
-    dashboard_type_opts.sorting.ascending
-  )
-
-  if dashboard_type_opts.dynamic_bar_height_thresholds then
-    max_bar_height = dashboard_content.calc_max_bar_height(
-      vertical_space_for_bars,
-      dashboard_type_opts.dynamic_bar_height_thresholds,
-      max_time
-    )
-  end
-
-  local bar_repr = get_random_from_tbl(
-    dashboard_type_opts.bar_chars and dashboard_type_opts.bar_chars or dashboard_opts.bar_chars
-  )
-
-  local bar_representation = dashboard_utils.construct_bar_representation(
-    bar_repr,
-    dashboard_opts.bar_width,
-    dashboard_opts.bar_header_extends_by,
-    dashboard_opts.bar_footer_extends_by
-  )
-
-  ---@type chronicles.Dashboard.BarData[], integer, table<string, string>
-  local bars_data, max_lines_proj_names, project_id_to_color = dashboard_content.create_bars_data(
-    arr_projects,
-    max_time,
-    max_bar_height,
-    chart_start_col,
-    dashboard_opts.bar_width,
-    dashboard_opts.bar_spacing,
-    dashboard_opts.footer.let_proj_names_extend_bars_by_one,
-    dashboard_type_opts.random_bars_coloring,
-    dashboard_type_opts.bars_coloring_follows_sorting_in_order
-        and dashboard_type_opts.sorting.ascending
-      or not dashboard_type_opts.sorting.ascending,
-    bar_representation.header.realized_rows,
-    differentiate_projects_by_folder_not_path
-  )
-
-  dashboard_content.set_header_lines_highlights(
-    lines,
-    highlights,
-    data.time_period_str,
-    win_width,
-    data.global_time_filtered,
-    dashboard_type_opts.header.total_time_as_hours_max,
-    dashboard_type_opts.header.total_time_as_hours_min,
-    dashboard_type_opts.header.show_current_session_time,
-    dashboard_type_opts.header.total_time_format_str,
-    dashboard_type_opts.header.prettify,
-    curr_session_time,
-    dashboard_type_opts.header.total_time_round_hours_above_one,
-    top_projects,
-    dashboard_type_opts.header.top_projects,
-    project_id_to_color
-  )
-
-  dashboard_content.set_time_labels_above_bars(
-    lines,
-    highlights,
-    bars_data,
-    win_width,
-    dashboard_type_opts.color_proj_times_like_bars,
-    dashboard_type_opts.header.show_global_time_for_each_project,
-    dashboard_type_opts.header.show_global_time_only_if_differs,
-    dashboard_type_opts.header.color_global_proj_times_like_bars,
-    dashboard_type_opts.proj_total_time_as_hours_max,
-    dashboard_type_opts.proj_total_time_as_hours_min,
-    dashboard_type_opts.proj_total_time_round_hours_above_one,
-    dashboard_type_opts.header.proj_global_total_time_round_hours_above_one
-  )
-
-  dashboard_content.set_bars_lines_highlights(
-    lines,
-    highlights,
-    bars_data,
-    bar_representation,
-    dashboard_opts.bar_header_extends_by,
-    dashboard_opts.bar_footer_extends_by,
-    vertical_space_for_bars,
-    dashboard_opts.bar_width,
-    win_width
-  )
-
-  dashboard_content.set_hline_lines_highlights(lines, highlights, win_width)
-
-  dashboard_content.set_project_names_lines_highlights(
-    lines,
-    highlights,
-    bars_data,
-    max_lines_proj_names,
-    dashboard_opts.footer.let_proj_names_extend_bars_by_one,
-    win_width
-  )
-
-  return lines, highlights
-end
-
 -- TODO: return type
 ---@param data chronicles.ChroniclesData
+---@param canonical_month_str string
+---@param canonical_today_str string
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
 ---@param time_period_singular_str? string
 M.get_dashboard_data_all = function(
   data,
+  canonical_month_str,
+  canonical_today_str,
   show_date_period,
   show_time,
   time_period_str,
@@ -267,6 +26,8 @@ M.get_dashboard_data_all = function(
     time_period_str = time.get_time_period_str_months(
       time.get_month_str(data.tracking_start),
       time.get_month_str(),
+      canonical_month_str,
+      canonical_today_str,
       show_date_period,
       show_time,
       time_period_str,
@@ -289,6 +50,7 @@ end
 M.get_dashboard_data_months = function(
   data,
   canonical_month_str,
+  canonical_today_str,
   start_date,
   end_date,
   n_months_by_default,
@@ -382,6 +144,8 @@ M.get_dashboard_data_months = function(
     time_period_str = time.get_time_period_str_months(
       start_date,
       end_date,
+      canonical_month_str,
+      canonical_today_str,
       show_date_period,
       show_time,
       time_period_str,
@@ -401,7 +165,6 @@ end
 ---@param time_period_str? string
 ---@param time_period_singular_str? string
 ---@param construct_most_worked_on_project_arr boolean
----@param extend_today_to_4am boolean
 ---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
 M.get_dashboard_data_days = function(
   data,
@@ -413,8 +176,7 @@ M.get_dashboard_data_days = function(
   show_time,
   time_period_str,
   time_period_singular_str,
-  construct_most_worked_on_project_arr,
-  extend_today_to_4am
+  construct_most_worked_on_project_arr
 )
   local time = require('dev-chronicles.core.time')
 
@@ -492,11 +254,11 @@ M.get_dashboard_data_days = function(
       start_offset - end_offset + 1,
       start_str,
       end_str,
+      canonical_today_str,
       show_date_period,
       show_time,
       time_period_str,
-      time_period_singular_str,
-      extend_today_to_4am
+      time_period_singular_str
     ),
   },
     most_worked_on_project_per_day
