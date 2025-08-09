@@ -191,14 +191,14 @@ end
 M.convert_day_str_to_timestamp = function(day_month_year_str, end_of_day)
   local day, month, year = M.extract_day_month_year(day_month_year_str)
   -- bump to next day when end_of_day is requested
-  local ts = os.time {
+  local ts = os.time({
     year = year,
     month = month,
     day = day + (end_of_day and 1 or 0),
     hour = 0,
     min = 0,
     sec = 0,
-  }
+  })
   -- if end_of_day, subtract 1s to get last second of the requested day
   return end_of_day and (ts - 1) or ts
 end
@@ -212,14 +212,14 @@ end
 M.convert_month_str_to_timestamp = function(month_year_str, end_of_month)
   local month, year = M.extract_month_year(month_year_str)
   -- if end_of_month: bump to first of next month, otherwise first of this month
-  local ts = os.time {
+  local ts = os.time({
     year = year,
     month = month + (end_of_month and 1 or 0),
     day = 1,
     hour = 0,
     min = 0,
     sec = 0,
-  }
+  })
   -- if end_of_month, subtract 1 sec to get last second of the requested month
   return end_of_month and (ts - 1) or ts
 end
