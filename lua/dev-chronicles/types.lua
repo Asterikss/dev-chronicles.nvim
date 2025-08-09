@@ -12,11 +12,6 @@
 ---| 'Years'
 ---| 'All'
 
----@alias chronicles.DashboardType
----| 'Days'
----| 'Months'
----| 'All'
-
 ---@alias chronicles.BarLevel
 ---| 'Header'
 ---| 'Body'
@@ -30,6 +25,7 @@
 ---@class chronicles.SessionIdle
 ---@field canonical_ts integer
 ---@field canonical_today_str string
+---@field canonical_month_str string
 
 ---@class chronicles.SessionActive: chronicles.SessionIdle
 ---@field project_id string
@@ -38,7 +34,7 @@
 ---@field session_time_str string
 ---@field now_ts integer
 
----@class (exact) chronicles.DashboardType.Args
+---@class (exact) chronicles.Panel.Subtype.Args
 ---@field start_offset? integer
 ---@field end_offset? integer
 ---@field start_date? string

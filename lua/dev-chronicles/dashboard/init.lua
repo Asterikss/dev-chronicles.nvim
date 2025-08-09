@@ -71,9 +71,9 @@ function M.dashboard(
 
   local lines, highlights = M.create_dashboard_content(
     dashboard_stats,
+    dashboard_type_options,
     window_dimensions.width,
     window_dimensions.height,
-    panel_subtype,
     top_projects,
     session_time_seconds
   )
@@ -88,19 +88,19 @@ function M.dashboard(
   }
 end
 
----Creates lines and highlights for the dashboard
+---Creates lines and highlights tbls for the dashboard panel
 ---@param data chronicles.Dashboard.Data?
+---@param dashboard_type_opts chronicles.Options.Dashboard.Section
 ---@param win_width integer
 ---@param win_height integer
----@param panel_subtype chronicles.Panel.Subtype
 ---@param top_projects? chronicles.Dashboard.TopProjectsArray
 ---@param curr_session_time? integer
----@return table, table: Lines, Highlights
+---@return string[], table: Lines, Highlights
 M.create_dashboard_content = function(
   data,
+  dashboard_type_opts,
   win_width,
   win_height,
-  panel_subtype,
   top_projects,
   curr_session_time
 )
@@ -120,15 +120,6 @@ M.create_dashboard_content = function(
   local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
   local differentiate_projects_by_folder_not_path =
     require('dev-chronicles.config').options.differentiate_projects_by_folder_not_path
-
-  local dashboard_type_opts
-  if panel_subtype == require('dev-chronicles.api').DashboardType.All then
-    dashboard_type_opts = dashboard_opts.dashboard_all
-  elseif panel_subtype == require('dev-chronicles.api').DashboardType.Days then
-    dashboard_type_opts = dashboard_opts.dashboard_days
-  else
-    dashboard_type_opts = dashboard_opts.dashboard_months
-  end
 
   local chart_height = win_height - 7 -- header_height + footer_height
   local max_chart_width = win_width - 4 -- margins

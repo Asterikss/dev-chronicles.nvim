@@ -1,11 +1,5 @@
 local M = {}
 
-M.DashboardType = {
-  Days = 'Days',
-  Months = 'Months',
-  All = 'All',
-}
-
 ---@param panel_type chronicles.Panel.Type
 ---@param panel_subtype chronicles.Panel.Subtype
 ---@param panel_subtype_args? chronicles.Panel.Subtype.Args
