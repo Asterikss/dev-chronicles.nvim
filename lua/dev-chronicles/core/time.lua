@@ -227,24 +227,24 @@ end
 ---@param n_days integer
 ---@param start_day string 'DD.MM.YYYY'
 ---@param end_day string 'DD.MM.YYYY'
+---@param canonical_today_str string 'DD.MM.YYYY'
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
 ---@param time_period_singular_str? string
----@param extend_today_to_4am boolean
 ---@return string
 M.get_time_period_str_days = function(
   n_days,
   start_day,
   end_day,
+  canonical_today_str,
   show_date_period,
   show_time,
   time_period_str,
-  time_period_singular_str,
-  extend_today_to_4am
+  time_period_singular_str
 )
   local is_singular = n_days == 1
-  local ends_today = end_day == M.get_day_str(nil, extend_today_to_4am)
+  local ends_today = end_day == canonical_today_str
 
   if ends_today then
     local template = is_singular and time_period_singular_str or time_period_str
@@ -291,6 +291,8 @@ end
 ---
 ---@param start_month string 'MM.YYYY'
 ---@param end_month string 'MM.YYYY'
+---@param canonical_month_str string 'MM.YYYY'
+---@param canonical_today_str string 'MM.YYYY'
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
@@ -299,6 +301,8 @@ end
 M.get_time_period_str_months = function(
   start_month,
   end_month,
+  canonical_month_str,
+  canonical_today_str,
   show_date_period,
   show_time,
   time_period_str,
@@ -320,25 +324,22 @@ M.get_time_period_str_months = function(
   end
 
   local time_period = ''
-  local current_month = M.get_month_str()
+  local is_current_month = end_month == canonical_month_str
 
   if show_date_period then
     local month_start, year_start = M.extract_month_year(start_month)
     local month_end, year_end = M.extract_month_year(end_month)
 
-    -- Its presence signifies that end_month is the current month
-    local day_month_str = current_month == end_month and M.get_day_str() or nil
-
     if year_start == year_end then
       if month_start == month_end then
-        if day_month_str then
-          time_period = '01.' .. start_month .. ' — ' .. day_month_str
+        if is_current_month then
+          time_period = '01.' .. start_month .. ' — ' .. canonical_today_str
         else
           time_period = start_month
         end
       else
-        if day_month_str then
-          time_period = '01.' .. string.sub(start_month, 1, 2) .. ' — ' .. day_month_str
+        if is_current_month then
+          time_period = '01.' .. string.sub(start_month, 1, 2) .. ' — ' .. canonical_today_str
         else
           time_period = string.sub(start_month, 1, 2)
             .. '—'
@@ -355,7 +356,7 @@ M.get_time_period_str_months = function(
   if show_time then
     local start_ts = M.convert_month_str_to_timestamp(start_month)
 
-    local end_ts = current_month == end_month and M.get_current_timestamp()
+    local end_ts = is_current_month and os.time()
       or M.convert_month_str_to_timestamp(end_month, true)
 
     local total_time = M.format_time(end_ts - start_ts, false)

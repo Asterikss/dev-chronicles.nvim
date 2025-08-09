@@ -36,13 +36,14 @@ function M.dashboard(
       dashboard_type_options.header.show_time,
       dashboard_type_options.header.time_period_str,
       dashboard_type_options.header.time_period_singular_str,
-      dashboard_type_options.header.top_projects.enable,
-      opts.extend_today_to_4am
+      dashboard_type_options.header.top_projects.enable
     )
   elseif panel_subtype == PanelSubtype.All then
     dashboard_type_options = opts.dashboard.dashboard_all
     dashboard_stats = M.get_dashboard_data_all(
       data,
+      session_idle.canonical_month_str,
+      session_idle.canonical_today_str,
       dashboard_type_options.header.show_date_period,
       dashboard_type_options.header.show_time,
       dashboard_type_options.header.time_period_str,
@@ -53,6 +54,7 @@ function M.dashboard(
     dashboard_stats, top_projects = M.get_dashboard_data_months(
       data,
       session_idle.canonical_month_str,
+      session_idle.canonical_today_str,
       panel_subtype_args.start_date,
       panel_subtype_args.end_date,
       dashboard_type_options.n_by_default,
@@ -88,7 +90,7 @@ function M.dashboard(
   }
 end
 
----Creates lines and highlights tbls for the dashboard panel
+---Creates lines and highlights tables for the dashboard panel
 ---@param data chronicles.Dashboard.Data?
 ---@param dashboard_type_opts chronicles.Options.Dashboard.Section
 ---@param win_width integer
