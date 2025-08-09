@@ -7,9 +7,8 @@ local session = {
   is_tracking = false,
 }
 
-M.start_session = function()
-  local opts = require('dev-chronicles.config').options
-
+---@param opts chronicles.Options
+M.start_session = function(opts)
   local project_id = require('dev-chronicles.core').is_project(
     vim.fn.getcwd(),
     opts.tracked_parent_dirs,
@@ -21,8 +20,7 @@ M.start_session = function()
 
   if project_id then
     session.project_id = project_id
-    session.start_time = opts.for_dev_start_time
-      or require('dev-chronicles.core.time').get_current_timestamp()
+    session.start_time = opts.for_dev_start_time or os.time()
     session.is_tracking = true
   end
 end
@@ -40,11 +38,13 @@ M.get_session_info = function(extend_today_to_4am)
 
   local canonical_ts, canonical_today_str =
     time.get_canonical_curr_ts_and_day_str(extend_today_to_4am)
+  local canonical_month_str = time.get_month_str(canonical_ts)
 
   ---@type chronicles.SessionIdle
   local session_idle = {
     canonical_ts = canonical_ts,
     canonical_today_str = canonical_today_str,
+    canonical_month_str = canonical_month_str,
   }
 
   if not session_state.is_tracking then
