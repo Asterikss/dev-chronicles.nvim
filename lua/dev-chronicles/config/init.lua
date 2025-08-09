@@ -1,5 +1,8 @@
 local M = {}
 
+---@type chronicles.Options
+local options
+
 ---@type chronicles.Options.DefaultVars
 local default_vars = {
   bar_width = 9,
@@ -265,9 +268,14 @@ M.setup = function(opts)
   end
 
   ---@type chronicles.Options
-  M.options = merged
+  options = merged
 
   require('dev-chronicles.core').init(M.options)
+end
+
+---@return chronicles.Options
+function M.get_opts()
+  return options
 end
 
 return M

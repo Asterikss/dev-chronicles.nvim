@@ -5,7 +5,7 @@ local M = {}
 ---@param panel_subtype_args? chronicles.Panel.Subtype.Args
 ---@param opts? chronicles.Options
 function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
-  opts = opts or require('dev-chronicles.config').options
+  opts = opts or require('dev-chronicles.config').get_opts()
   local data = require('dev-chronicles.utils.data').load_data(opts.data_file)
   if not data then
     return
@@ -48,13 +48,13 @@ end
 ---@return chronicles.SessionIdle, chronicles.SessionActive?
 M.get_session_info = function(extend_today_to_4am)
   extend_today_to_4am = extend_today_to_4am
-    or require('dev-chronicles.config').options.extend_today_to_4am
+    or require('dev-chronicles.config').get_opts().extend_today_to_4am
   return require('dev-chronicles.core.state').get_session_info(extend_today_to_4am)
 end
 
 ---@param opts? chronicles.Options
 function M.start_session(opts)
-  opts = opts or require('dev-chronicles.config').options
+  opts = opts or require('dev-chronicles.config').get_opts()
   require('dev-chronicles.core.state').start_session(opts)
 end
 

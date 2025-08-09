@@ -18,7 +18,7 @@ M.load_data = function(file_path)
   if not ok then
     local err = 'DevChronicles Error: failed loading data from disk: Failed to read the data file'
     vim.notify(err)
-    local f = io.open(require('dev-chronicles.config').options.log_file, 'a')
+    local f = io.open(require('dev-chronicles.config').get_opts().log_file, 'a')
     if f then
       f:write(err)
       f:close()
@@ -30,7 +30,7 @@ M.load_data = function(file_path)
   if not ok_decode then
     local err = 'DevChronicles Error: failed loading data from disk: Could not decode json'
     vim.notify(err)
-    local f = io.open(require('dev-chronicles.config').options.log_file, 'a')
+    local f = io.open(require('dev-chronicles.config').get_opts().log_file, 'a')
     if f then
       f:write(err)
       f:close()

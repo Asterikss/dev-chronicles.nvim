@@ -115,11 +115,11 @@ M.create_dashboard_content = function(
   end
 
   local dashboard_content = require('dev-chronicles.dashboard.content')
-  local dashboard_opts = require('dev-chronicles.config').options.dashboard
+  local dashboard_opts = require('dev-chronicles.config').get_opts().dashboard
   local dashboard_utils = require('dev-chronicles.utils.dashboard')
   local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
   local differentiate_projects_by_folder_not_path =
-    require('dev-chronicles.config').options.differentiate_projects_by_folder_not_path
+    require('dev-chronicles.config').get_opts().differentiate_projects_by_folder_not_path
 
   local chart_height = win_height - 7 -- header_height + footer_height
   local max_chart_width = win_width - 4 -- margins
