@@ -26,26 +26,22 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
 
   panel_subtype_args = panel_subtype_args or {}
 
-  local _, session_active = get_session_info(opts.extend_today_to_4am)
-  ---@type integer?
-  local session_time_seconds
-
+  local session_idle, session_active = get_session_info(opts.extend_today_to_4am)
   if session_active then
     data = update_chronicles_data_with_curr_session(data, session_active)
-    session_time_seconds = session_active.session_time_seconds
   end
 
   ---@type chronicles.Panel.Data?
   local panel_data
 
   if panel_type == PanelType.Dashboard then
-    vim.notify(panel_subtype)
     panel_data = require('dev-chronicles.dashboard').dashboard(
       panel_subtype,
       data,
       opts,
-      session_time_seconds,
-      panel_subtype_args
+      panel_subtype_args,
+      session_idle,
+      session_active and session_active.session_time_seconds
     )
   end
 

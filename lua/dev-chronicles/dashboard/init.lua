@@ -3,10 +3,18 @@ local M = {}
 ---@param panel_subtype chronicles.Panel.Subtype
 ---@param data chronicles.ChroniclesData
 ---@param opts chronicles.Options
----@param session_time_seconds? integer
 ---@param panel_subtype_args chronicles.Panel.Subtype.Args
+---@param session_idle chronicles.SessionIdle
+---@param session_time_seconds? integer
 ---@return chronicles.Panel.Data?
-function M.dashboard(panel_subtype, data, opts, session_time_seconds, panel_subtype_args)
+function M.dashboard(
+  panel_subtype,
+  data,
+  opts,
+  panel_subtype_args,
+  session_idle,
+  session_time_seconds
+)
   local get_window_dimensions = require('dev-chronicles.utils').get_window_dimensions
   local PanelSubtype = require('dev-chronicles.core.enums').PanelSubtype
 
@@ -20,6 +28,7 @@ function M.dashboard(panel_subtype, data, opts, session_time_seconds, panel_subt
     dashboard_type_options = opts.dashboard.dashboard_days
     dashboard_stats, top_projects = M.get_dashboard_data_days(
       data,
+      session_idle.canonical_today_str,
       panel_subtype_args.start_offset,
       panel_subtype_args.end_offset,
       dashboard_type_options.n_by_default,
@@ -43,6 +52,7 @@ function M.dashboard(panel_subtype, data, opts, session_time_seconds, panel_subt
     dashboard_type_options = opts.dashboard.dashboard_months
     dashboard_stats, top_projects = M.get_dashboard_data_months(
       data,
+      session_idle.canonical_month_str,
       panel_subtype_args.start_date,
       panel_subtype_args.end_date,
       dashboard_type_options.n_by_default,
@@ -272,6 +282,7 @@ M.get_dashboard_data_all = function(
 end
 
 ---@param data chronicles.ChroniclesData
+---@param canonical_month_str string
 ---@param start_date? string
 ---@param end_date? string
 ---@param n_months_by_default integer
@@ -283,6 +294,7 @@ end
 ---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
 M.get_dashboard_data_months = function(
   data,
+  canonical_month_str,
   start_date,
   end_date,
   n_months_by_default,
@@ -294,9 +306,8 @@ M.get_dashboard_data_months = function(
 )
   local time = require('dev-chronicles.core.time')
 
-  local current_month = time.get_month_str()
-  start_date = start_date or time.get_previous_month(current_month, n_months_by_default - 1)
-  end_date = end_date or current_month
+  start_date = start_date or time.get_previous_month(canonical_month_str, n_months_by_default - 1)
+  end_date = end_date or canonical_month_str
   local start_ts = time.convert_month_str_to_timestamp(start_date)
   local end_ts = time.convert_month_str_to_timestamp(end_date, true)
 
@@ -387,6 +398,7 @@ M.get_dashboard_data_months = function(
 end
 
 ---@param data chronicles.ChroniclesData
+---@param canonical_today_str string
 ---@param start_offset? integer
 ---@param end_offset? integer
 ---@param n_days_by_default integer
@@ -399,6 +411,7 @@ end
 ---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
 M.get_dashboard_data_days = function(
   data,
+  canonical_today_str,
   start_offset,
   end_offset,
   n_days_by_default,
@@ -413,17 +426,10 @@ M.get_dashboard_data_days = function(
 
   start_offset = start_offset or n_days_by_default - 1
   end_offset = end_offset or 0
-  local today = time.get_day_str()
-
-  -- TODO: Don't do this. Just use time.get_previous_day on session_active.canonical_day_str
-  if extend_today_to_4am and time.is_time_before_4am() then
-    start_offset = start_offset + 1
-    end_offset = end_offset + 1
-  end
 
   local DAY_SEC = 86400 -- 24 * 60 * 60
-  local start_str = time.get_previous_day(today, start_offset)
-  local end_str = time.get_previous_day(today, end_offset)
+  local start_str = time.get_previous_day(canonical_today_str, start_offset)
+  local end_str = time.get_previous_day(canonical_today_str, end_offset)
   local start_timestamp = time.convert_day_str_to_timestamp(start_str)
   local end_timestamp = time.convert_day_str_to_timestamp(end_str, true)
 
