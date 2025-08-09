@@ -54,10 +54,18 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
   end
 end
 
----@param extend_today_to_4am boolean
+---@param extend_today_to_4am? boolean
 ---@return chronicles.SessionIdle, chronicles.SessionActive?
 M.get_session_info = function(extend_today_to_4am)
+  extend_today_to_4am = extend_today_to_4am
+    or require('dev-chronicles.config').options.extend_today_to_4am
   return require('dev-chronicles.core.state').get_session_info(extend_today_to_4am)
+end
+
+---@param opts? chronicles.Options
+function M.start_session(opts)
+  opts = opts or require('dev-chronicles.config').options
+  require('dev-chronicles.core.state').start_session(opts)
 end
 
 M.abort_session = function()
