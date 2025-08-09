@@ -1,10 +1,88 @@
 local M = {}
 
+---@param panel_subtype chronicles.Panel.Subtype
+---@param data chronicles.ChroniclesData
+---@param opts chronicles.Options
+---@param session_time_seconds? integer
+---@param panel_subtype_args chronicles.Panel.Subtype.Args
+---@return chronicles.Panel.Data?
+function M.dashboard(panel_subtype, data, opts, session_time_seconds, panel_subtype_args)
+  local get_window_dimensions = require('dev-chronicles.utils').get_window_dimensions
+  local PanelSubtype = require('dev-chronicles.core.enums').PanelSubtype
+
+  local dashboard_stats
+  ---@type chronicles.Dashboard.TopProjectsArray?
+  local top_projects = nil
+  ---@type chronicles.Options.Dashboard.Section
+  local dashboard_type_options
+
+  if panel_subtype == PanelSubtype.Days then
+    dashboard_type_options = opts.dashboard.dashboard_days
+    dashboard_stats, top_projects = M.get_dashboard_data_days(
+      data,
+      panel_subtype_args.start_offset,
+      panel_subtype_args.end_offset,
+      dashboard_type_options.n_by_default,
+      dashboard_type_options.header.show_date_period,
+      dashboard_type_options.header.show_time,
+      dashboard_type_options.header.time_period_str,
+      dashboard_type_options.header.time_period_singular_str,
+      dashboard_type_options.header.top_projects.enable,
+      opts.extend_today_to_4am
+    )
+  elseif panel_subtype == PanelSubtype.All then
+    dashboard_type_options = opts.dashboard.dashboard_all
+    dashboard_stats = M.get_dashboard_data_all(
+      data,
+      dashboard_type_options.header.show_date_period,
+      dashboard_type_options.header.show_time,
+      dashboard_type_options.header.time_period_str,
+      dashboard_type_options.header.time_period_singular_str
+    )
+  elseif panel_subtype == PanelSubtype.Months then
+    dashboard_type_options = opts.dashboard.dashboard_months
+    dashboard_stats, top_projects = M.get_dashboard_data_months(
+      data,
+      panel_subtype_args.start_date,
+      panel_subtype_args.end_date,
+      dashboard_type_options.n_by_default,
+      dashboard_type_options.header.show_date_period,
+      dashboard_type_options.header.show_time,
+      dashboard_type_options.header.time_period_str,
+      dashboard_type_options.header.time_period_singular_str,
+      dashboard_type_options.header.top_projects.enable
+    )
+  else
+    vim.notify('Unrecognised panel subtype for dashboard: ' .. panel_subtype)
+    return
+  end
+
+  local window_dimensions = get_window_dimensions(0.8, 0.8)
+
+  local lines, highlights = M.create_dashboard_content(
+    dashboard_stats,
+    window_dimensions.width,
+    window_dimensions.height,
+    panel_subtype,
+    top_projects,
+    session_time_seconds
+  )
+
+  ---@type chronicles.Panel.Data
+  return {
+    lines = lines,
+    highlights = highlights,
+    window_dimensions = window_dimensions,
+    window_title = dashboard_type_options.header.window_title,
+    window_boarder = dashboard_type_options.window_border,
+  }
+end
+
 ---Creates lines and highlights for the dashboard
 ---@param data chronicles.Dashboard.Data?
 ---@param win_width integer
 ---@param win_height integer
----@param dashboard_type chronicles.DashboardType
+---@param panel_subtype chronicles.Panel.Subtype
 ---@param top_projects? chronicles.Dashboard.TopProjectsArray
 ---@param curr_session_time? integer
 ---@return table, table: Lines, Highlights
@@ -12,7 +90,7 @@ M.create_dashboard_content = function(
   data,
   win_width,
   win_height,
-  dashboard_type,
+  panel_subtype,
   top_projects,
   curr_session_time
 )
@@ -34,9 +112,9 @@ M.create_dashboard_content = function(
     require('dev-chronicles.config').options.differentiate_projects_by_folder_not_path
 
   local dashboard_type_opts
-  if dashboard_type == require('dev-chronicles.api').DashboardType.All then
+  if panel_subtype == require('dev-chronicles.api').DashboardType.All then
     dashboard_type_opts = dashboard_opts.dashboard_all
-  elseif dashboard_type == require('dev-chronicles.api').DashboardType.Days then
+  elseif panel_subtype == require('dev-chronicles.api').DashboardType.Days then
     dashboard_type_opts = dashboard_opts.dashboard_days
   else
     dashboard_type_opts = dashboard_opts.dashboard_months
