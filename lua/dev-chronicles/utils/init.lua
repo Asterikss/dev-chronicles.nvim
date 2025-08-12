@@ -36,4 +36,22 @@ M.shuffle = function(tbl)
   end
 end
 
+---@param screen_width_percent number
+---@param screen_height_percent number
+---@return chronicles.WindowDimensions
+M.get_window_dimensions = function(screen_width_percent, screen_height_percent)
+  local screen_width = vim.o.columns
+  local screen_height = vim.o.lines
+  local win_width = math.floor(screen_width * screen_width_percent)
+  local win_height = math.floor(screen_height * screen_height_percent)
+  local win_row = math.floor((screen_height - win_height) / 2)
+  local win_col = math.floor((screen_width - win_width) / 2)
+  ---@type chronicles.WindowDimensions
+  return {
+    width = win_width,
+    height = win_height,
+    row = win_row,
+    col = win_col,
+  }
+end
 return M
