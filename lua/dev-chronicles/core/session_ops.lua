@@ -44,10 +44,9 @@ end
 ---@param min_session_time integer
 ---@param extend_today_to_4am boolean
 M.end_session = function(data_file, track_days, min_session_time, extend_today_to_4am)
-  local _, session_active =
-    require('dev-chronicles.core.state').get_session_info(extend_today_to_4am)
+  local state = require('dev-chronicles.core.state')
+  local _, session_active = state.get_session_info(extend_today_to_4am)
   if not session_active then
-    vim.notify('Dev Chronicles Error: Tried to end the session when session in not active')
     return
   end
 
@@ -55,15 +54,15 @@ M.end_session = function(data_file, track_days, min_session_time, extend_today_t
     M._record_session(data_file, session_active, track_days)
   end
 
-  require('dev-chronicles.core.state').abort_session()
+  state.abort_session()
 end
 
 ---@param data_file string
 ---@param session_active chronicles.SessionActive
 ---@param track_days boolean
 M._record_session = function(data_file, session_active, track_days)
-  local time = require('dev-chronicles.core.time')
-  local data = require('dev-chronicles.utils.data').load_data(data_file)
+  local data_utils = require('dev-chronicles.utils.data')
+  local data = data_utils.load_data(data_file)
   if not data then
     vim.notify(
       'DevChronicles Error: Recording the session failed. No data returned from load_data()'
@@ -74,6 +73,7 @@ M._record_session = function(data_file, session_active, track_days)
   local canonical_end_ts = session_active.canonical_ts
   local end_ts = session_active.now_ts
   local today_key = session_active.canonical_today_str
+  local month_key = session_active.canonical_month_str
   local duration_sec = session_active.session_time_seconds
   local project_id = session_active.project_id
 
@@ -100,14 +100,13 @@ M._record_session = function(data_file, session_active, track_days)
   project.last_worked_canonical = canonical_end_ts
   project.last_worked = end_ts
 
-  local curr_month = time.get_month_str(canonical_end_ts)
-  project.by_month[curr_month] = (project.by_month[curr_month] or 0) + duration_sec
+  project.by_month[month_key] = (project.by_month[month_key] or 0) + duration_sec
 
   if track_days then
     project.by_day[today_key] = (project.by_day[today_key] or 0) + duration_sec
   end
 
-  require('dev-chronicles.utils.data').save_data(data, data_file)
+  data_utils.save_data(data, data_file)
 end
 
 return M

@@ -1,29 +1,25 @@
 local M = {}
 
----@param lines string[]
----@param highlights table
----@param window_dimensions chronicles.WindowDimensions
----@param title? string
----@param border? string[]
-M.render = function(lines, highlights, window_dimensions, title, border)
+---@param panel_data chronicles.Panel.Data
+M.render = function(panel_data)
   local buf = vim.api.nvim_create_buf(false, true)
 
   local win = vim.api.nvim_open_win(buf, true, {
     relative = 'editor',
-    width = window_dimensions.width,
-    height = window_dimensions.height,
-    row = window_dimensions.row,
-    col = window_dimensions.col,
+    width = panel_data.window_dimensions.width,
+    height = panel_data.window_dimensions.height,
+    row = panel_data.window_dimensions.row,
+    col = panel_data.window_dimensions.col,
     style = 'minimal',
-    border = border or 'rounded',
-    title = title,
+    border = panel_data.window_border or 'rounded',
+    title = panel_data.window_title,
     title_pos = 'center',
   })
 
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, panel_data.lines)
 
   local ns_id = vim.api.nvim_create_namespace('dev_chronicles_dashboard')
-  for _, hl in ipairs(highlights) do
+  for _, hl in ipairs(panel_data.highlights) do
     vim.api.nvim_buf_add_highlight(
       buf,
       ns_id,
