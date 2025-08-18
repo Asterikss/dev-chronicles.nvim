@@ -148,7 +148,7 @@ M.get_previous_day = function(start_day, offset)
 
   local day, month, year = M.extract_day_month_year(start_day)
   -- construct a timestamp at midnight UTC of that day
-  local ts = os.time { year = year, month = month, day = day, hour = 0 }
+  local ts = os.time({ year = year, month = month, day = day, hour = 0 })
   -- subtract the offset in seconds
   local prev_ts = ts - offset * 86400 -- 24 * 60 * 60
 

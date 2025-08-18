@@ -175,6 +175,8 @@
 ---@field bars_coloring_follows_sorting_in_order boolean
 ---@field color_proj_times_like_bars boolean
 ---@field min_proj_time_to_display_proj integer
+---@field window_height number
+---@field window_width number
 ---@field window_border? string[]
 ---@field bar_chars any?
 

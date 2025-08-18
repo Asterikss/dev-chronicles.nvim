@@ -56,6 +56,8 @@ local dashboard_section_base = {
   bars_coloring_follows_sorting_in_order = true,
   color_proj_times_like_bars = false,
   min_proj_time_to_display_proj = 0,
+  window_height = 0.8,
+  window_width = 0.8,
   window_border = nil,
   bar_chars = nil,
 }
@@ -120,6 +122,8 @@ local defaults = {
         show_current_session_time = false,
       },
       sorting = { sort_by_last_worked_not_total_time = false },
+      window_height = 0.85,
+      window_width = 1,
       window_border = { '╳', '━', '╳', '┃', '╳', '━', '╳', '┃' },
     }),
   },
@@ -270,7 +274,7 @@ M.setup = function(opts)
   ---@type chronicles.Options
   options = merged
 
-  require('dev-chronicles.core').init(M.options)
+  require('dev-chronicles.core').init(options)
 end
 
 ---@return chronicles.Options

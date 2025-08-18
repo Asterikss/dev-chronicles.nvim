@@ -70,7 +70,8 @@ function M.dashboard(
     return
   end
 
-  local window_dimensions = get_window_dimensions(0.8, 0.8)
+  local window_dimensions =
+    get_window_dimensions(dashboard_type_options.window_width, dashboard_type_options.window_height)
 
   local lines, highlights = M.create_dashboard_content(
     dashboard_stats,
