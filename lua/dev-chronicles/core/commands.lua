@@ -14,39 +14,43 @@ M._setup_the_command = function(opts)
 
   vim.api.nvim_create_user_command('DevChronicles', function(command_opts)
     local args = command_opts.fargs
+    local first_arg = args[1]
 
     if #args == 0 then
       api.panel(enums.PanelType.Dashboard, enums.PanelSubtype.Days, nil, opts)
-    elseif args[1] == 'all' then
+    elseif first_arg == 'all' then
       api.panel(enums.PanelType.Dashboard, enums.PanelSubtype.All, nil, opts)
-    elseif args[1] == 'days' then
+    elseif first_arg == 'days' then
       api.panel(
         enums.PanelType.Dashboard,
         enums.PanelSubtype.Days,
         { start_offset = tonumber(args[2]), end_offset = tonumber(args[3]) },
         opts
       )
-    elseif args[1] == 'months' then
+    elseif first_arg == 'months' then
       api.panel(
         enums.PanelType.Dashboard,
         enums.PanelSubtype.Months,
         { start_date = args[2], end_date = args[3] },
         opts
       )
-    elseif args[1] == 'today' then
+    elseif first_arg == 'today' then
       api.panel(enums.PanelType.Dashboard, enums.PanelSubtype.Days, { start_offset = 0 }, opts)
-    elseif args[1] == 'week' then
+    elseif first_arg == 'week' then
       api.panel(enums.PanelType.Dashboard, enums.PanelSubtype.Days, { start_offset = 6 }, opts)
-    elseif args[1] == 'info' then
+    elseif first_arg == 'info' then
       local session_idle, session_active = api.get_session_info(opts.extend_today_to_4am)
       vim.notify(
         vim.inspect(
           session_active or vim.tbl_extend('error', session_idle, { is_tracking = false })
         )
       )
-    elseif args[1] == 'abort' then
+    elseif first_arg == 'abort' then
       api.abort_session()
       vim.notify('Session aborted')
+    elseif first_arg == 'finish' then
+      api.finish_session()
+      vim.notify('Session finished')
     else
       vim.notify(
         'Usage: :DevChronicles [all | days [start_offset [end_offset]] |'
