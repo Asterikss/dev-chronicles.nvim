@@ -22,7 +22,7 @@ M.get_dashboard_data_all = function(
   return {
     global_time = data.global_time,
     global_time_filtered = data.global_time,
-    projects_filtered_parsed = data.projects,
+    projects_filtered_parsed = next(data.projects) ~= nil and data.projects,
     time_period_str = time.get_time_period_str_months(
       time.get_month_str(data.tracking_start),
       time.get_month_str(),
@@ -69,22 +69,47 @@ M.get_dashboard_data_months = function(
 
   if start_ts > end_ts then
     vim.notify(('DevChronicles Error: start (%s) > end (%s)'):format(start_date, end_date))
-    return nil, nil
+    return
   end
+
+  local final_time_period_str = time.get_time_period_str_months(
+    start_date,
+    end_date,
+    canonical_month_str,
+    canonical_today_str,
+    show_date_period,
+    show_time,
+    time_period_str,
+    time_period_singular_str
+  )
+  local most_worked_on_project_per_month = construct_most_worked_on_project_arr and {} or nil
 
   local filtered_projects = M._filter_projects_by_period(data.projects, start_ts, end_ts)
 
   if next(filtered_projects) == nil then
-    vim.notify(
-      ('DevChronicles: no projects worked on between %s and %s'):format(start_date, end_date)
-    )
-    return
+    if construct_most_worked_on_project_arr then
+      vim.notify(tostring(end_ts))
+      vim.notify(tostring(start_ts))
+      vim.notify(tostring(math.floor(math.abs(end_ts - start_ts) / (86400 * 31))))
+      vim.notify(tostring((86400 * 31)))
+      vim.notify(tostring(math.floor(math.abs(end_ts - start_ts))))
+      local n_months_this_period = math.floor(math.abs(end_ts - start_ts) / (86400 * 31)) + 1
+      for i = 1, n_months_this_period do
+        most_worked_on_project_per_month[i] = false
+      end
+    end
+    return {
+      global_time = 0,
+      global_time_filtered = 0,
+      projects_filtered_parsed = nil,
+      time_period_str = final_time_period_str,
+    },
+      most_worked_on_project_per_month
   end
 
   ---@type chronicles.Dashboard.Stats.ParsedProjects
   local projects_filtered_parsed = {}
   local global_time_filtered = 0
-  local most_worked_on_project_per_month = construct_most_worked_on_project_arr and {} or nil
 
   local l_pointer_month, l_pointer_year = time.extract_month_year(start_date)
   local r_pointer_month, r_pointer_year = time.extract_month_year(end_date)
@@ -141,16 +166,7 @@ M.get_dashboard_data_months = function(
     global_time = data.global_time,
     global_time_filtered = global_time_filtered,
     projects_filtered_parsed = projects_filtered_parsed,
-    time_period_str = time.get_time_period_str_months(
-      start_date,
-      end_date,
-      canonical_month_str,
-      canonical_today_str,
-      show_date_period,
-      show_time,
-      time_period_str,
-      time_period_singular_str
-    ),
+    time_period_str = final_time_period_str,
   },
     most_worked_on_project_per_month
 end
@@ -194,18 +210,40 @@ M.get_dashboard_data_days = function(
     return
   end
 
+  local final_time_period_str = time.get_time_period_str_days(
+    start_offset - end_offset + 1,
+    start_str,
+    end_str,
+    canonical_today_str,
+    show_date_period,
+    show_time,
+    time_period_str,
+    time_period_singular_str
+  )
+  local most_worked_on_project_per_day = construct_most_worked_on_project_arr and {} or nil
+
   local filtered_projects =
     M._filter_projects_by_period(data.projects, start_timestamp, end_timestamp)
 
   if next(filtered_projects) == nil then
-    vim.notify(('DevChronicles: no projects worked between %s and %s'):format(start_str, end_str))
-    return
+    if construct_most_worked_on_project_arr then
+      local n_days_this_period = math.floor(math.abs(end_timestamp - start_timestamp) / DAY_SEC) + 1
+      for i = 1, n_days_this_period do
+        most_worked_on_project_per_day[i] = false
+      end
+    end
+    return {
+      global_time = 0,
+      global_time_filtered = 0,
+      projects_filtered_parsed = nil,
+      time_period_str = final_time_period_str,
+    },
+      most_worked_on_project_per_day
   end
 
   ---@type chronicles.Dashboard.Stats.ParsedProjects
   local projects_filtered_parsed = {}
   local global_time_filtered = 0
-  local most_worked_on_project_per_day = construct_most_worked_on_project_arr and {} or nil
 
   local i = 0
   for ts = start_timestamp, end_timestamp, DAY_SEC do
@@ -250,16 +288,7 @@ M.get_dashboard_data_days = function(
     global_time = data.global_time,
     global_time_filtered = global_time_filtered,
     projects_filtered_parsed = projects_filtered_parsed,
-    time_period_str = time.get_time_period_str_days(
-      start_offset - end_offset + 1,
-      start_str,
-      end_str,
-      canonical_today_str,
-      show_date_period,
-      show_time,
-      time_period_str,
-      time_period_singular_str
-    ),
+    time_period_str = final_time_period_str,
   },
     most_worked_on_project_per_day
 end

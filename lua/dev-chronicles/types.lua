@@ -55,7 +55,7 @@
 ---@class (exact) chronicles.Dashboard.Data
 ---@field global_time integer
 ---@field global_time_filtered integer
----@field projects_filtered_parsed chronicles.Dashboard.Stats.ParsedProjects
+---@field projects_filtered_parsed? chronicles.Dashboard.Stats.ParsedProjects
 ---@field time_period_str string
 
 ---@class (exact) chronicles.Dashboard.Stats
