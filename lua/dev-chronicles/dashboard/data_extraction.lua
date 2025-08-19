@@ -210,76 +210,58 @@ M.get_dashboard_data_days = function(
     return
   end
 
-  local final_time_period_str = time.get_time_period_str_days(
-    start_offset - end_offset + 1,
-    start_str,
-    end_str,
-    canonical_today_str,
-    show_date_period,
-    show_time,
-    time_period_str,
-    time_period_singular_str
-  )
-  local most_worked_on_project_per_day = construct_most_worked_on_project_arr and {} or nil
-
   local filtered_projects =
     M._filter_projects_by_period(data.projects, start_timestamp, end_timestamp)
-
-  if next(filtered_projects) == nil then
-    if construct_most_worked_on_project_arr then
-      local n_days_this_period = math.floor(math.abs(end_timestamp - start_timestamp) / DAY_SEC) + 1
-      for i = 1, n_days_this_period do
-        most_worked_on_project_per_day[i] = false
-      end
-    end
-    return {
-      global_time = 0,
-      global_time_filtered = 0,
-      projects_filtered_parsed = nil,
-      time_period_str = final_time_period_str,
-    },
-      most_worked_on_project_per_day
-  end
 
   ---@type chronicles.Dashboard.Stats.ParsedProjects
   local projects_filtered_parsed = {}
   local global_time_filtered = 0
+  local most_worked_on_project_per_day = construct_most_worked_on_project_arr and {} or nil
 
-  local i = 0
-  for ts = start_timestamp, end_timestamp, DAY_SEC do
-    i = i + 1
-    local day_max_time = 0
-    ---@type string|boolean
-    local day_max_project = false
-    local key = time.get_day_str(ts)
+  if filtered_projects then
+    local i = 0
+    for ts = start_timestamp, end_timestamp, DAY_SEC do
+      i = i + 1
+      local day_max_time = 0
+      ---@type string|boolean
+      local day_max_project = false
+      local key = time.get_day_str(ts)
 
-    for project_id, project_data in pairs(filtered_projects) do
-      local day_time = project_data.by_day[key]
-      if day_time then
-        local accum_proj_data = projects_filtered_parsed[project_id]
-        if not accum_proj_data then
-          accum_proj_data = {
-            total_time = 0,
-            last_worked = project_data.last_worked,
-            last_worked_canonical = project_data.last_worked_canonical,
-            first_worked = project_data.first_worked,
-            tags_map = project_data.tags_map,
-            total_global_time = project_data.total_time,
-          }
-          projects_filtered_parsed[project_id] = accum_proj_data
-        end
-        accum_proj_data.total_time = accum_proj_data.total_time + day_time
-        global_time_filtered = global_time_filtered + day_time
+      for project_id, project_data in pairs(filtered_projects) do
+        local day_time = project_data.by_day[key]
+        if day_time then
+          local accum_proj_data = projects_filtered_parsed[project_id]
+          if not accum_proj_data then
+            accum_proj_data = {
+              total_time = 0,
+              last_worked = project_data.last_worked,
+              last_worked_canonical = project_data.last_worked_canonical,
+              first_worked = project_data.first_worked,
+              tags_map = project_data.tags_map,
+              total_global_time = project_data.total_time,
+            }
+            projects_filtered_parsed[project_id] = accum_proj_data
+          end
+          accum_proj_data.total_time = accum_proj_data.total_time + day_time
+          global_time_filtered = global_time_filtered + day_time
 
-        if construct_most_worked_on_project_arr and day_time > day_max_time then
-          day_max_time = day_time
-          day_max_project = project_id
+          if construct_most_worked_on_project_arr and day_time > day_max_time then
+            day_max_time = day_time
+            day_max_project = project_id
+          end
         end
       end
-    end
 
-    if construct_most_worked_on_project_arr then
-      most_worked_on_project_per_day[i] = day_max_project
+      if construct_most_worked_on_project_arr then
+        most_worked_on_project_per_day[i] = day_max_project
+      end
+    end
+  end
+
+  if next(projects_filtered_parsed) == nil and construct_most_worked_on_project_arr then
+    local n_days_this_period = math.floor(math.abs(end_timestamp - start_timestamp) / DAY_SEC) + 1
+    for i = 1, n_days_this_period do
+      most_worked_on_project_per_day[i] = false
     end
   end
 
@@ -287,8 +269,17 @@ M.get_dashboard_data_days = function(
   return {
     global_time = data.global_time,
     global_time_filtered = global_time_filtered,
-    projects_filtered_parsed = projects_filtered_parsed,
-    time_period_str = final_time_period_str,
+    projects_filtered_parsed = next(projects_filtered_parsed) and projects_filtered_parsed or nil,
+    time_period_str = time.get_time_period_str_days(
+      start_offset - end_offset + 1,
+      start_str,
+      end_str,
+      canonical_today_str,
+      show_date_period,
+      show_time,
+      time_period_str,
+      time_period_singular_str
+    ),
   },
     most_worked_on_project_per_day
 end
