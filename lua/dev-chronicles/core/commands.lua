@@ -51,6 +51,12 @@ M._setup_the_command = function(opts)
     elseif first_arg == 'finish' then
       api.finish_session()
       vim.notify('Session finished')
+    elseif first_arg == 'config' then
+      if args[2] == 'default' then
+        vim.notify(vim.inspect(require('dev-chronicles.config').get_default_opts()))
+      else
+        vim.notify(vim.inspect(opts))
+      end
     else
       vim.notify(
         'Usage: :DevChronicles [all | days [start_offset [end_offset]] |'

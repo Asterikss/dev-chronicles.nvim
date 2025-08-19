@@ -282,4 +282,9 @@ function M.get_opts()
   return options
 end
 
+---@return chronicles.Options
+function M.get_default_opts()
+  return defaults
+end
+
 return M
