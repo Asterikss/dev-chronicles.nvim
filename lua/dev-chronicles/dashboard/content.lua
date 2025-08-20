@@ -43,6 +43,7 @@ end
 ---@param time_period_str string
 ---@param win_width integer
 ---@param global_time_filtered integer
+---@param does_include_curr_date boolean
 ---@param total_time_as_hours_max boolean
 ---@param total_time_as_hours_min boolean
 ---@param show_current_session_time boolean
@@ -59,6 +60,7 @@ M.set_header_lines_highlights = function(
   time_period_str,
   win_width,
   global_time_filtered,
+  does_include_curr_date,
   total_time_as_hours_max,
   total_time_as_hours_min,
   show_current_session_time,
@@ -81,7 +83,7 @@ M.set_header_lines_highlights = function(
       total_time_round_hours_above_one
     )
   )
-  if show_current_session_time and curr_session_time_seconds then
+  if show_current_session_time and curr_session_time_seconds and does_include_curr_date then
     left_header = left_header
       .. ' ('
       .. time.format_time(curr_session_time_seconds, true, false, false)

@@ -56,6 +56,7 @@
 ---@field global_time integer
 ---@field global_time_filtered integer
 ---@field projects_filtered_parsed? chronicles.Dashboard.Stats.ParsedProjects
+---@field does_include_curr_date boolean
 ---@field time_period_str string
 
 ---@class (exact) chronicles.Dashboard.Stats

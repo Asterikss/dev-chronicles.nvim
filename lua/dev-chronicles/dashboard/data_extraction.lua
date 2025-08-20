@@ -72,101 +72,87 @@ M.get_dashboard_data_months = function(
     return
   end
 
-  local final_time_period_str = time.get_time_period_str_months(
-    start_date,
-    end_date,
-    canonical_month_str,
-    canonical_today_str,
-    show_date_period,
-    show_time,
-    time_period_str,
-    time_period_singular_str
-  )
-  local most_worked_on_project_per_month = construct_most_worked_on_project_arr and {} or nil
-
   local filtered_projects = M._filter_projects_by_period(data.projects, start_ts, end_ts)
-
-  if next(filtered_projects) == nil then
-    if construct_most_worked_on_project_arr then
-      vim.notify(tostring(end_ts))
-      vim.notify(tostring(start_ts))
-      vim.notify(tostring(math.floor(math.abs(end_ts - start_ts) / (86400 * 31))))
-      vim.notify(tostring((86400 * 31)))
-      vim.notify(tostring(math.floor(math.abs(end_ts - start_ts))))
-      local n_months_this_period = math.floor(math.abs(end_ts - start_ts) / (86400 * 31)) + 1
-      for i = 1, n_months_this_period do
-        most_worked_on_project_per_month[i] = false
-      end
-    end
-    return {
-      global_time = 0,
-      global_time_filtered = 0,
-      projects_filtered_parsed = nil,
-      time_period_str = final_time_period_str,
-    },
-      most_worked_on_project_per_month
-  end
 
   ---@type chronicles.Dashboard.Stats.ParsedProjects
   local projects_filtered_parsed = {}
   local global_time_filtered = 0
+  local most_worked_on_project_per_month = construct_most_worked_on_project_arr and {} or nil
 
   local l_pointer_month, l_pointer_year = time.extract_month_year(start_date)
   local r_pointer_month, r_pointer_year = time.extract_month_year(end_date)
 
-  local i = 0
-  while true do
-    i = i + 1
-    local month_max_time = 0
-    ---@type string|boolean
-    local month_max_project = false
-    local curr_date_key = string.format('%02d.%d', l_pointer_month, l_pointer_year)
+  if filtered_projects then
+    local i = 0
+    while true do
+      i = i + 1
+      local month_max_time = 0
+      ---@type string|boolean
+      local month_max_project = false
+      local curr_date_key = string.format('%02d.%d', l_pointer_month, l_pointer_year)
 
-    for project_id, project_data in pairs(filtered_projects) do
-      local month_time = project_data.by_month[curr_date_key]
-      if month_time then
-        local filtered_project_data = projects_filtered_parsed[project_id]
-        if not filtered_project_data then
-          filtered_project_data = {
-            total_time = 0,
-            last_worked = project_data.last_worked,
-            last_worked_canonical = project_data.last_worked_canonical, -- TODO: This is not used later, remove it after fixing the types. first_worked too
-            first_worked = project_data.first_worked,
-            tags_map = project_data.tags_map,
-            total_global_time = project_data.total_time,
-          }
-          projects_filtered_parsed[project_id] = filtered_project_data
-        end
-        filtered_project_data.total_time = filtered_project_data.total_time + month_time
-        global_time_filtered = global_time_filtered + month_time
+      for project_id, project_data in pairs(filtered_projects) do
+        local month_time = project_data.by_month[curr_date_key]
+        if month_time then
+          local filtered_project_data = projects_filtered_parsed[project_id]
+          if not filtered_project_data then
+            filtered_project_data = {
+              total_time = 0,
+              last_worked = project_data.last_worked,
+              last_worked_canonical = project_data.last_worked_canonical, -- TODO: This is not used later, remove it after fixing the types. first_worked too
+              first_worked = project_data.first_worked,
+              tags_map = project_data.tags_map,
+              total_global_time = project_data.total_time,
+            }
+            projects_filtered_parsed[project_id] = filtered_project_data
+          end
+          filtered_project_data.total_time = filtered_project_data.total_time + month_time
+          global_time_filtered = global_time_filtered + month_time
 
-        if construct_most_worked_on_project_arr and month_time > month_max_time then
-          month_max_time = month_time
-          month_max_project = project_id
+          if construct_most_worked_on_project_arr and month_time > month_max_time then
+            month_max_time = month_time
+            month_max_project = project_id
+          end
         end
       end
-    end
 
-    if construct_most_worked_on_project_arr then
-      most_worked_on_project_per_month[i] = month_max_project
-    end
+      if construct_most_worked_on_project_arr then
+        most_worked_on_project_per_month[i] = month_max_project
+      end
 
-    if l_pointer_month == r_pointer_month and l_pointer_year == r_pointer_year then
-      break
-    end
+      if l_pointer_month == r_pointer_month and l_pointer_year == r_pointer_year then
+        break
+      end
 
-    l_pointer_month = l_pointer_month + 1
-    if l_pointer_month == 13 then
-      l_pointer_month = 1
-      l_pointer_year = l_pointer_year + 1
+      l_pointer_month = l_pointer_month + 1
+      if l_pointer_month == 13 then
+        l_pointer_month = 1
+        l_pointer_year = l_pointer_year + 1
+      end
+    end
+  end
+
+  if next(projects_filtered_parsed) == nil and construct_most_worked_on_project_arr then
+    for i = 1, ((r_pointer_year - l_pointer_year) * 12 + (r_pointer_month - l_pointer_month) + 1) do
+      most_worked_on_project_per_month[i] = false
     end
   end
 
   return {
     global_time = data.global_time,
     global_time_filtered = global_time_filtered,
-    projects_filtered_parsed = projects_filtered_parsed,
-    time_period_str = final_time_period_str,
+    projects_filtered_parsed = next(projects_filtered_parsed) and projects_filtered_parsed or nil,
+    does_include_curr_date = time.is_month_in_range(canonical_month_str, start_date, end_date),
+    time_period_str = time.get_time_period_str_months(
+      start_date,
+      end_date,
+      canonical_month_str,
+      canonical_today_str,
+      show_date_period,
+      show_time,
+      time_period_str,
+      time_period_singular_str
+    ),
   },
     most_worked_on_project_per_month
 end
@@ -204,6 +190,7 @@ M.get_dashboard_data_days = function(
   local end_str = time.get_previous_day(canonical_today_str, end_offset)
   local start_timestamp = time.convert_day_str_to_timestamp(start_str)
   local end_timestamp = time.convert_day_str_to_timestamp(end_str, true)
+  local canonical_today_timestamp = time.convert_day_str_to_timestamp(canonical_today_str)
 
   if start_timestamp > end_timestamp then
     vim.notify(('DevChronicles Error: start (%s) > end (%s)'):format(start_str, end_str))
@@ -270,6 +257,8 @@ M.get_dashboard_data_days = function(
     global_time = data.global_time,
     global_time_filtered = global_time_filtered,
     projects_filtered_parsed = next(projects_filtered_parsed) and projects_filtered_parsed or nil,
+    does_include_curr_date = canonical_today_timestamp >= start_timestamp
+      and canonical_today_timestamp <= end_timestamp,
     time_period_str = time.get_time_period_str_days(
       start_offset - end_offset + 1,
       start_str,
