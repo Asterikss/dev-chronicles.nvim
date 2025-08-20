@@ -48,6 +48,8 @@ M._setup_the_command = function(opts)
     elseif first_arg == 'abort' then
       api.abort_session()
       vim.notify('Session aborted')
+    elseif first_arg == 'time' then
+      require('dev-chronicles.core.panels').display_session_time()
     elseif first_arg == 'finish' then
       api.finish_session()
       vim.notify('Session finished')
@@ -69,12 +71,14 @@ M._setup_the_command = function(opts)
       local split = vim.split(cmd_line, '%s+')
       local n_splits = #split
       if n_splits == 2 then
-        return { 'all', 'days', 'months', 'info', 'abort' }
+        return { 'all', 'days', 'months', 'info', 'abort', 'time', 'config' }
       elseif n_splits == 3 then
         if split[2] == 'days' then
           return { '30' }
         elseif split[2] == 'months' then
           return { curr_month }
+        elseif split[2] == 'config' then
+          return { 'default' }
         end
       end
     end,
