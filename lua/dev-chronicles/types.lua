@@ -27,14 +27,13 @@
 ---@field canonical_ts integer
 ---@field canonical_today_str string
 ---@field canonical_month_str string
+---@field now_ts integer
 
----@class chronicles.SessionActive: chronicles.SessionIdle
+---@class chronicles.SessionActive
 ---@field project_id string
 ---@field project_name string
 ---@field start_time integer
 ---@field session_time_seconds integer
----@field session_time_str string
----@field now_ts integer
 
 ---@class (exact) chronicles.Panel.Subtype.Args
 ---@field start_offset? integer

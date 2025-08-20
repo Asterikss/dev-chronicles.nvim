@@ -14,7 +14,6 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
   local render = require('dev-chronicles.core.render')
   local PanelType = require('dev-chronicles.core.enums').PanelType
   local get_session_info = require('dev-chronicles.core.state').get_session_info
-
   local update_chronicles_data_with_curr_session =
     require('dev-chronicles.core.session_ops').update_chronicles_data_with_curr_session
 
@@ -22,7 +21,7 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
 
   local session_idle, session_active = get_session_info(opts.extend_today_to_4am)
   if session_active then
-    data = update_chronicles_data_with_curr_session(data, session_active)
+    data = update_chronicles_data_with_curr_session(data, session_active, session_idle)
   end
 
   ---@type chronicles.Panel.Data?

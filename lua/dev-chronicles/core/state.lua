@@ -35,32 +35,31 @@ end
 ---@return chronicles.SessionIdle, chronicles.SessionActive?
 M.get_session_info = function(extend_today_to_4am)
   local time = require('dev-chronicles.core.time')
-  local session_state = session
 
+  local now_ts = os.time()
   local canonical_ts, canonical_today_str =
     time.get_canonical_curr_ts_and_day_str(extend_today_to_4am)
-  local canonical_month_str = time.get_month_str(canonical_ts)
 
   ---@type chronicles.SessionIdle
   local session_idle = {
     canonical_ts = canonical_ts,
     canonical_today_str = canonical_today_str,
-    canonical_month_str = canonical_month_str,
+    canonical_month_str = time.get_month_str(canonical_ts),
+    now_ts = now_ts,
   }
 
-  if not session_state.is_tracking then
+  if not session.is_tracking then
     return session_idle, nil
   end
 
   local start_time, project_id, project_name =
-    session_state.start_time, session_state.project_id, session_state.project_name
+    session.start_time, session.project_id, session.project_name
   if not (start_time and project_id and project_name) then
     error(
       "DevChronicles Internal Error: Session's is_tracking is set to true, but its start_time or project_id is missing"
     )
   end
 
-  local now_ts = os.time()
   local session_time_seconds = now_ts - start_time
 
   ---@type chronicles.SessionActive
@@ -69,11 +68,6 @@ M.get_session_info = function(extend_today_to_4am)
     project_name = project_name,
     start_time = start_time,
     session_time_seconds = session_time_seconds,
-    session_time_str = time.format_time(session_time_seconds),
-    canonical_today_str = canonical_today_str,
-    canonical_month_str = canonical_month_str,
-    canonical_ts = canonical_ts,
-    now_ts = now_ts,
   }
 
   return session_idle, session_active

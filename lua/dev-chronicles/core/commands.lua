@@ -42,7 +42,8 @@ M._setup_the_command = function(opts)
       local session_idle, session_active = api.get_session_info(opts.extend_today_to_4am)
       vim.notify(
         vim.inspect(
-          session_active or vim.tbl_extend('error', session_idle, { is_tracking = false })
+          session_active and vim.tbl_extend('error', session_active, session_idle)
+            or vim.tbl_extend('error', session_idle, { is_tracking = false })
         )
       )
     elseif first_arg == 'abort' then

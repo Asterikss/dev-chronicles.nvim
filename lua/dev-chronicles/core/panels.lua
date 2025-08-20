@@ -1,11 +1,12 @@
 local M = {}
 
 function M.display_session_time()
+  local format_time = require('dev-chronicles.core.time').format_time
   local _, session_active = require('dev-chronicles.api').get_session_info()
 
   local lines, width
   if session_active then
-    local session_time_str = ' ' .. session_active.session_time_str .. ' '
+    local session_time_str = ' ' .. format_time(session_active.session_time_seconds) .. ' '
     local project_name = ' ' .. session_active.project_name .. ' '
     width = math.max(#session_time_str, #project_name)
 
