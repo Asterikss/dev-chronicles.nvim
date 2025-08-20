@@ -377,4 +377,20 @@ M.is_time_before_4am = function(ts)
   return tonumber(os.date('%H', ts)) <= 3
 end
 
+---@param month_str string
+---@param start_month string
+---@param end_month string
+---@return boolean
+function M.is_month_in_range(month_str, start_month, end_month)
+  local y, m = M.extract_month_year(month_str)
+  local sy, sm = M.extract_month_year(start_month)
+  local ey, em = M.extract_month_year(end_month)
+
+  local idx = y * 12 + m
+  local sidx = sy * 12 + sm
+  local eidx = ey * 12 + em
+
+  return idx >= sidx and idx <= eidx
+end
+
 return M

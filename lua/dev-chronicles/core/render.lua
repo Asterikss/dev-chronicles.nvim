@@ -13,7 +13,8 @@ M.render = function(panel_data)
     style = 'minimal',
     border = panel_data.window_border or 'rounded',
     title = panel_data.window_title,
-    title_pos = 'center',
+    title_pos = panel_data.window_title and 'center' or nil,
+    focusable = true,
   })
 
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, panel_data.lines)
@@ -38,13 +39,14 @@ M.render = function(panel_data)
     vim.api.nvim_win_close(win, true)
   end, opts)
 
+  vim.api.nvim_set_option_value('buftype', 'nofile', { buf = buf })
+  vim.api.nvim_set_option_value('bufhidden', 'wipe', { buf = buf })
+  vim.api.nvim_set_option_value('filetype', 'dev-chronicles', { buf = buf })
+  vim.api.nvim_set_option_value('modifiable', false, { buf = buf })
+  vim.api.nvim_set_option_value('readonly', true, { buf = buf })
+
   vim.api.nvim_buf_set_name(buf, 'Dev Chronicles')
-  vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
-  vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
-  vim.api.nvim_buf_set_option(buf, 'filetype', 'dev-chronicles')
-  vim.api.nvim_buf_set_option(buf, 'modifiable', false)
-  vim.api.nvim_buf_set_option(buf, 'readonly', true)
-  vim.api.nvim_win_set_cursor(win, { 2, 0 })
+  vim.api.nvim_win_set_cursor(win, { 1, 0 })
 end
 
 return M
