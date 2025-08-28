@@ -1,10 +1,12 @@
 local M = {}
 
+local notify = require('dev-chronicles.utils.notify')
+
 ---@param file_path string
 ---@return chronicles.ChroniclesData?
-M.load_data = function(file_path)
+function M.load_data(file_path)
   if vim.fn.filereadable(file_path) == 0 then
-    local current_timestamp = os.time() -- TODO: propagate from session info
+    local current_timestamp = os.time()
     return {
       global_time = 0,
       tracking_start = current_timestamp,
@@ -16,26 +18,14 @@ M.load_data = function(file_path)
 
   local ok, content = pcall(vim.fn.readfile, file_path)
   if not ok then
-    local err = 'DevChronicles Error: failed loading data from disk: Failed to read the data file'
-    vim.notify(err)
-    local f = io.open(require('dev-chronicles.config').get_opts().log_file, 'a')
-    if f then
-      f:write(err)
-      f:close()
-    end
-    return nil
+    notify.error('Failed loading data from disk: Failed to read the data file')
+    return
   end
 
   local ok_decode, data = pcall(vim.fn.json_decode, table.concat(content, '\n'))
   if not ok_decode then
-    local err = 'DevChronicles Error: failed loading data from disk: Could not decode json'
-    vim.notify(err)
-    local f = io.open(require('dev-chronicles.config').get_opts().log_file, 'a')
-    if f then
-      f:write(err)
-      f:close()
-    end
-    return nil
+    notify.error('Failed loading data from disk: Could not decode json')
+    return
   end
 
   return data
@@ -43,7 +33,7 @@ end
 
 ---@param data chronicles.ChroniclesData
 ---@param file_path string
-M.save_data = function(data, file_path)
+function M.save_data(data, file_path)
   local json_content = vim.fn.json_encode(data)
 
   -- Write to temp file first, then rename for atomic operation
@@ -52,6 +42,8 @@ M.save_data = function(data, file_path)
 
   if ok then
     vim.fn.rename(temp_file, file_path)
+  else
+    notify.error('Failed to write the data to disk')
   end
 end
 
