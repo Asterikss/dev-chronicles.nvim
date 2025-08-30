@@ -1,5 +1,7 @@
 local M = {}
 
+local notify = require('dev-chronicles.utils.notify')
+
 ---@param panel_subtype chronicles.Panel.Subtype
 ---@param data chronicles.ChroniclesData
 ---@param opts chronicles.Options
@@ -25,13 +27,20 @@ function M.dashboard(
   ---@type chronicles.Options.Dashboard.Section
   local dashboard_type_options
 
+  local start_offset = panel_subtype_args.start_offset
+  local end_offset = panel_subtype_args.end_offset
+  if (start_offset and start_offset < 0) or (end_offset and end_offset < 0) then
+    notify.warn('Both start_offset and end_offset cannot be smaller than 0')
+    return
+  end
+
   if panel_subtype == PanelSubtype.Days then
     dashboard_type_options = opts.dashboard.dashboard_days
     dashboard_stats, top_projects = dashboard_data_extraction.get_dashboard_data_days(
       data,
       session_idle.canonical_today_str,
-      panel_subtype_args.start_offset,
-      panel_subtype_args.end_offset,
+      start_offset,
+      end_offset,
       dashboard_type_options.n_by_default,
       dashboard_type_options.header.show_date_period,
       dashboard_type_options.header.show_time,
