@@ -1,7 +1,7 @@
 local M = {}
 
 ---@param opts chronicles.Options
-M.init = function(opts)
+function M.init(opts)
   math.randomseed(os.time())
   require('dev-chronicles.core.highlights').setup_highlights()
   require('dev-chronicles.core.commands').setup_commands(opts)
@@ -17,7 +17,7 @@ end
 ---@param parsed_exclude_subdirs_relative_map table<string, boolean>
 ---@param differentiate_projects_by_folder_not_path boolean
 ---@return string?, string?
-M.is_project = function(
+function M.is_project(
   cwd,
   tracked_parent_dirs,
   tracked_dirs,

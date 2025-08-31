@@ -9,7 +9,7 @@ local M = {}
 ---@param bar_header_extends_by integer
 ---@param bar_footer_extends_by integer
 ---@return chronicles.BarRepresentation
-M.construct_bar_representation = function(
+function M.construct_bar_representation(
   pattern,
   bar_width,
   bar_header_extends_by,
@@ -110,7 +110,7 @@ end
 
 ---@param bar_width integer
 ---@return chronicles.BarRepresentation
-M._construct_fallback_bar_representation = function(bar_width)
+function M._construct_fallback_bar_representation(bar_width)
   local bar_representation = {}
   local char_display_widths_entry = {}
   for i = 1, bar_width do

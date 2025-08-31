@@ -179,7 +179,7 @@ local defaults = {
 }
 
 ---@param opts? chronicles.Options
-M.setup = function(opts)
+function M.setup(opts)
   local utils = require('dev-chronicles.utils')
 
   ---@type chronicles.Options

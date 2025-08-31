@@ -24,7 +24,7 @@ M.BarLevel = {
 ---@param n_projects integer
 ---@param win_width integer
 ---@return integer, integer: n_projects_to_keep, chart_start_col
-M.calc_chart_stats = function(bar_width, bar_spacing, max_chart_width, n_projects, win_width)
+function M.calc_chart_stats(bar_width, bar_spacing, max_chart_width, n_projects, win_width)
   -- total_width = k_bars * bar_width + (k_bars - 1) * bar_spacing
   -- k_bars * bar_width + (k_bars - 1) * bar_spacing <= max_chart_width
   -- k_bars * (bar_width + bar_spacing) - bar_spacing <= max_chart_width
@@ -54,7 +54,7 @@ end
 ---@param top_projects? chronicles.Dashboard.TopProjectsArray
 ---@param top_projects_settings chronicles.Options.Dashboard.Header.TopProjects
 ---@param project_id_to_color table<string, string>
-M.set_header_lines_highlights = function(
+function M.set_header_lines_highlights(
   lines,
   highlights,
   time_period_str,
@@ -283,7 +283,7 @@ end
 ---@param projects_filtered_parsed chronicles.Dashboard.Stats.ParsedProjects
 ---@param min_proj_time_to_display_proj integer
 ---@return chronicles.Dashboard.FinalProjectData[], integer
-M.parse_projects_calc_max_time = function(projects_filtered_parsed, min_proj_time_to_display_proj)
+function M.parse_projects_calc_max_time(projects_filtered_parsed, min_proj_time_to_display_proj)
   ---@type chronicles.Dashboard.FinalProjectData[]
   local arr_projects = {}
   local max_time = 0
@@ -316,7 +316,7 @@ end
 ---@param by_last_worked boolean
 ---@param asc boolean
 ---@return chronicles.Dashboard.FinalProjectData[]
-M.sort_and_cutoff_projects = function(arr_projects, n_projects_to_keep, sort, by_last_worked, asc)
+function M.sort_and_cutoff_projects(arr_projects, n_projects_to_keep, sort, by_last_worked, asc)
   if sort then
     table.sort(arr_projects, function(a, b)
       if by_last_worked then
@@ -367,7 +367,7 @@ end
 ---@param bar_header_realized_rows_tbl string[]
 ---@param differentiate_projects_by_folder_not_path boolean
 ---@return chronicles.Dashboard.BarData[], integer, table<string, string>
-M.create_bars_data = function(
+function M.create_bars_data(
   arr_projects,
   max_time,
   max_bar_height,
@@ -457,7 +457,7 @@ end
 ---@param proj_total_time_as_hours_min boolean
 ---@param proj_total_time_round_hours_above_one boolean
 ---@param proj_global_total_time_round_hours_above_one boolean
-M.set_time_labels_above_bars = function(
+function M.set_time_labels_above_bars(
   lines,
   highlights,
   bars_data,
@@ -586,7 +586,7 @@ end
 ---@param vertical_space_for_bars integer
 ---@param bar_width integer
 ---@param win_width integer
-M.set_bars_lines_highlights = function(
+function M.set_bars_lines_highlights(
   lines,
   highlights,
   bars_data,
@@ -699,7 +699,7 @@ end
 ---@param win_width integer
 ---@param char? string
 ---@param hl_group? string
-M.set_hline_lines_highlights = function(lines, highlights, win_width, char, hl_group)
+function M.set_hline_lines_highlights(lines, highlights, win_width, char, hl_group)
   table.insert(lines, string.rep(char or '▔', win_width))
   table.insert(
     highlights,
@@ -713,7 +713,7 @@ end
 ---@param max_lines_proj_names integer
 ---@param let_proj_names_extend_bars_by_one boolean
 ---@param win_width integer
-M.set_project_names_lines_highlights = function(
+function M.set_project_names_lines_highlights(
   lines,
   highlights,
   bars_data,
@@ -771,7 +771,7 @@ M.set_project_names_lines_highlights = function(
   end
 end
 
-M.calc_max_bar_height = function(initial_max_bar_height, thresholds, max_time)
+function M.calc_max_bar_height(initial_max_bar_height, thresholds, max_time)
   for i, threshold in ipairs(thresholds) do
     if max_time < threshold * 3600 then
       return math.floor((i / (#thresholds + 1)) * initial_max_bar_height)

@@ -1,13 +1,13 @@
 local M = {}
 
 ---@param opts chronicles.Options
-M.setup_commands = function(opts)
+function M.setup_commands(opts)
   M._setup_the_command(opts)
   M._setup_autocmds(opts)
 end
 
 ---@param opts chronicles.Options
-M._setup_the_command = function(opts)
+function M._setup_the_command(opts)
   local api = require('dev-chronicles.api')
   local enums = require('dev-chronicles.core.enums')
   local curr_month = require('dev-chronicles.core.time').get_month_str()
@@ -92,7 +92,7 @@ end
 -- -@param extend_today_to_4am boolean
 -- M._setup_autocmds = function(data_file, track_days, min_session_time, extend_today_to_4am)
 ---@param opts chronicles.Options
-M._setup_autocmds = function(opts)
+function M._setup_autocmds(opts)
   local group = vim.api.nvim_create_augroup('DevChronicles', { clear = true })
 
   vim.api.nvim_create_autocmd('VimEnter', {

@@ -45,7 +45,7 @@ end
 
 ---@param extend_today_to_4am? boolean
 ---@return chronicles.SessionIdle, chronicles.SessionActive?
-M.get_session_info = function(extend_today_to_4am)
+function M.get_session_info(extend_today_to_4am)
   extend_today_to_4am = extend_today_to_4am
     or require('dev-chronicles.config').get_opts().extend_today_to_4am
   return require('dev-chronicles.core.state').get_session_info(extend_today_to_4am)
@@ -57,7 +57,7 @@ function M.start_session(opts)
   require('dev-chronicles.core.state').start_session(opts)
 end
 
-M.abort_session = function()
+function M.abort_session()
   require('dev-chronicles.core.state').abort_session()
 end
 

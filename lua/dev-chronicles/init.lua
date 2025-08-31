@@ -1,6 +1,6 @@
 local M = {}
 
-M.setup = function(opts)
+function M.setup(opts)
   require('dev-chronicles.config').setup(opts)
 end
 

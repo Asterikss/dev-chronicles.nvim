@@ -109,7 +109,7 @@ end
 ---@param top_projects? chronicles.Dashboard.TopProjectsArray
 ---@param curr_session_time? integer
 ---@return string[], table: Lines, Highlights
-M.create_dashboard_content = function(
+function M.create_dashboard_content(
   data,
   dashboard_type_opts,
   win_width,

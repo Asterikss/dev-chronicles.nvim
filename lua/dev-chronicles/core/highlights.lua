@@ -1,6 +1,6 @@
 local M = {}
 
-M.setup_highlights = function()
+function M.setup_highlights()
   local highlights = {
     DevChroniclesRed = { fg = '#ff6b6b', bold = true },
     DevChroniclesBlue = { fg = '#5F91FD', bold = true },

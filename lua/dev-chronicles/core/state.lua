@@ -8,7 +8,7 @@ local session = {
 }
 
 ---@param opts chronicles.Options
-M.start_session = function(opts)
+function M.start_session(opts)
   local project_id, project_name = require('dev-chronicles.core').is_project(
     vim.fn.getcwd(),
     opts.tracked_parent_dirs,
@@ -33,7 +33,7 @@ end
 ---truth (non-pure).
 ---@param extend_today_to_4am boolean
 ---@return chronicles.SessionIdle, chronicles.SessionActive?
-M.get_session_info = function(extend_today_to_4am)
+function M.get_session_info(extend_today_to_4am)
   local time = require('dev-chronicles.core.time')
 
   local now_ts = os.time()
@@ -73,7 +73,7 @@ M.get_session_info = function(extend_today_to_4am)
   return session_idle, session_active
 end
 
-M.abort_session = function()
+function M.abort_session()
   session.is_tracking = false
   session.start_time = nil
   session.project_id = nil

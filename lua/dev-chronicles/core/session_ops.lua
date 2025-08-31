@@ -4,7 +4,7 @@ local M = {}
 ---@param session_active chronicles.SessionActive
 ---@param session_idle chronicles.SessionIdle
 ---@return chronicles.ChroniclesData
-M.update_chronicles_data_with_curr_session = function(data, session_active, session_idle)
+function M.update_chronicles_data_with_curr_session(data, session_active, session_idle)
   local session_time_sec = session_active.session_time_seconds
   data.global_time = data.global_time + session_time_sec
 
@@ -42,7 +42,7 @@ end
 ---@param track_days boolean
 ---@param min_session_time integer
 ---@param extend_today_to_4am boolean
-M.end_session = function(data_file, track_days, min_session_time, extend_today_to_4am)
+function M.end_session(data_file, track_days, min_session_time, extend_today_to_4am)
   local state = require('dev-chronicles.core.state')
   local session_idle, session_active = state.get_session_info(extend_today_to_4am)
   if not session_active then
@@ -60,7 +60,7 @@ end
 ---@param session_active chronicles.SessionActive
 ---@param session_idle chronicles.SessionIdle
 ---@param track_days boolean
-M._record_session = function(data_file, session_active, session_idle, track_days)
+function M._record_session(data_file, session_active, session_idle, track_days)
   local data_utils = require('dev-chronicles.utils.data')
   local data = data_utils.load_data(data_file)
   if not data then

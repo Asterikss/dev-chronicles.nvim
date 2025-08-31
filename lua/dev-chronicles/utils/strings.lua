@@ -5,7 +5,7 @@ local M = {}
 ---@param project_name string
 ---@param max_width integer
 ---@return table<string>
-M.format_project_name = function(project_name, max_width)
+function M.format_project_name(project_name, max_width)
   if #project_name <= max_width then
     local project_name_parsed, _ = string.gsub(project_name, '[%-_.]', ' ')
     return { project_name_parsed }
@@ -43,7 +43,7 @@ end
 ---@param max_width integer
 ---@param n_splits integer
 ---@return table<string>
-M._split_string_given_max_width = function(project_name, max_width, n_splits)
+function M._split_string_given_max_width(project_name, max_width, n_splits)
   local ret = {}
 
   for i = 1, n_splits do
@@ -66,7 +66,7 @@ end
 ---Split the project name by `_`, `-`, and `.`
 ---@param project_name string
 ---@return table<string>
-M._separate_project_name = function(project_name)
+function M._separate_project_name(project_name)
   local result = {}
   for part in string.gmatch(project_name, '([^' .. '-_.' .. ']+)') do
     table.insert(result, part)
@@ -82,7 +82,7 @@ end
 ---@param i integer
 ---@param j integer
 ---@return string
-M.str_sub = function(str, i, j)
+function M.str_sub(str, i, j)
   local length = vim.str_utfindex(str)
   if i < 0 then
     i = i + length + 1
@@ -103,7 +103,7 @@ end
 ---Extract project name from its id
 ---@param project_id string
 ---@return string
-M.get_project_name = function(project_id)
+function M.get_project_name(project_id)
   return project_id:match('([^/]+)/?$') or project_id
 end
 

@@ -8,7 +8,7 @@ local M = {}
 ---@param show_time boolean
 ---@param time_period_str? string
 ---@param time_period_singular_str? string
-M.get_dashboard_data_all = function(
+function M.get_dashboard_data_all(
   data,
   canonical_month_str,
   canonical_today_str,
@@ -47,7 +47,7 @@ end
 ---@param time_period_singular_str? string
 ---@param construct_most_worked_on_project_arr boolean
 ---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
-M.get_dashboard_data_months = function(
+function M.get_dashboard_data_months(
   data,
   canonical_month_str,
   canonical_today_str,
@@ -168,7 +168,7 @@ end
 ---@param time_period_singular_str? string
 ---@param construct_most_worked_on_project_arr boolean
 ---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
-M.get_dashboard_data_days = function(
+function M.get_dashboard_data_days(
   data,
   canonical_today_str,
   start_offset,
@@ -278,7 +278,7 @@ end
 ---@param start_ts integer
 ---@param end_ts integer
 ---@return table<string, chronicles.ChroniclesData.ProjectData>
-M._filter_projects_by_period = function(projects, start_ts, end_ts)
+function M._filter_projects_by_period(projects, start_ts, end_ts)
   local filtered_projects = {}
   for project_id, project_data in pairs(projects) do
     if project_data.first_worked <= end_ts and project_data.last_worked_canonical >= start_ts then
