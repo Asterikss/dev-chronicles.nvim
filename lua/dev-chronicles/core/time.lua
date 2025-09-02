@@ -94,6 +94,13 @@ function M.get_month_str(timestamp)
   return os.date('%m.%Y', timestamp)
 end
 
+---@param timestamp? integer
+---@return string
+function M.get_year_str(timestamp)
+  ---@type string
+  return os.date('%Y', timestamp)
+end
+
 ---Accepts a day-month-year string in format: 'DD.MM.YYYY' and extracts day,
 ---month, and year from it, turning them to integers.
 ---@param day_month_year_str string Date in format: 'DD.MM.YYYY'

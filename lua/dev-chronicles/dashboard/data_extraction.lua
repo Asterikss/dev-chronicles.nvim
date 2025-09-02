@@ -37,7 +37,7 @@ function M.get_dashboard_data_all(
 end
 
 ---@param data chronicles.ChroniclesData
----@param canonical_month_str string
+---@param session_idle chronicles.SessionIdle
 ---@param start_date? string
 ---@param end_date? string
 ---@param n_months_by_default integer
@@ -49,8 +49,7 @@ end
 ---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
 function M.get_dashboard_data_months(
   data,
-  canonical_month_str,
-  canonical_today_str,
+  session_idle,
   start_date,
   end_date,
   n_months_by_default,
@@ -62,8 +61,10 @@ function M.get_dashboard_data_months(
 )
   local time = require('dev-chronicles.core.time')
 
-  start_date = start_date or time.get_previous_month(canonical_month_str, n_months_by_default - 1)
-  end_date = end_date or canonical_month_str
+  start_date = start_date
+    or time.get_previous_month(session_idle.canonical_month_str, n_months_by_default - 1)
+  end_date = end_date or session_idle.canonical_month_str
+
   local start_ts = time.convert_month_str_to_timestamp(start_date)
   local end_ts = time.convert_month_str_to_timestamp(end_date, true)
 
@@ -89,10 +90,14 @@ function M.get_dashboard_data_months(
       local month_max_time = 0
       ---@type string|boolean
       local month_max_project = false
-      local curr_date_key = string.format('%02d.%d', l_pointer_month, l_pointer_year)
+
+      local year_str = string.format('%d', l_pointer_year)
+      local month_str = string.format('%02d.%d', l_pointer_month, l_pointer_year)
 
       for project_id, project_data in pairs(filtered_projects) do
-        local month_time = project_data.by_month[curr_date_key]
+        local month_time = project_data.by_year[year_str]
+          and project_data.by_year[year_str].by_month[month_str]
+
         if month_time then
           local filtered_project_data = projects_filtered_parsed[project_id]
           if not filtered_project_data then
@@ -142,12 +147,16 @@ function M.get_dashboard_data_months(
     global_time = data.global_time,
     global_time_filtered = global_time_filtered,
     projects_filtered_parsed = next(projects_filtered_parsed) and projects_filtered_parsed or nil,
-    does_include_curr_date = time.is_month_in_range(canonical_month_str, start_date, end_date),
+    does_include_curr_date = time.is_month_in_range(
+      session_idle.canonical_month_str,
+      start_date,
+      end_date
+    ),
     time_period_str = time.get_time_period_str_months(
       start_date,
       end_date,
-      canonical_month_str,
-      canonical_today_str,
+      session_idle.canonical_month_str,
+      session_idle.canonical_today_str,
       show_date_period,
       show_time,
       time_period_str,

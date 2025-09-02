@@ -63,8 +63,7 @@ function M.dashboard(
     dashboard_type_options = opts.dashboard.dashboard_months
     dashboard_stats, top_projects = dashboard_data_extraction.get_dashboard_data_months(
       data,
-      session_idle.canonical_month_str,
-      session_idle.canonical_today_str,
+      session_idle,
       panel_subtype_args.start_date,
       panel_subtype_args.end_date,
       dashboard_type_options.n_by_default,
@@ -75,7 +74,7 @@ function M.dashboard(
       dashboard_type_options.header.top_projects.enable
     )
   else
-    vim.notify('Unrecognised panel subtype for dashboard: ' .. panel_subtype)
+    notify.warn('Unrecognised panel subtype for a dashboard: ' .. panel_subtype)
     return
   end
 

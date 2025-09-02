@@ -27,6 +27,7 @@
 ---@field canonical_ts integer
 ---@field canonical_today_str string
 ---@field canonical_month_str string
+---@field canonical_year_str string
 ---@field now_ts integer
 
 ---@class chronicles.SessionActive
@@ -85,7 +86,7 @@
 
 ---@class (exact) chronicles.ChroniclesData.ProjectData
 ---@field total_time integer
----@field by_month table<string, number>
+---@field by_year table<string, {by_month: table<string, number>, total_time: integer}>
 ---@field by_day table<string, number>
 ---@field first_worked integer
 ---@field last_worked integer

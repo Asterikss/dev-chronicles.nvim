@@ -45,6 +45,7 @@ function M.get_session_info(extend_today_to_4am)
     canonical_ts = canonical_ts,
     canonical_today_str = canonical_today_str,
     canonical_month_str = time.get_month_str(canonical_ts),
+    canonical_year_str = time.get_year_str(canonical_ts),
     now_ts = now_ts,
   }
 
