@@ -23,7 +23,7 @@
 ---@field start_time? integer
 ---@field is_tracking boolean
 
----@class chronicles.SessionIdle
+---@class chronicles.SessionBase
 ---@field canonical_ts integer
 ---@field canonical_today_str string
 ---@field canonical_month_str string

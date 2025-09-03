@@ -2,17 +2,17 @@ local M = {}
 
 ---@param data chronicles.ChroniclesData
 ---@param session_active chronicles.SessionActive
----@param session_idle chronicles.SessionIdle
+---@param session_base chronicles.SessionBase
 ---@return chronicles.ChroniclesData
-function M.update_chronicles_data_with_curr_session(data, session_active, session_idle)
+function M.update_chronicles_data_with_curr_session(data, session_active, session_base)
   local session_time_sec = session_active.session_time_seconds
   data.global_time = data.global_time + session_time_sec
 
-  local now_ts = session_idle.now_ts
-  local canonical_ts = session_idle.canonical_ts
-  local today_key = session_idle.canonical_today_str
-  local curr_month_key = session_idle.canonical_month_str
-  local curr_year_key = session_idle.canonical_year_str
+  local now_ts = session_base.now_ts
+  local canonical_ts = session_base.canonical_ts
+  local today_key = session_base.canonical_today_str
+  local curr_month_key = session_base.canonical_month_str
+  local curr_year_key = session_base.canonical_year_str
   local current_project = data.projects[session_active.project_id]
 
   if not current_project then
@@ -57,13 +57,13 @@ end
 ---@param extend_today_to_4am boolean
 function M.end_session(data_file, track_days, min_session_time, extend_today_to_4am)
   local state = require('dev-chronicles.core.state')
-  local session_idle, session_active = state.get_session_info(extend_today_to_4am)
+  local session_base, session_active = state.get_session_info(extend_today_to_4am)
   if not session_active then
     return
   end
 
   if session_active.session_time_seconds >= min_session_time then
-    M._record_session(data_file, session_active, session_idle, track_days)
+    M._record_session(data_file, session_active, session_base, track_days)
   end
 
   state.abort_session()
@@ -71,9 +71,9 @@ end
 
 ---@param data_file string
 ---@param session_active chronicles.SessionActive
----@param session_idle chronicles.SessionIdle
+---@param session_base chronicles.SessionBase
 ---@param track_days boolean
-function M._record_session(data_file, session_active, session_idle, track_days)
+function M._record_session(data_file, session_active, session_base, track_days)
   local data_utils = require('dev-chronicles.utils.data')
   local data = data_utils.load_data(data_file)
   if not data then
@@ -83,11 +83,11 @@ function M._record_session(data_file, session_active, session_idle, track_days)
     return
   end
 
-  local end_ts = session_idle.now_ts
-  local canonical_end_ts = session_idle.canonical_ts
-  local today_key = session_idle.canonical_today_str
-  local month_key = session_idle.canonical_month_str
-  local year_key = session_idle.canonical_year_str
+  local end_ts = session_base.now_ts
+  local canonical_end_ts = session_base.canonical_ts
+  local today_key = session_base.canonical_today_str
+  local month_key = session_base.canonical_month_str
+  local year_key = session_base.canonical_year_str
   local duration_sec = session_active.session_time_seconds
   local project_id = session_active.project_id
 

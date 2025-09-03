@@ -6,7 +6,7 @@ local notify = require('dev-chronicles.utils.notify')
 ---@param data chronicles.ChroniclesData
 ---@param opts chronicles.Options
 ---@param panel_subtype_args chronicles.Panel.Subtype.Args
----@param session_idle chronicles.SessionIdle
+---@param session_base chronicles.SessionBase
 ---@param session_time_seconds? integer
 ---@return chronicles.Panel.Data?
 function M.dashboard(
@@ -14,7 +14,7 @@ function M.dashboard(
   data,
   opts,
   panel_subtype_args,
-  session_idle,
+  session_base,
   session_time_seconds
 )
   local dashboard_data_extraction = require('dev-chronicles.dashboard.data_extraction')
@@ -38,7 +38,7 @@ function M.dashboard(
     dashboard_type_options = opts.dashboard.dashboard_days
     dashboard_stats, top_projects = dashboard_data_extraction.get_dashboard_data_days(
       data,
-      session_idle.canonical_today_str,
+      session_base.canonical_today_str,
       start_offset,
       end_offset,
       dashboard_type_options.n_by_default,
@@ -52,8 +52,8 @@ function M.dashboard(
     dashboard_type_options = opts.dashboard.dashboard_all
     dashboard_stats = dashboard_data_extraction.get_dashboard_data_all(
       data,
-      session_idle.canonical_month_str,
-      session_idle.canonical_today_str,
+      session_base.canonical_month_str,
+      session_base.canonical_today_str,
       dashboard_type_options.header.show_date_period,
       dashboard_type_options.header.show_time,
       dashboard_type_options.header.time_period_str,
@@ -63,7 +63,7 @@ function M.dashboard(
     dashboard_type_options = opts.dashboard.dashboard_months
     dashboard_stats, top_projects = dashboard_data_extraction.get_dashboard_data_months(
       data,
-      session_idle,
+      session_base,
       panel_subtype_args.start_date,
       panel_subtype_args.end_date,
       dashboard_type_options.n_by_default,

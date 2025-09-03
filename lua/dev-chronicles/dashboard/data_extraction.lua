@@ -1,5 +1,7 @@
 local M = {}
 
+local time = require('dev-chronicles.core.time')
+
 -- TODO: return type
 ---@param data chronicles.ChroniclesData
 ---@param canonical_month_str string
@@ -17,8 +19,6 @@ function M.get_dashboard_data_all(
   time_period_str,
   time_period_singular_str
 )
-  local time = require('dev-chronicles.core.time')
-
   return {
     global_time = data.global_time,
     global_time_filtered = data.global_time,
@@ -37,7 +37,7 @@ function M.get_dashboard_data_all(
 end
 
 ---@param data chronicles.ChroniclesData
----@param session_idle chronicles.SessionIdle
+---@param session_base chronicles.SessionBase
 ---@param start_date? string
 ---@param end_date? string
 ---@param n_months_by_default integer
@@ -49,7 +49,7 @@ end
 ---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
 function M.get_dashboard_data_months(
   data,
-  session_idle,
+  session_base,
   start_date,
   end_date,
   n_months_by_default,
@@ -59,11 +59,9 @@ function M.get_dashboard_data_months(
   time_period_singular_str,
   construct_most_worked_on_project_arr
 )
-  local time = require('dev-chronicles.core.time')
-
   start_date = start_date
-    or time.get_previous_month(session_idle.canonical_month_str, n_months_by_default - 1)
-  end_date = end_date or session_idle.canonical_month_str
+    or time.get_previous_month(session_base.canonical_month_str, n_months_by_default - 1)
+  end_date = end_date or session_base.canonical_month_str
 
   local start_ts = time.convert_month_str_to_timestamp(start_date)
   local end_ts = time.convert_month_str_to_timestamp(end_date, true)
@@ -148,15 +146,15 @@ function M.get_dashboard_data_months(
     global_time_filtered = global_time_filtered,
     projects_filtered_parsed = next(projects_filtered_parsed) and projects_filtered_parsed or nil,
     does_include_curr_date = time.is_month_in_range(
-      session_idle.canonical_month_str,
+      session_base.canonical_month_str,
       start_date,
       end_date
     ),
     time_period_str = time.get_time_period_str_months(
       start_date,
       end_date,
-      session_idle.canonical_month_str,
-      session_idle.canonical_today_str,
+      session_base.canonical_month_str,
+      session_base.canonical_today_str,
       show_date_period,
       show_time,
       time_period_str,
@@ -189,8 +187,6 @@ function M.get_dashboard_data_days(
   time_period_singular_str,
   construct_most_worked_on_project_arr
 )
-  local time = require('dev-chronicles.core.time')
-
   start_offset = start_offset or n_days_by_default - 1
   end_offset = end_offset or 0
 

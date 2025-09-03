@@ -39,11 +39,11 @@ function M._setup_the_command(opts)
     elseif first_arg == 'week' then
       api.panel(enums.PanelType.Dashboard, enums.PanelSubtype.Days, { start_offset = 6 }, opts)
     elseif first_arg == 'info' then
-      local session_idle, session_active = api.get_session_info(opts.extend_today_to_4am)
+      local session_base, session_active = api.get_session_info(opts.extend_today_to_4am)
       vim.notify(
         vim.inspect(
-          session_active and vim.tbl_extend('error', session_active, session_idle)
-            or vim.tbl_extend('error', session_idle, { is_tracking = false })
+          session_active and vim.tbl_extend('error', session_active, session_base)
+            or vim.tbl_extend('error', session_base, { is_tracking = false })
         )
       )
     elseif first_arg == 'abort' then

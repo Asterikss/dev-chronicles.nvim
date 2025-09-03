@@ -19,9 +19,9 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
 
   panel_subtype_args = panel_subtype_args or {}
 
-  local session_idle, session_active = get_session_info(opts.extend_today_to_4am)
+  local session_base, session_active = get_session_info(opts.extend_today_to_4am)
   if session_active then
-    data = update_chronicles_data_with_curr_session(data, session_active, session_idle)
+    data = update_chronicles_data_with_curr_session(data, session_active, session_base)
   end
 
   ---@type chronicles.Panel.Data?
@@ -33,7 +33,7 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
       data,
       opts,
       panel_subtype_args,
-      session_idle,
+      session_base,
       session_active and session_active.session_time_seconds
     )
   end
@@ -44,7 +44,7 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
 end
 
 ---@param extend_today_to_4am? boolean
----@return chronicles.SessionIdle, chronicles.SessionActive?
+---@return chronicles.SessionBase, chronicles.SessionActive?
 function M.get_session_info(extend_today_to_4am)
   extend_today_to_4am = extend_today_to_4am
     or require('dev-chronicles.config').get_opts().extend_today_to_4am

@@ -26,13 +26,14 @@ function M.start_session(opts)
   end
 end
 
----Return values mimic a tagged union: the first value is always a
----`chronicles.SessionIdle`; the second value is a `chronicles.SessionActive`
----if a session is currently being tracked, otherwise it is `nil`. This is done
----to avoid billions of if checks everywhere. This function is the global source of
----truth (non-pure).
+---The first return value (`SessionBase`) is always present and provides the
+---baseline context (needed for both displaying and saving data). The second
+---return value (`SessionActive`) is present only if a session is currently
+---being tracked; it is also used for both displaying and saving. If it is
+---`nil`, no session data will be saved. This approach is used to avoid billions of if
+---checks. This function is the global source of truth (non-pure).
 ---@param extend_today_to_4am boolean
----@return chronicles.SessionIdle, chronicles.SessionActive?
+---@return chronicles.SessionBase, chronicles.SessionActive?
 function M.get_session_info(extend_today_to_4am)
   local time = require('dev-chronicles.core.time')
 
@@ -40,8 +41,8 @@ function M.get_session_info(extend_today_to_4am)
   local canonical_ts, canonical_today_str =
     time.get_canonical_curr_ts_and_day_str(extend_today_to_4am)
 
-  ---@type chronicles.SessionIdle
-  local session_idle = {
+  ---@type chronicles.SessionBase
+  local session_base = {
     canonical_ts = canonical_ts,
     canonical_today_str = canonical_today_str,
     canonical_month_str = time.get_month_str(canonical_ts),
@@ -50,7 +51,7 @@ function M.get_session_info(extend_today_to_4am)
   }
 
   if not session.is_tracking then
-    return session_idle, nil
+    return session_base, nil
   end
 
   local start_time, project_id, project_name =
@@ -71,7 +72,7 @@ function M.get_session_info(extend_today_to_4am)
     session_time_seconds = session_time_seconds,
   }
 
-  return session_idle, session_active
+  return session_base, session_active
 end
 
 function M.abort_session()
