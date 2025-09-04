@@ -15,6 +15,8 @@ function M.setup_highlights()
     DevChroniclesTime = { fg = '#dddddd', bold = true },
     DevChroniclesGrayedOut = { fg = '#606065', bold = true },
     DevChroniclesLightGray = { fg = '#d3d3d3', bold = true },
+    DevChroniclesWindowBG = { bg = '#100E18' },
+    DevChroniclesWindowTile = { bg = '#FFC0CB' },
   }
 
   for name, opts in pairs(highlights) do

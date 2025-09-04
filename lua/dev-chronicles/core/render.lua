@@ -17,6 +17,12 @@ function M.render(panel_data)
     focusable = true,
   })
 
+  vim.api.nvim_set_option_value(
+    'winhighlight',
+    'NormalFloat:DevChroniclesWindowBG,FloatBorder:DevChroniclesLightGray,FloatTitle:DevChroniclesLightGray',
+    { win = win }
+  )
+
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, panel_data.lines)
 
   local ns_id = vim.api.nvim_create_namespace('dev_chronicles_dashboard')
