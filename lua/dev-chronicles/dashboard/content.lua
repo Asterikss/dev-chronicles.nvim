@@ -39,7 +39,7 @@ end
 
 ---Adds 4 line header
 ---@param lines string[]
----@param highlights table<integer>
+---@param highlights chronicles.Highlight[]
 ---@param time_period_str string
 ---@param win_width integer
 ---@param global_time_filtered integer
@@ -446,7 +446,7 @@ end
 
 --- If global_time_line is set, then it overrides 3rd lines line
 ---@param lines string[]
----@param highlights table<integer>
+---@param highlights chronicles.Highlight[]
 ---@param bars_data chronicles.Dashboard.BarData[]
 ---@param win_width integer
 ---@param color_proj_times_like_bars boolean
@@ -578,7 +578,7 @@ function M.set_time_labels_above_bars(
 end
 
 ---@param lines string[]
----@param highlights table<string, any>[]
+---@param highlights chronicles.Highlight[]
 ---@param bars_data chronicles.Dashboard.BarData[]
 ---@param bar_representation chronicles.BarRepresentation
 ---@param bar_header_extends_by integer
@@ -695,7 +695,7 @@ function M.set_bars_lines_highlights(
 end
 
 ---@param lines string[]
----@param highlights table<integer>
+---@param highlights chronicles.Highlight[]
 ---@param win_width integer
 ---@param char? string
 ---@param hl_group? string
@@ -708,7 +708,7 @@ function M.set_hline_lines_highlights(lines, highlights, win_width, char, hl_gro
 end
 
 ---@param lines string[]
----@param highlights string[]
+---@param highlights chronicles.Highlight[]
 ---@param bars_data chronicles.Dashboard.BarData[]
 ---@param max_lines_proj_names integer
 ---@param let_proj_names_extend_bars_by_one boolean

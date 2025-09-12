@@ -55,6 +55,10 @@ function M.get_window_dimensions(screen_width_percent, screen_height_percent)
   }
 end
 
+---@param lines string[]
+---@param highlights chronicles.Highlight[]
+---@param win_width integer
+---@param win_height integer
 function M.set_no_data_mess_lines_highlights(lines, highlights, win_width, win_height)
   local message = {
     '▀███▀▀▀███                             ██                                      ▄█▀▀▀█▄ ',

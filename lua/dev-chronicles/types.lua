@@ -120,10 +120,16 @@
 
 ---@class chronicles.Panel.Data
 ---@field lines string[]
----@field highlights table
+---@field highlights chronicles.Highlight
 ---@field window_dimensions chronicles.WindowDimensions
 ---@field window_title? string
 ---@field window_border? string[]
+
+---@class chronicles.Highlight
+---@field line integer
+---@field col integer
+---@field end_col integer
+---@field hl_group string
 
 -- --------------------------------------------
 -- Plugin Configuration Types
