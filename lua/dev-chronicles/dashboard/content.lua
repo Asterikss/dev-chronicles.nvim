@@ -249,24 +249,24 @@ function M.set_header_lines_highlights(
     line = 1,
     col = 0,
     end_col = left_header_bytes,
-    hl_group = 'DevChroniclesTitle',
+    hl_group = 'DevChroniclesAccent',
   })
   table.insert(highlights, {
     line = 1,
     col = right_header_highlight_start_col,
     end_col = -1,
-    hl_group = 'DevChroniclesTitle',
+    hl_group = 'DevChroniclesAccent',
   })
   if prettify then
     table.insert(
       highlights,
-      { line = 2, col = 0, end_col = decorator_left_bytes, hl_group = 'DevChroniclesTitle' }
+      { line = 2, col = 0, end_col = decorator_left_bytes, hl_group = 'DevChroniclesAccent' }
     )
     table.insert(highlights, {
       line = 2,
       col = decorator_right_highlight_start_col,
       end_col = -1,
-      hl_group = 'DevChroniclesTitle',
+      hl_group = 'DevChroniclesAccent',
     })
   end
 
@@ -274,7 +274,7 @@ function M.set_header_lines_highlights(
   lines[2] = header_line2
   lines[3] = ''
 
-  M.set_hline_lines_highlights(lines, highlights, win_width, '─', 'DevChroniclesTitle')
+  M.set_hline_lines_highlights(lines, highlights, win_width, '─', 'DevChroniclesAccent')
 end
 
 ---Parse projects into an array, so that it can be sorted and traversed in
@@ -560,7 +560,7 @@ function M.set_time_labels_above_bars(
       line = global_time_line_number,
       col = 0,
       end_col = -1,
-      hl_group = 'DevChroniclesLabel',
+      hl_group = 'DevChroniclesGlobalProjectTime',
     })
   end
 
@@ -570,7 +570,7 @@ function M.set_time_labels_above_bars(
       line = highlights_insert_positon,
       col = 0,
       end_col = -1,
-      hl_group = 'DevChroniclesTime',
+      hl_group = 'DevChroniclesProjectTime',
     })
   end
 
@@ -703,7 +703,12 @@ function M.set_hline_lines_highlights(lines, highlights, win_width, char, hl_gro
   table.insert(lines, string.rep(char or '▔', win_width))
   table.insert(
     highlights,
-    { line = #lines, col = 0, end_col = -1, hl_group = hl_group or 'DevChroniclesLabel' }
+    {
+      line = #lines,
+      col = 0,
+      end_col = -1,
+      hl_group = hl_group or 'DevChroniclesGlobalProjectTime',
+    }
   )
 end
 

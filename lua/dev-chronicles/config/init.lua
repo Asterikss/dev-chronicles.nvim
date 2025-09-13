@@ -127,6 +127,15 @@ local defaults = {
       window_border = { '╳', '━', '╳', '┃', '╳', '━', '╳', '┃' },
     }),
   },
+  highlights = {
+    DevChroniclesAccent = { fg = '#ffffff', bold = true },
+    DevChroniclesProjectTime = { fg = '#dddddd', bold = true },
+    DevChroniclesGlobalProjectTime = { fg = '#b2bec3', bold = true },
+    DevChroniclesGrayedOut = { fg = '#606065', bold = true },
+    DevChroniclesLightGray = { fg = '#d3d3d3', bold = true },
+    DevChroniclesWindowBG = { bg = '#100E18' },
+    DevChroniclesWindowTile = { bg = '#FFC0CB' },
+  },
   for_dev_start_time = nil,
   parsed_exclude_subdirs_relative_map = nil,
   extra_default_dashboard_bar_chars = {
@@ -269,6 +278,10 @@ function M.setup(opts)
       'DevChronicles setup error: dashboard.default_n_last_days_shown cannot be grater than 30 and smaller than 1. Setting it to 30'
     )
     merged.dashboard.dashboard_days.n_by_default = 30
+  end
+
+  for hl_name, hl_opts in pairs(merged.highlights) do
+    vim.api.nvim_set_hl(0, hl_name, hl_opts)
   end
 
   ---@type chronicles.Options

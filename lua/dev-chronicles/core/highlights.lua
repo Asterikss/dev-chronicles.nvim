@@ -10,13 +10,6 @@ function M.setup_highlights()
     DevChroniclesPurple = { fg = '#6c5ce7', bold = true },
     DevChroniclesOrange = { fg = '#ffa500', bold = true },
     DevChroniclesLightPurple = { fg = '#a29bfe', bold = true },
-    DevChroniclesTitle = { fg = '#ffffff', bold = true },
-    DevChroniclesLabel = { fg = '#b2bec3', bold = false },
-    DevChroniclesTime = { fg = '#dddddd', bold = true },
-    DevChroniclesGrayedOut = { fg = '#606065', bold = true },
-    DevChroniclesLightGray = { fg = '#d3d3d3', bold = true },
-    DevChroniclesWindowBG = { bg = '#100E18' },
-    DevChroniclesWindowTile = { bg = '#FFC0CB' },
   }
 
   for name, opts in pairs(colors) do

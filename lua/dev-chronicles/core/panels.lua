@@ -29,7 +29,7 @@ function M.display_session_time()
       line = i,
       col = 0,
       end_col = -1,
-      hl_group = 'DevChroniclesTitle',
+      hl_group = 'DevChroniclesAccent',
     }
   end
 
