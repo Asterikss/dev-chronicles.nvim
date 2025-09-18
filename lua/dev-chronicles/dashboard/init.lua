@@ -128,7 +128,8 @@ function M.create_dashboard_content(
 
   local dashboard_content = require('dev-chronicles.dashboard.content')
 
-  if data.projects_filtered_parsed == nil then
+  local arr_projects = data.final_project_data_arr
+  if arr_projects == nil then
     dashboard_content.set_header_lines_highlights(
       lines,
       highlights,
@@ -167,16 +168,19 @@ function M.create_dashboard_content(
   local vertical_space_for_bars = chart_height - 3 -- projects_time + gap 1 + chart floor
   local max_bar_height = vertical_space_for_bars
 
-  local arr_projects, max_time = dashboard_content.parse_projects_calc_max_time(
-    data.projects_filtered_parsed,
-    dashboard_type_opts.min_proj_time_to_display_proj
-  )
+  if dashboard_type_opts.min_proj_time_to_display_proj > 0 then
+    arr_projects = dashboard_content.filter_by_min_time(
+      arr_projects,
+      dashboard_type_opts.min_proj_time_to_display_proj
+    )
+  end
+  local len_arr_projects = #arr_projects
 
   local n_projects_to_keep, chart_start_col = dashboard_content.calc_chart_stats(
     dashboard_opts.bar_width,
     dashboard_opts.bar_spacing,
     max_chart_width,
-    #arr_projects,
+    len_arr_projects,
     win_width
   )
 
@@ -192,7 +196,7 @@ function M.create_dashboard_content(
     max_bar_height = dashboard_content.calc_max_bar_height(
       vertical_space_for_bars,
       dashboard_type_opts.dynamic_bar_height_thresholds,
-      max_time
+      data.max_project_time
     )
   end
 
@@ -210,7 +214,7 @@ function M.create_dashboard_content(
   ---@type chronicles.Dashboard.BarData[], integer, table<string, string>
   local bars_data, max_lines_proj_names, project_id_to_color = dashboard_content.create_bars_data(
     arr_projects,
-    max_time,
+    data.max_project_time,
     max_bar_height,
     chart_start_col,
     dashboard_opts.bar_width,

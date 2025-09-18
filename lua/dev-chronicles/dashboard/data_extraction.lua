@@ -1,6 +1,7 @@
 local M = {}
 
 local time = require('dev-chronicles.core.time')
+local notify = require('dev-chronicles.utils.notify')
 
 -- TODO: return type
 ---@param data chronicles.ChroniclesData
@@ -67,7 +68,7 @@ function M.get_dashboard_data_months(
   local end_ts = time.convert_month_str_to_timestamp(end_date, true)
 
   if start_ts > end_ts then
-    vim.notify(('DevChronicles Error: start (%s) > end (%s)'):format(start_date, end_date))
+    notify.warn(('DevChronicles Error: start (%s) > end (%s)'):format(start_date, end_date))
     return
   end
 
@@ -198,15 +199,19 @@ function M.get_dashboard_data_days(
   local canonical_today_timestamp = time.convert_day_str_to_timestamp(canonical_today_str)
 
   if start_timestamp > end_timestamp then
-    vim.notify(('DevChronicles Error: start (%s) > end (%s)'):format(start_str, end_str))
+    notify.warn(('DevChronicles Error: start (%s) > end (%s)'):format(start_str, end_str))
     return
   end
 
   local filtered_projects =
     M._filter_projects_by_period(data.projects, start_timestamp, end_timestamp)
 
-  ---@type chronicles.Dashboard.Stats.ParsedProjects
+  ---@type chronicles.Dashboard.FinalProjectDataMap
   local projects_filtered_parsed = {}
+  ---@type chronicles.Dashboard.FinalProjectData[]
+  local arr_projects = {}
+  local len_arr_projects = 0
+  local max_project_time = 0
   local global_time_filtered = 0
   local most_worked_on_project_per_day = construct_most_worked_on_project_arr and {} or nil
 
@@ -225,17 +230,21 @@ function M.get_dashboard_data_days(
           local accum_proj_data = projects_filtered_parsed[project_id]
           if not accum_proj_data then
             accum_proj_data = {
+              id = project_id,
               total_time = 0,
               last_worked = project_data.last_worked,
               last_worked_canonical = project_data.last_worked_canonical,
               first_worked = project_data.first_worked,
               tags_map = project_data.tags_map,
-              total_global_time = project_data.total_time,
+              global_time = project_data.total_time,
             }
             projects_filtered_parsed[project_id] = accum_proj_data
+            len_arr_projects = len_arr_projects + 1
+            arr_projects[len_arr_projects] = accum_proj_data
           end
           accum_proj_data.total_time = accum_proj_data.total_time + day_time
           global_time_filtered = global_time_filtered + day_time
+          max_project_time = math.max(max_project_time, accum_proj_data.total_time)
 
           if construct_most_worked_on_project_arr and day_time > day_max_time then
             day_max_time = day_time
@@ -261,7 +270,8 @@ function M.get_dashboard_data_days(
   return {
     global_time = data.global_time,
     global_time_filtered = global_time_filtered,
-    projects_filtered_parsed = next(projects_filtered_parsed) and projects_filtered_parsed or nil,
+    final_project_data_arr = next(arr_projects) and arr_projects or nil,
+    max_project_time = max_project_time,
     does_include_curr_date = canonical_today_timestamp >= start_timestamp
       and canonical_today_timestamp <= end_timestamp,
     time_period_str = time.get_time_period_str_days(

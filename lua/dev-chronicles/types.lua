@@ -50,12 +50,15 @@
 ---@field tags_map table<string, any>
 ---@field total_global_time integer?
 
+---@alias chronicles.Dashboard.FinalProjectDataMap table<string, chronicles.Dashboard.FinalProjectData>
+
 ---@alias chronicles.Dashboard.Stats.ParsedProjects table<string, chronicles.Dashboard.Stats.ParsedProjectData>
 
 ---@class (exact) chronicles.Dashboard.Data
 ---@field global_time integer
 ---@field global_time_filtered integer
----@field projects_filtered_parsed? chronicles.Dashboard.Stats.ParsedProjects
+---@field final_project_data_arr? chronicles.Dashboard.FinalProjectData[]
+---@field max_project_time integer
 ---@field does_include_curr_date boolean
 ---@field time_period_str string
 
@@ -79,9 +82,11 @@
 
 ---@class (exact) chronicles.Dashboard.FinalProjectData
 ---@field id string
----@field time integer
+---@field total_time integer
 ---@field last_worked integer
 ---@field last_worked_canonical integer
+---@field first_worked integer
+---@field tags_map table<string, any>
 ---@field global_time integer?
 
 ---@class (exact) chronicles.ChroniclesData.ProjectData
