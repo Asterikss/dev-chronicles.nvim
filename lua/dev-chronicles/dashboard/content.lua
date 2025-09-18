@@ -277,39 +277,6 @@ function M.set_header_lines_highlights(
   M.set_hline_lines_highlights(lines, highlights, win_width, '─', 'DevChroniclesAccent')
 end
 
----Parse projects into an array, so that it can be sorted and traversed in
----order, and calculate maximum time across projects. If in a session, update
----that sessoin's project data.
----@param projects_filtered_parsed chronicles.Dashboard.Stats.ParsedProjects
----@param min_proj_time_to_display_proj integer
----@return chronicles.Dashboard.FinalProjectData[], integer
-function M.parse_projects_calc_max_time(projects_filtered_parsed, min_proj_time_to_display_proj)
-  ---@type chronicles.Dashboard.FinalProjectData[]
-  local arr_projects = {}
-  local max_time = 0
-
-  -- TODO: remove all of that
-  for parsed_project_id, parsed_project_data in pairs(projects_filtered_parsed) do
-    local project_total_time = parsed_project_data.total_time
-    local project_total_global_time = parsed_project_data.total_global_time
-    local project_last_worked = parsed_project_data.last_worked
-
-    if project_total_time >= min_proj_time_to_display_proj then
-      max_time = math.max(max_time, project_total_time)
-
-      table.insert(arr_projects, {
-        id = parsed_project_id,
-        time = project_total_time,
-        last_worked = project_last_worked,
-        last_worked_canonical = parsed_project_data.last_worked_canonical,
-        global_time = project_total_global_time,
-      })
-    end
-  end
-
-  return arr_projects, max_time
-end
-
 ---@param arr_projects chronicles.Dashboard.FinalProjectData[]
 ---@param n_projects_to_keep integer
 ---@param sort boolean
@@ -327,9 +294,9 @@ function M.sort_and_cutoff_projects(arr_projects, n_projects_to_keep, sort, by_l
         end
       else
         if asc then
-          return a.time < b.time
+          return a.total_time < b.total_time
         else
-          return a.time > b.time
+          return a.total_time > b.total_time
         end
       end
     end)
@@ -400,7 +367,7 @@ function M.create_bars_data(
   end
 
   for i, project in ipairs(arr_projects) do
-    local bar_height = math.max(1, math.floor((project.time / max_time) * max_bar_height))
+    local bar_height = math.max(1, math.floor((project.total_time / max_time) * max_bar_height))
 
     local color
     if random_bars_coloring then
@@ -429,7 +396,7 @@ function M.create_bars_data(
 
     table.insert(bars_data, {
       project_name_tbl = project_name_tbl,
-      project_time = project.time,
+      project_time = project.total_time,
       height = bar_height,
       color = color,
       start_col = chart_start_col + (i - 1) * (bar_width + bar_spacing),
@@ -701,15 +668,12 @@ end
 ---@param hl_group? string
 function M.set_hline_lines_highlights(lines, highlights, win_width, char, hl_group)
   table.insert(lines, string.rep(char or '▔', win_width))
-  table.insert(
-    highlights,
-    {
-      line = #lines,
-      col = 0,
-      end_col = -1,
-      hl_group = hl_group or 'DevChroniclesGlobalProjectTime',
-    }
-  )
+  table.insert(highlights, {
+    line = #lines,
+    col = 0,
+    end_col = -1,
+    hl_group = hl_group or 'DevChroniclesGlobalProjectTime',
+  })
 end
 
 ---@param lines string[]
@@ -783,6 +747,23 @@ function M.calc_max_bar_height(initial_max_bar_height, thresholds, max_time)
     end
   end
   return initial_max_bar_height
+end
+
+---@param final_project_data_arr chronicles.Dashboard.FinalProjectData[]
+---@param min_proj_time_to_display_proj integer
+---@return chronicles.Dashboard.FinalProjectData[]
+function M.filter_by_min_time(final_project_data_arr, min_proj_time_to_display_proj)
+  local out = {}
+  local len_out = 0
+
+  for _, project_data in ipairs(final_project_data_arr) do
+    if project_data.total_time >= min_proj_time_to_display_proj then
+      len_out = len_out + 1
+      out[len_out] = project_data
+    end
+  end
+
+  return out
 end
 
 return M

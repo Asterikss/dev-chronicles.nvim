@@ -74,8 +74,12 @@ function M.get_dashboard_data_months(
 
   local filtered_projects = M._filter_projects_by_period(data.projects, start_ts, end_ts)
 
-  ---@type chronicles.Dashboard.Stats.ParsedProjects
+  ---@type chronicles.Dashboard.FinalProjectDataMap
   local projects_filtered_parsed = {}
+  ---@type chronicles.Dashboard.FinalProjectData[]
+  local arr_projects = {}
+  local len_arr_projects = 0
+  local max_project_time = 0
   local global_time_filtered = 0
   local most_worked_on_project_per_month = construct_most_worked_on_project_arr and {} or nil
 
@@ -101,17 +105,21 @@ function M.get_dashboard_data_months(
           local filtered_project_data = projects_filtered_parsed[project_id]
           if not filtered_project_data then
             filtered_project_data = {
+              id = project_id,
               total_time = 0,
               last_worked = project_data.last_worked,
-              last_worked_canonical = project_data.last_worked_canonical, -- TODO: This is not used later, remove it after fixing the types. first_worked too
+              last_worked_canonical = project_data.last_worked_canonical,
               first_worked = project_data.first_worked,
               tags_map = project_data.tags_map,
-              total_global_time = project_data.total_time,
+              global_time = project_data.total_time,
             }
             projects_filtered_parsed[project_id] = filtered_project_data
+            len_arr_projects = len_arr_projects + 1
+            arr_projects[len_arr_projects] = filtered_project_data
           end
           filtered_project_data.total_time = filtered_project_data.total_time + month_time
           global_time_filtered = global_time_filtered + month_time
+          max_project_time = math.max(max_project_time, filtered_project_data.total_time)
 
           if construct_most_worked_on_project_arr and month_time > month_max_time then
             month_max_time = month_time
@@ -142,10 +150,12 @@ function M.get_dashboard_data_months(
     end
   end
 
+  ---@type chronicles.Dashboard.Data
   return {
     global_time = data.global_time,
     global_time_filtered = global_time_filtered,
-    projects_filtered_parsed = next(projects_filtered_parsed) and projects_filtered_parsed or nil,
+    final_project_data_arr = next(arr_projects) and arr_projects or nil,
+    max_project_time = max_project_time,
     does_include_curr_date = time.is_month_in_range(
       session_base.canonical_month_str,
       start_date,
