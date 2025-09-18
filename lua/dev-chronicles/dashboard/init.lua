@@ -130,31 +130,15 @@ function M.create_dashboard_content(
 
   local arr_projects = data.final_project_data_arr
   if arr_projects == nil then
-    dashboard_content.set_header_lines_highlights(
+    return dashboard_content.handle_no_projects_lines_hl(
       lines,
       highlights,
-      data.time_period_str,
+      data,
       win_width,
-      data.global_time_filtered,
-      data.does_include_curr_date,
-      dashboard_type_opts.header.total_time_as_hours_max,
-      dashboard_type_opts.header.total_time_as_hours_min,
-      dashboard_type_opts.header.show_current_session_time,
-      dashboard_type_opts.header.total_time_format_str,
-      dashboard_type_opts.header.prettify,
-      nil,
-      dashboard_type_opts.header.total_time_round_hours_above_one,
-      top_projects,
-      dashboard_type_opts.header.top_projects,
-      {}
+      win_height,
+      dashboard_type_opts.header,
+      top_projects
     )
-    require('dev-chronicles.utils').set_no_data_mess_lines_highlights(
-      lines,
-      highlights,
-      win_width,
-      win_height
-    )
-    return lines, highlights
   end
 
   local dashboard_opts = require('dev-chronicles.config').get_opts().dashboard
@@ -184,13 +168,27 @@ function M.create_dashboard_content(
     win_width
   )
 
-  arr_projects = dashboard_content.sort_and_cutoff_projects(
+  -- Reset len_arr_projects to avoid using stale value later
+  arr_projects, len_arr_projects = dashboard_content.sort_and_cutoff_projects(
     arr_projects,
+    len_arr_projects,
     n_projects_to_keep,
     dashboard_type_opts.sorting.enable,
     dashboard_type_opts.sorting.sort_by_last_worked_not_total_time,
     dashboard_type_opts.sorting.ascending
   )
+
+  if len_arr_projects < 1 then
+    return dashboard_content.handle_no_projects_lines_hl(
+      lines,
+      highlights,
+      data,
+      win_width,
+      win_height,
+      dashboard_type_opts.header,
+      top_projects
+    )
+  end
 
   if dashboard_type_opts.dynamic_bar_height_thresholds then
     max_bar_height = dashboard_content.calc_max_bar_height(

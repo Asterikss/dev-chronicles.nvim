@@ -25,6 +25,9 @@ M.BarLevel = {
 ---@param win_width integer
 ---@return integer, integer: n_projects_to_keep, chart_start_col
 function M.calc_chart_stats(bar_width, bar_spacing, max_chart_width, n_projects, win_width)
+  if n_projects < 1 then
+    return 0, -1
+  end
   -- total_width = k_bars * bar_width + (k_bars - 1) * bar_spacing
   -- k_bars * bar_width + (k_bars - 1) * bar_spacing <= max_chart_width
   -- k_bars * (bar_width + bar_spacing) - bar_spacing <= max_chart_width
@@ -278,12 +281,20 @@ function M.set_header_lines_highlights(
 end
 
 ---@param arr_projects chronicles.Dashboard.FinalProjectData[]
+---@param len_arr_projects integer
 ---@param n_projects_to_keep integer
 ---@param sort boolean
 ---@param by_last_worked boolean
 ---@param asc boolean
----@return chronicles.Dashboard.FinalProjectData[]
-function M.sort_and_cutoff_projects(arr_projects, n_projects_to_keep, sort, by_last_worked, asc)
+---@return chronicles.Dashboard.FinalProjectData[], integer
+function M.sort_and_cutoff_projects(
+  arr_projects,
+  len_arr_projects,
+  n_projects_to_keep,
+  sort,
+  by_last_worked,
+  asc
+)
   if sort then
     table.sort(arr_projects, function(a, b)
       if by_last_worked then
@@ -302,9 +313,8 @@ function M.sort_and_cutoff_projects(arr_projects, n_projects_to_keep, sort, by_l
     end)
   end
 
-  local len_arr_projects = #arr_projects
   if n_projects_to_keep == len_arr_projects then
-    return arr_projects
+    return arr_projects, len_arr_projects
   end
 
   local arr_projects_filtered = {}
@@ -319,7 +329,7 @@ function M.sort_and_cutoff_projects(arr_projects, n_projects_to_keep, sort, by_l
     end
   end
 
-  return arr_projects_filtered
+  return arr_projects_filtered, #arr_projects_filtered
 end
 
 ---@param arr_projects chronicles.Dashboard.FinalProjectData[]
@@ -764,6 +774,53 @@ function M.filter_by_min_time(final_project_data_arr, min_proj_time_to_display_p
   end
 
   return out
+end
+
+---@param lines string[]
+---@param highlights chronicles.Highlight[]
+---@param data chronicles.Dashboard.Data
+---@param win_width integer
+---@param win_height integer
+---@param header_dashboard_type_opts chronicles.Options.Dashboard.Header
+---@param top_projects any
+---@return any
+---@return any
+function M.handle_no_projects_lines_hl(
+  lines,
+  highlights,
+  data,
+  win_width,
+  win_height,
+  header_dashboard_type_opts,
+  top_projects
+)
+  M.set_header_lines_highlights(
+    lines,
+    highlights,
+    data.time_period_str,
+    win_width,
+    data.global_time_filtered,
+    data.does_include_curr_date,
+    header_dashboard_type_opts.total_time_as_hours_max,
+    header_dashboard_type_opts.total_time_as_hours_min,
+    header_dashboard_type_opts.show_current_session_time,
+    header_dashboard_type_opts.total_time_format_str,
+    header_dashboard_type_opts.prettify,
+    nil,
+    header_dashboard_type_opts.total_time_round_hours_above_one,
+    top_projects,
+    header_dashboard_type_opts.top_projects,
+    {}
+  )
+
+  require('dev-chronicles.utils').set_no_data_mess_lines_highlights(
+    lines,
+    highlights,
+    win_width,
+    win_height
+  )
+
+  return lines, highlights
 end
 
 return M
