@@ -47,15 +47,9 @@ end
 ---@param win_width integer
 ---@param global_time_filtered integer
 ---@param does_include_curr_date boolean
----@param total_time_as_hours_max boolean
----@param total_time_as_hours_min boolean
----@param show_current_session_time boolean
----@param total_time_format_str string
----@param prettify boolean
+---@param header_dashboard_type_opts chronicles.Options.Dashboard.Header
 ---@param curr_session_time_seconds? integer
----@param total_time_round_hours_above_one boolean
 ---@param top_projects? chronicles.Dashboard.TopProjectsArray
----@param top_projects_settings chronicles.Options.Dashboard.Header.TopProjects
 ---@param project_id_to_color table<string, string>
 function M.set_header_lines_highlights(
   lines,
@@ -64,29 +58,27 @@ function M.set_header_lines_highlights(
   win_width,
   global_time_filtered,
   does_include_curr_date,
-  total_time_as_hours_max,
-  total_time_as_hours_min,
-  show_current_session_time,
-  total_time_format_str,
-  prettify,
+  header_dashboard_type_opts,
   curr_session_time_seconds,
-  total_time_round_hours_above_one,
   top_projects,
-  top_projects_settings,
   project_id_to_color
 )
   local time = require('dev-chronicles.core.time')
 
   local left_header = string.format(
-    total_time_format_str,
+    header_dashboard_type_opts.total_time_format_str,
     time.format_time(
       global_time_filtered,
-      total_time_as_hours_max,
-      total_time_as_hours_min,
-      total_time_round_hours_above_one
+      header_dashboard_type_opts.total_time_as_hours_max,
+      header_dashboard_type_opts.total_time_as_hours_min,
+      header_dashboard_type_opts.total_time_round_hours_above_one
     )
   )
-  if show_current_session_time and curr_session_time_seconds and does_include_curr_date then
+  if
+    header_dashboard_type_opts.show_current_session_time
+    and curr_session_time_seconds
+    and does_include_curr_date
+  then
     left_header = left_header
       .. ' ('
       .. time.format_time(curr_session_time_seconds, true, false, false)
@@ -95,6 +87,7 @@ function M.set_header_lines_highlights(
 
   local right_header = time_period_str
 
+  local prettify = header_dashboard_type_opts.prettify
   if prettify then
     left_header = '│ ' .. left_header .. ' │'
     right_header = '│ ' .. right_header .. ' │'
@@ -123,14 +116,14 @@ function M.set_header_lines_highlights(
   if
     top_projects
     and len_top_projects
-    and len_top_projects >= top_projects_settings.min_top_projects_len_to_show
+    and len_top_projects >= header_dashboard_type_opts.top_projects.min_top_projects_len_to_show
   then
-    local use_wide_bars = top_projects_settings.use_wide_bars
+    local use_wide_bars = header_dashboard_type_opts.top_projects.use_wide_bars
     local single_top_bar = use_wide_bars and '▆▆' or '▆'
     local single_bottom_bar = use_wide_bars and '▀▀' or '▀'
     local bar_disp_width = vim.fn.strdisplaywidth(single_top_bar)
     local single_top_bar_bytes = #single_top_bar
-    local space_width = top_projects_settings.extra_space_between_bars and 2 or 1
+    local space_width = header_dashboard_type_opts.top_projects.extra_space_between_bars and 2 or 1
     local disp_width_per_project = bar_disp_width + space_width
 
     -- Calculate maximum bars length that can be centered without overlapping headers
@@ -801,15 +794,9 @@ function M.handle_no_projects_lines_hl(
     win_width,
     data.global_time_filtered,
     data.does_include_curr_date,
-    header_dashboard_type_opts.total_time_as_hours_max,
-    header_dashboard_type_opts.total_time_as_hours_min,
-    header_dashboard_type_opts.show_current_session_time,
-    header_dashboard_type_opts.total_time_format_str,
-    header_dashboard_type_opts.prettify,
+    header_dashboard_type_opts,
     nil,
-    header_dashboard_type_opts.total_time_round_hours_above_one,
     top_projects,
-    header_dashboard_type_opts.top_projects,
     {}
   )
 

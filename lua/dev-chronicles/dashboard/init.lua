@@ -233,15 +233,9 @@ function M.create_dashboard_content(
     win_width,
     data.global_time_filtered,
     data.does_include_curr_date,
-    dashboard_type_opts.header.total_time_as_hours_max,
-    dashboard_type_opts.header.total_time_as_hours_min,
-    dashboard_type_opts.header.show_current_session_time,
-    dashboard_type_opts.header.total_time_format_str,
-    dashboard_type_opts.header.prettify,
+    dashboard_type_opts.header,
     curr_session_time,
-    dashboard_type_opts.header.total_time_round_hours_above_one,
     top_projects,
-    dashboard_type_opts.header.top_projects,
     project_id_to_color
   )
 
