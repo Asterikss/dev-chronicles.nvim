@@ -22,12 +22,6 @@ function M.get_canonical_curr_ts_and_day_str(extend_today_to_4am, timestamp)
   return ts, day_key
 end
 
----Returns current unix timestamp
----@return integer
-function M.get_current_timestamp()
-  return os.time()
-end
-
 ---Return seconds as a formatted time string
 ---@param seconds integer Seconds
 ---@param max_hours? boolean Should the maximal unit be hours (default true)

@@ -1,5 +1,7 @@
 local M = {}
 
+local format_time = require('dev-chronicles.core.time').format_time
+
 M._colors = {
   'DevChroniclesRed',
   'DevChroniclesBlue',
@@ -63,11 +65,9 @@ function M.set_header_lines_highlights(
   top_projects,
   project_id_to_color
 )
-  local time = require('dev-chronicles.core.time')
-
   local left_header = string.format(
     header_dashboard_type_opts.total_time_format_str,
-    time.format_time(
+    format_time(
       global_time_filtered,
       header_dashboard_type_opts.total_time_as_hours_max,
       header_dashboard_type_opts.total_time_as_hours_min,
@@ -81,7 +81,7 @@ function M.set_header_lines_highlights(
   then
     left_header = left_header
       .. ' ('
-      .. time.format_time(curr_session_time_seconds, true, false, false)
+      .. format_time(curr_session_time_seconds, true, false, false)
       .. ')'
   end
 
@@ -441,8 +441,6 @@ function M.set_time_labels_above_bars(
   proj_total_time_round_hours_above_one,
   proj_global_total_time_round_hours_above_one
 )
-  local format_time = require('dev-chronicles.core.time').format_time
-
   -- Helper function to place a formatted time string onto a character array.
   ---@param target_line string[]
   ---@param time_to_format integer
