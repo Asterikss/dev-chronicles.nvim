@@ -40,7 +40,7 @@ function M.calc_chart_stats(bar_width, bar_spacing, max_chart_width, n_projects,
   return n_projects_to_keep, chart_start_col
 end
 
----Adds 4 line header
+---Adds 4 line header. Monster func
 ---@param lines string[]
 ---@param highlights chronicles.Highlight[]
 ---@param time_period_str string

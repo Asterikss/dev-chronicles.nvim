@@ -66,13 +66,14 @@ function M.get_dashboard_data_months(
 
   local start_ts = time.convert_month_str_to_timestamp(start_date)
   local end_ts = time.convert_month_str_to_timestamp(end_date, true)
+  local projects = data.projects
 
   if start_ts > end_ts then
     notify.warn(('DevChronicles Error: start (%s) > end (%s)'):format(start_date, end_date))
     return
   end
 
-  local filtered_projects = M._filter_projects_by_period(data.projects, start_ts, end_ts)
+  M._filter_projects_by_period_inplace(projects, start_ts, end_ts)
 
   ---@type chronicles.Dashboard.FinalProjectDataMap
   local projects_filtered_parsed = {}
@@ -86,7 +87,7 @@ function M.get_dashboard_data_months(
   local l_pointer_month, l_pointer_year = time.extract_month_year(start_date)
   local r_pointer_month, r_pointer_year = time.extract_month_year(end_date)
 
-  if filtered_projects then
+  if projects then
     local i = 0
     while true do
       i = i + 1
@@ -97,7 +98,7 @@ function M.get_dashboard_data_months(
       local year_str = string.format('%d', l_pointer_year)
       local month_str = string.format('%02d.%d', l_pointer_month, l_pointer_year)
 
-      for project_id, project_data in pairs(filtered_projects) do
+      for project_id, project_data in pairs(projects) do
         local month_time = project_data.by_year[year_str]
           and project_data.by_year[year_str].by_month[month_str]
 
@@ -204,17 +205,17 @@ function M.get_dashboard_data_days(
   local DAY_SEC = 86400 -- 24 * 60 * 60
   local start_str = time.get_previous_day(canonical_today_str, start_offset)
   local end_str = time.get_previous_day(canonical_today_str, end_offset)
-  local start_timestamp = time.convert_day_str_to_timestamp(start_str)
-  local end_timestamp = time.convert_day_str_to_timestamp(end_str, true)
+  local start_ts = time.convert_day_str_to_timestamp(start_str)
+  local end_ts = time.convert_day_str_to_timestamp(end_str, true)
   local canonical_today_timestamp = time.convert_day_str_to_timestamp(canonical_today_str)
+  local projects = data.projects
 
-  if start_timestamp > end_timestamp then
+  if start_ts > end_ts then
     notify.warn(('DevChronicles Error: start (%s) > end (%s)'):format(start_str, end_str))
     return
   end
 
-  local filtered_projects =
-    M._filter_projects_by_period(data.projects, start_timestamp, end_timestamp)
+  M._filter_projects_by_period_inplace(projects, start_ts, end_ts)
 
   ---@type chronicles.Dashboard.FinalProjectDataMap
   local projects_filtered_parsed = {}
@@ -225,16 +226,16 @@ function M.get_dashboard_data_days(
   local global_time_filtered = 0
   local most_worked_on_project_per_day = construct_most_worked_on_project_arr and {} or nil
 
-  if filtered_projects then
+  if projects then
     local i = 0
-    for ts = start_timestamp, end_timestamp, DAY_SEC do
+    for ts = start_ts, end_ts, DAY_SEC do
       i = i + 1
       local day_max_time = 0
       ---@type string|boolean
       local day_max_project = false
       local key = time.get_day_str(ts)
 
-      for project_id, project_data in pairs(filtered_projects) do
+      for project_id, project_data in pairs(projects) do
         local day_time = project_data.by_day[key]
         if day_time then
           local accum_proj_data = projects_filtered_parsed[project_id]
@@ -270,7 +271,7 @@ function M.get_dashboard_data_days(
   end
 
   if next(projects_filtered_parsed) == nil and construct_most_worked_on_project_arr then
-    local n_days_this_period = math.floor(math.abs(end_timestamp - start_timestamp) / DAY_SEC) + 1
+    local n_days_this_period = math.floor(math.abs(end_ts - start_ts) / DAY_SEC) + 1
     for i = 1, n_days_this_period do
       most_worked_on_project_per_day[i] = false
     end
@@ -282,8 +283,8 @@ function M.get_dashboard_data_days(
     global_time_filtered = global_time_filtered,
     final_project_data_arr = next(arr_projects) and arr_projects or nil,
     max_project_time = max_project_time,
-    does_include_curr_date = canonical_today_timestamp >= start_timestamp
-      and canonical_today_timestamp <= end_timestamp,
+    does_include_curr_date = canonical_today_timestamp >= start_ts
+      and canonical_today_timestamp <= end_ts,
     time_period_str = time.get_time_period_str_days(
       start_offset - end_offset + 1,
       start_str,
@@ -298,19 +299,15 @@ function M.get_dashboard_data_days(
     most_worked_on_project_per_day
 end
 
---- TODO: Set it to nil inplace
 ---@param projects table<string, chronicles.ChroniclesData.ProjectData>
 ---@param start_ts integer
 ---@param end_ts integer
----@return table<string, chronicles.ChroniclesData.ProjectData>
-function M._filter_projects_by_period(projects, start_ts, end_ts)
-  local filtered_projects = {}
+function M._filter_projects_by_period_inplace(projects, start_ts, end_ts)
   for project_id, project_data in pairs(projects) do
-    if project_data.first_worked <= end_ts and project_data.last_worked_canonical >= start_ts then
-      filtered_projects[project_id] = project_data
+    if project_data.first_worked > end_ts or project_data.last_worked_canonical < start_ts then
+      projects[project_id] = nil
     end
   end
-  return filtered_projects
 end
 
 return M
