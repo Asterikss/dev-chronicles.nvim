@@ -10,7 +10,7 @@ local notify = require('dev-chronicles.utils.notify')
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
----@param time_period_singular_str? string
+---@param time_period_str_singular? string
 function M.get_dashboard_data_all(
   data,
   canonical_month_str,
@@ -18,7 +18,7 @@ function M.get_dashboard_data_all(
   show_date_period,
   show_time,
   time_period_str,
-  time_period_singular_str
+  time_period_str_singular
 )
   return {
     global_time = data.global_time,
@@ -32,7 +32,7 @@ function M.get_dashboard_data_all(
       show_date_period,
       show_time,
       time_period_str,
-      time_period_singular_str
+      time_period_str_singular
     ),
   }
 end
@@ -45,7 +45,7 @@ end
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
----@param time_period_singular_str? string
+---@param time_period_str_singular? string
 ---@param construct_most_worked_on_project_arr boolean
 ---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
 function M.get_dashboard_data_months(
@@ -57,7 +57,7 @@ function M.get_dashboard_data_months(
   show_date_period,
   show_time,
   time_period_str,
-  time_period_singular_str,
+  time_period_str_singular,
   construct_most_worked_on_project_arr
 )
   start_date = start_date
@@ -170,7 +170,7 @@ function M.get_dashboard_data_months(
       show_date_period,
       show_time,
       time_period_str,
-      time_period_singular_str
+      time_period_str_singular
     ),
   },
     most_worked_on_project_per_month
@@ -184,7 +184,7 @@ end
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
----@param time_period_singular_str? string
+---@param time_period_str_singular? string
 ---@param construct_most_worked_on_project_arr boolean
 ---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
 function M.get_dashboard_data_days(
@@ -196,7 +196,7 @@ function M.get_dashboard_data_days(
   show_date_period,
   show_time,
   time_period_str,
-  time_period_singular_str,
+  time_period_str_singular,
   construct_most_worked_on_project_arr
 )
   start_offset = start_offset or n_days_by_default - 1
@@ -293,7 +293,7 @@ function M.get_dashboard_data_days(
       show_date_period,
       show_time,
       time_period_str,
-      time_period_singular_str
+      time_period_str_singular
     ),
   },
     most_worked_on_project_per_day

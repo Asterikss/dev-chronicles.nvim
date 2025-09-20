@@ -45,7 +45,7 @@ function M.dashboard(
       dashboard_type_options.header.show_date_period,
       dashboard_type_options.header.show_time,
       dashboard_type_options.header.time_period_str,
-      dashboard_type_options.header.time_period_singular_str,
+      dashboard_type_options.header.time_period_str_singular,
       dashboard_type_options.header.top_projects.enable
     )
   elseif panel_subtype == PanelSubtype.All then
@@ -57,7 +57,7 @@ function M.dashboard(
       dashboard_type_options.header.show_date_period,
       dashboard_type_options.header.show_time,
       dashboard_type_options.header.time_period_str,
-      dashboard_type_options.header.time_period_singular_str
+      dashboard_type_options.header.time_period_str_singular
     )
   elseif panel_subtype == PanelSubtype.Months then
     dashboard_type_options = opts.dashboard.dashboard_months
@@ -70,7 +70,7 @@ function M.dashboard(
       dashboard_type_options.header.show_date_period,
       dashboard_type_options.header.show_time,
       dashboard_type_options.header.time_period_str,
-      dashboard_type_options.header.time_period_singular_str,
+      dashboard_type_options.header.time_period_str_singular,
       dashboard_type_options.header.top_projects.enable
     )
   else

@@ -156,7 +156,7 @@
 ---@field show_date_period boolean
 ---@field show_time boolean
 ---@field time_period_str string?
----@field time_period_singular_str string?
+---@field time_period_str_singular string?
 ---@field total_time_as_hours_max boolean
 ---@field total_time_as_hours_min boolean
 ---@field total_time_round_hours_above_one boolean

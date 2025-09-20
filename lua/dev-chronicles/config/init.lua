@@ -16,7 +16,7 @@ local dashboard_section_header_opts = {
   show_date_period = true,
   show_time = true,
   time_period_str = nil,
-  time_period_singular_str = nil,
+  time_period_str_singular = nil,
   total_time_as_hours_max = true,
   total_time_as_hours_min = true,
   total_time_round_hours_above_one = true,
@@ -80,7 +80,7 @@ local defaults = {
   exclude_dirs_absolute = {},
   sort_tracked_parent_dirs = false,
   differentiate_projects_by_folder_not_path = true,
-  min_session_time = 180,
+  min_session_time = 15,
   track_days = true,
   extend_today_to_4am = true,
   data_file = 'dev-chronicles.json',
@@ -101,7 +101,7 @@ local defaults = {
       header = {
         window_title = ' Dev Chronicles Days ',
         time_period_str = 'last %s days',
-        time_period_singular_str = 'today',
+        time_period_str_singular = 'today',
       },
       n_by_default = 30,
       dynamic_bar_height_thresholds = { 2, 3.5, 5 }, -- It could be a integer[] and integer[][]
@@ -221,11 +221,11 @@ function M.setup(opts)
   end
 
   if vim.fn.isabsolutepath(merged.data_file) ~= 1 then
-    merged.data_file = vim.fn.stdpath('data') .. '/' .. merged.data_file
+    merged.data_file = vim.fn.stdpath('data') .. '/dev-chronicles/' .. merged.data_file
   end
 
   if vim.fn.isabsolutepath(merged.log_file) ~= 1 then
-    merged.log_file = vim.fn.stdpath('data') .. '/' .. merged.log_file
+    merged.log_file = vim.fn.stdpath('data') .. '/dev-chronicles/' .. merged.log_file
   end
 
   if merged.dashboard.dashboard_months.n_by_default < 1 then

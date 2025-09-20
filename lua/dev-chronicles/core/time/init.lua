@@ -232,7 +232,7 @@ end
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
----@param time_period_singular_str? string
+---@param time_period_str_singular? string
 ---@return string
 function M.get_time_period_str_days(
   n_days,
@@ -242,13 +242,13 @@ function M.get_time_period_str_days(
   show_date_period,
   show_time,
   time_period_str,
-  time_period_singular_str
+  time_period_str_singular
 )
   local is_singular = n_days == 1
   local ends_today = end_day == canonical_today_str
 
   if ends_today then
-    local template = is_singular and time_period_singular_str or time_period_str
+    local template = is_singular and time_period_str_singular or time_period_str
     if template then
       return template:format(n_days)
     end
@@ -297,7 +297,7 @@ end
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
----@param time_period_singular_str? string
+---@param time_period_str_singular? string
 ---@return string
 function M.get_time_period_str_months(
   start_month,
@@ -307,10 +307,10 @@ function M.get_time_period_str_months(
   show_date_period,
   show_time,
   time_period_str,
-  time_period_singular_str
+  time_period_str_singular
 )
-  if start_month == end_month and time_period_singular_str then
-    return string.format(time_period_singular_str, 1)
+  if start_month == end_month and time_period_str_singular then
+    return time_period_str_singular:format(1)
   end
   if time_period_str then
     local start_ts = M.convert_month_str_to_timestamp(start_month)
