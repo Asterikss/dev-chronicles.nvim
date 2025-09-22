@@ -118,9 +118,12 @@ function M.set_header_lines_highlights(
     and len_top_projects
     and len_top_projects >= header_dashboard_type_opts.top_projects.min_top_projects_len_to_show
   then
-    local use_wide_bars = header_dashboard_type_opts.top_projects.use_wide_bars
-    local single_top_bar = use_wide_bars and '▆▆' or '▆'
-    local single_bottom_bar = use_wide_bars and '▀▀' or '▀'
+    local use_wide_bars = header_dashboard_type_opts.top_projects.wide_bars
+    local use_extra_wide_bars = header_dashboard_type_opts.top_projects.super_extra_duper_wide_bars
+    local single_top_bar = use_extra_wide_bars and '▆▆▆'
+      or (use_wide_bars and '▆▆' or '▆')
+    local single_bottom_bar = use_extra_wide_bars and '▀▀▀'
+      or (use_wide_bars and '▀▀' or '▀')
     local bar_disp_width = vim.fn.strdisplaywidth(single_top_bar)
     local single_top_bar_bytes = #single_top_bar
     local space_width = header_dashboard_type_opts.top_projects.extra_space_between_bars and 2 or 1

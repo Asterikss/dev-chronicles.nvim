@@ -140,7 +140,8 @@
 ---@class chronicles.Options.Dashboard.Header.TopProjects
 ---@field enable boolean
 ---@field extra_space_between_bars boolean
----@field use_wide_bars boolean
+---@field wide_bars boolean
+---@field super_extra_duper_wide_bars boolean
 ---@field min_top_projects_len_to_show integer
 
 ---@class chronicles.Options.Dashboard.Header

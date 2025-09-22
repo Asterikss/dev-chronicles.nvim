@@ -31,7 +31,8 @@ local dashboard_section_header_opts = {
   top_projects = {
     enable = true,
     extra_space_between_bars = false,
-    use_wide_bars = false,
+    wide_bars = false,
+    super_extra_duper_wide_bars = false,
     min_top_projects_len_to_show = 1,
   },
 }
@@ -109,7 +110,7 @@ local defaults = {
     dashboard_months = make_dashboard_section({
       header = {
         window_title = ' Dev Chronicles Months ',
-        top_projects = { use_wide_bars = true },
+        top_projects = { wide_bars = true },
       },
       n_by_default = 2,
       window_border = { '╬', '═', '╬', '║', '╬', '═', '╬', '║' },
@@ -118,7 +119,7 @@ local defaults = {
     dashboard_years = make_dashboard_section({
       header = {
         window_title = ' Dev Chronicles Years ',
-        top_projects = { use_wide_bars = true },
+        top_projects = { super_extra_duper_wide_bars = true },
       },
       n_by_default = -1,
       sorting = { sort_by_last_worked_not_total_time = false },
