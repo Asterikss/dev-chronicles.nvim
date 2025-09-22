@@ -200,6 +200,7 @@
 ---@field footer chronicles.Options.Dashboard.Footer
 ---@field dashboard_days chronicles.Options.Dashboard.Section
 ---@field dashboard_months chronicles.Options.Dashboard.Section
+---@field dashboard_years chronicles.Options.Dashboard.Section
 ---@field dashboard_all chronicles.Options.Dashboard.Section
 
 ---@class chronicles.Options

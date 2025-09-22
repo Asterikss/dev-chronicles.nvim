@@ -74,7 +74,7 @@ function M.dashboard(
       dashboard_type_options.header.top_projects.enable
     )
   elseif panel_subtype == PanelSubtype.Years then
-    dashboard_type_options = opts.dashboard.dashboard_months
+    dashboard_type_options = opts.dashboard.dashboard_years
     dashboard_stats, top_projects = dashboard_data_extraction.get_dashboard_data_years(
       data,
       session_base,

@@ -115,6 +115,15 @@ local defaults = {
       window_border = { '╬', '═', '╬', '║', '╬', '═', '╬', '║' },
       dynamic_bar_height_thresholds = nil, -- = { 15, 25, 40 },
     }),
+    dashboard_years = make_dashboard_section({
+      header = {
+        window_title = ' Dev Chronicles Years ',
+        top_projects = { use_wide_bars = true },
+      },
+      n_by_default = -1,
+      sorting = { sort_by_last_worked_not_total_time = false },
+      window_border = { '╬', '═', '╬', '║', '╬', '═', '╬', '║' },
+    }),
     dashboard_all = make_dashboard_section({
       header = {
         window_title = ' Dev Chronicles All ',
