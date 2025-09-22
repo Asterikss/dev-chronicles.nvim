@@ -42,17 +42,16 @@
 ---@field start_date? string
 ---@field end_date? string
 
----@class (exact) chronicles.Dashboard.Stats.ParsedProjectData
+---@class (exact) chronicles.Dashboard.FinalProjectData
+---@field id string
 ---@field total_time integer
----@field first_worked integer
 ---@field last_worked integer
 ---@field last_worked_canonical integer
+---@field first_worked integer
 ---@field tags_map table<string, any>
----@field total_global_time integer?
+---@field global_time integer?
 
 ---@alias chronicles.Dashboard.FinalProjectDataMap table<string, chronicles.Dashboard.FinalProjectData>
-
----@alias chronicles.Dashboard.Stats.ParsedProjects table<string, chronicles.Dashboard.Stats.ParsedProjectData>
 
 ---@class (exact) chronicles.Dashboard.Data
 ---@field global_time integer
@@ -61,13 +60,6 @@
 ---@field max_project_time integer
 ---@field does_include_curr_date boolean
 ---@field time_period_str string
-
----@class (exact) chronicles.Dashboard.Stats
----@field global_time integer
----@field global_time_filtered integer
----@field projects_filtered_parsed chronicles.Dashboard.Stats.ParsedProjects
----@field start_date string
----@field end_date string
 
 ---@class (exact) chronicles.Dashboard.BarData
 ---@field project_name_tbl string[]
@@ -80,14 +72,44 @@
 ---@field curr_bar_representation_index integer
 ---@field global_project_time integer?
 
----@class (exact) chronicles.Dashboard.FinalProjectData
----@field id string
----@field total_time integer
----@field last_worked integer
----@field last_worked_canonical integer
----@field first_worked integer
----@field tags_map table<string, any>
----@field global_time integer?
+---@class (exact) chronicles.BarLevelRepresentation
+---@field realized_rows string[]
+---@field row_codepoint_counts integer[]
+---@field char_display_widths integer[][]
+
+---@class (exact) chronicles.BarRepresentation
+---@field header chronicles.BarLevelRepresentation
+---@field body chronicles.BarLevelRepresentation
+---@field footer chronicles.BarLevelRepresentation
+
+---@alias chronicles.Dashboard.TopProjectsArray (string|boolean)[]
+
+-- --------------------------------------------
+-- Panel Data
+-- --------------------------------------------
+
+---@class chronicles.WindowDimensions
+---@field width integer
+---@field height integer
+---@field row integer
+---@field col integer
+
+---@class chronicles.Highlight
+---@field line integer
+---@field col integer
+---@field end_col integer
+---@field hl_group string
+
+---@class chronicles.Panel.Data
+---@field lines string[]
+---@field highlights chronicles.Highlight[]
+---@field window_dimensions chronicles.WindowDimensions
+---@field window_title? string
+---@field window_border? string[]
+
+-- --------------------------------------------
+-- Dev Chronicles Data
+-- --------------------------------------------
 
 ---@class (exact) chronicles.ChroniclesData.ProjectData
 ---@field total_time integer
@@ -104,37 +126,6 @@
 ---@field last_data_write integer
 ---@field schema_version integer
 ---@field projects table<string, chronicles.ChroniclesData.ProjectData>
-
----@class (exact) chronicles.BarLevelRepresentation
----@field realized_rows string[]
----@field row_codepoint_counts integer[]
----@field char_display_widths integer[][]
-
----@class (exact) chronicles.BarRepresentation
----@field header chronicles.BarLevelRepresentation
----@field body chronicles.BarLevelRepresentation
----@field footer chronicles.BarLevelRepresentation
-
----@alias chronicles.Dashboard.TopProjectsArray (string|boolean)[]
-
----@class chronicles.WindowDimensions
----@field width integer
----@field height integer
----@field row integer
----@field col integer
-
----@class chronicles.Panel.Data
----@field lines string[]
----@field highlights chronicles.Highlight
----@field window_dimensions chronicles.WindowDimensions
----@field window_title? string
----@field window_border? string[]
-
----@class chronicles.Highlight
----@field line integer
----@field col integer
----@field end_col integer
----@field hl_group string
 
 -- --------------------------------------------
 -- Plugin Configuration Types
