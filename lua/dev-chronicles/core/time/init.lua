@@ -1,5 +1,7 @@
 local M = {}
 
+local notify = require('dev-chronicles.utils.notify')
+
 ---Returns current timestamp and current day string, respecing
 ---extend_today_to_4am flag. If extend_today_to_4am being true
 ---causes today's calendar day to be shifted to yesterday, then the
@@ -101,13 +103,11 @@ end
 ---@return integer, integer, integer: day, month, year
 function M.extract_day_month_year(day_month_year_str)
   local day, month, year = day_month_year_str:match('(%d%d).(%d%d)%.(%d%d%d%d)')
-  day = tonumber(day)
-  month = tonumber(month)
-  year = tonumber(year)
-  if not day or not month or not year then
-    -- TODO:
-    error('Invalid day-month-year string date: ' .. tostring(day_month_year_str))
+  day, month, year = tonumber(day), tonumber(month), tonumber(year)
+  if not (day and month and year) then
+    notify.fatal('Invalid day-month-year string date: ' .. day_month_year_str)
   end
+  ---@diagnostic disable-next-line: return-type-mismatch
   return day, month, year
 end
 
@@ -117,11 +117,11 @@ end
 ---@return integer, integer: month, year
 function M.extract_month_year(month_year_str)
   local month, year = month_year_str:match('(%d%d)%.(%d%d%d%d)')
-  month = tonumber(month)
-  year = tonumber(year)
-  if not month or not year then
-    error('Invalid month-year string date: ' .. tostring(month_year_str))
+  month, year = tonumber(month), tonumber(year)
+  if not (month and year) then
+    notify.fatal('Invalid month-year string date: ' .. month_year_str)
   end
+  ---@diagnostic disable-next-line: return-type-mismatch
   return month, year
 end
 
