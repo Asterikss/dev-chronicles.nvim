@@ -293,7 +293,7 @@ end
 ---@param start_month string 'MM.YYYY'
 ---@param end_month string 'MM.YYYY'
 ---@param canonical_month_str string 'MM.YYYY'
----@param canonical_today_str string 'MM.YYYY'
+---@param canonical_today_str string 'DD.MM.YYYY'
 ---@param show_date_period boolean
 ---@param show_time boolean
 ---@param time_period_str? string
@@ -309,9 +309,11 @@ function M.get_time_period_str_months(
   time_period_str,
   time_period_str_singular
 )
+  -- -- caller wants a custom numeric placeholder
   if start_month == end_month and time_period_str_singular then
     return time_period_str_singular:format(1)
   end
+
   if time_period_str then
     local start_ts = M.convert_month_str_to_timestamp(start_month)
     local end_ts = M.convert_month_str_to_timestamp(end_month)
@@ -321,8 +323,9 @@ function M.get_time_period_str_months(
     local year_diff = later_date.year - earlier_date.year
     local month_diff = later_date.month - earlier_date.month
 
-    return string.format(time_period_str, year_diff * 12 + month_diff)
+    return time_period_str:format(year_diff * 12 + month_diff)
   end
+  -- --
 
   local time_period = ''
   local is_current_month = end_month == canonical_month_str

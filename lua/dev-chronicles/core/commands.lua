@@ -34,6 +34,13 @@ function M._setup_the_command(opts)
         { start_date = args[2], end_date = args[3] },
         opts
       )
+    elseif first_arg == 'years' then
+      api.panel(
+        enums.PanelType.Dashboard,
+        enums.PanelSubtype.Years,
+        { start_date = args[2], end_date = args[3] },
+        opts
+      )
     elseif first_arg == 'today' then
       api.panel(enums.PanelType.Dashboard, enums.PanelSubtype.Days, { start_offset = 0 }, opts)
     elseif first_arg == 'week' then
