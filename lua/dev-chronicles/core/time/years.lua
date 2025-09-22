@@ -129,7 +129,7 @@ end
 function M.str_to_year(year_str)
   local y = tonumber(year_str)
   if not (y and y >= 1 and y <= 9999) then
-    notify.fatal('Invalid day-month-year string date: ' .. year_str)
+    notify.fatal('Invalid year string date (YYYY): ' .. year_str)
   end
   ---@diagnostic disable-next-line: return-type-mismatch
   return y

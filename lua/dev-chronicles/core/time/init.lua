@@ -119,7 +119,7 @@ function M.extract_month_year(month_year_str)
   local month, year = month_year_str:match('(%d%d)%.(%d%d%d%d)')
   month, year = tonumber(month), tonumber(year)
   if not (month and year) then
-    notify.fatal('Invalid month-year string date: ' .. month_year_str)
+    notify.fatal('Invalid month-year string date (MM.YYYY): ' .. month_year_str)
   end
   ---@diagnostic disable-next-line: return-type-mismatch
   return month, year

@@ -64,6 +64,10 @@ function M.get_dashboard_data_months(
     or time.get_previous_month(session_base.canonical_month_str, n_months_by_default - 1)
   end_date = end_date or session_base.canonical_month_str
 
+  local l_pointer_month, l_pointer_year = time.extract_month_year(start_date)
+  local r_pointer_month, r_pointer_year = time.extract_month_year(end_date)
+
+  local orig_month, orig_year = l_pointer_month, l_pointer_year
   local start_ts = time.convert_month_str_to_timestamp(start_date)
   local end_ts = time.convert_month_str_to_timestamp(end_date, true)
   local projects = data.projects
@@ -83,9 +87,6 @@ function M.get_dashboard_data_months(
   local max_project_time = 0
   local global_time_filtered = 0
   local most_worked_on_project_per_month = construct_most_worked_on_project_arr and {} or nil
-
-  local l_pointer_month, l_pointer_year = time.extract_month_year(start_date)
-  local r_pointer_month, r_pointer_year = time.extract_month_year(end_date)
 
   if projects then
     local i = 0
@@ -146,7 +147,7 @@ function M.get_dashboard_data_months(
   end
 
   if next(projects_filtered_parsed) == nil and construct_most_worked_on_project_arr then
-    for i = 1, ((r_pointer_year - l_pointer_year) * 12 + (r_pointer_month - l_pointer_month) + 1) do
+    for i = 1, ((r_pointer_year - orig_year) * 12 + (r_pointer_month - orig_month) + 1) do
       most_worked_on_project_per_month[i] = false
     end
   end
@@ -328,14 +329,8 @@ function M.get_dashboard_data_years(
     or time_years.get_previous_year(session_base.canonical_year_str, n_years_by_default - 1)
   end_date = end_date or session_base.canonical_year_str
 
-  local l_pointer_year = time_years.str_to_year(start_date)
-  local r_pointer_year = time_years.str_to_year(end_date)
-  if not (l_pointer_year and r_pointer_year) then
-    notify.warn(
-      'Start and end year must be valid (YYYY). [' .. start_date .. ' — ' .. end_date .. ']'
-    )
-    return
-  end
+  local l_pointer_year, r_pointer_year =
+    time_years.str_to_year(start_date), time_years.str_to_year(end_date)
 
   local start_ts = time_years.convert_year_str_to_timestamp(start_date)
   local end_ts = time_years.convert_year_str_to_timestamp(end_date, true)
