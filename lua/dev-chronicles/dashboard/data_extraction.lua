@@ -299,6 +299,140 @@ function M.get_dashboard_data_days(
     most_worked_on_project_per_day
 end
 
+---@param data chronicles.ChroniclesData
+---@param session_base chronicles.SessionBase
+---@param start_date? string
+---@param end_date? string
+---@param n_years_by_default integer
+---@param show_date_period boolean
+---@param show_time boolean
+---@param time_period_str? string
+---@param time_period_str_singular? string
+---@param construct_most_worked_on_project_arr boolean
+---@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
+function M.get_dashboard_data_years(
+  data,
+  session_base,
+  start_date,
+  end_date,
+  n_years_by_default,
+  show_date_period,
+  show_time,
+  time_period_str,
+  time_period_str_singular,
+  construct_most_worked_on_project_arr
+)
+  start_date = start_date
+    or time_years.get_previous_year(session_base.canonical_year_str, n_years_by_default - 1)
+  end_date = end_date or session_base.canonical_year_str
+
+  local start_ts = time_years.convert_year_str_to_timestamp(start_date)
+  local end_ts = time_years.convert_year_str_to_timestamp(end_date, true)
+  local projects = data.projects
+
+  if start_ts > end_ts then
+    notify.warn(('DevChronicles Error: start (%s) > end (%s)'):format(start_date, end_date))
+    return
+  end
+
+  M._filter_projects_by_period_inplace(projects, start_ts, end_ts)
+
+  ---@type chronicles.Dashboard.FinalProjectDataMap
+  local projects_filtered_parsed = {}
+  ---@type chronicles.Dashboard.FinalProjectData[]
+  local arr_projects = {}
+  local len_arr_projects = 0
+  local max_project_time = 0
+  local global_time_filtered = 0
+  local most_worked_on_project_per_year = construct_most_worked_on_project_arr and {} or nil
+
+  local l_pointer_year = assert(tonumber(start_date), 'bad start_year')
+  local r_pointer_year = assert(tonumber(end_date), 'bad start_year')
+
+  if projects then
+    local i = 0
+    while true do
+      i = i + 1
+      local year_max_time = 0
+      ---@type string|boolean
+      local year_max_project = false
+      local year_str = tostring(l_pointer_year)
+
+      for project_id, project_data in pairs(projects) do
+        local year_time = project_data.by_year[year_str]
+          and project_data.by_year[year_str].total_time
+
+        if year_time then
+          local filtered_project_data = projects_filtered_parsed[project_id]
+          if not filtered_project_data then
+            filtered_project_data = {
+              id = project_id,
+              total_time = 0,
+              last_worked = project_data.last_worked,
+              last_worked_canonical = project_data.last_worked_canonical,
+              first_worked = project_data.first_worked,
+              tags_map = project_data.tags_map,
+              global_time = project_data.total_time,
+            }
+            projects_filtered_parsed[project_id] = filtered_project_data
+            len_arr_projects = len_arr_projects + 1
+            arr_projects[len_arr_projects] = filtered_project_data
+          end
+
+          filtered_project_data.total_time = filtered_project_data.total_time + year_time
+          global_time_filtered = global_time_filtered + year_time
+          max_project_time = math.max(max_project_time, filtered_project_data.total_time)
+
+          if construct_most_worked_on_project_arr and year_time > year_max_time then
+            year_max_time = year_time
+            year_max_project = project_id
+          end
+        end
+      end
+
+      if construct_most_worked_on_project_arr then
+        most_worked_on_project_per_year[i] = year_max_project
+      end
+
+      if l_pointer_year == r_pointer_year then
+        break
+      end
+
+      l_pointer_year = l_pointer_year + 1
+    end
+  end
+
+  if next(projects_filtered_parsed) == nil and construct_most_worked_on_project_arr then
+    for i = 1, (tonumber(end_date) - tonumber(start_date) + 1) do
+      most_worked_on_project_per_year[i] = false
+    end
+  end
+
+  ---@type chronicles.Dashboard.Data
+  return {
+    global_time = data.global_time,
+    global_time_filtered = global_time_filtered,
+    final_project_data_arr = next(arr_projects) and arr_projects or nil,
+    max_project_time = max_project_time,
+    does_include_curr_date = time_years.is_year_in_range(
+      session_base.canonical_year_str,
+      start_date,
+      end_date
+    ),
+    time_period_str = time_years.get_time_period_str_years(
+      start_date,
+      end_date,
+      session_base.canonical_year_str,
+      session_base.canonical_today_str,
+      show_date_period,
+      show_time,
+      time_period_str,
+      time_period_str_singular
+    ),
+  },
+    most_worked_on_project_per_year
+end
+
 ---@param projects table<string, chronicles.ChroniclesData.ProjectData>
 ---@param start_ts integer
 ---@param end_ts integer
