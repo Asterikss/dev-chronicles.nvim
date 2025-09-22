@@ -1,7 +1,6 @@
 local M = {}
 
 local time = require('dev-chronicles.core.time')
-local time_years = require('dev-chronicles.core.time.years')
 local notify = require('dev-chronicles.utils.notify')
 
 -- TODO: return type
@@ -323,16 +322,27 @@ function M.get_dashboard_data_years(
   time_period_str_singular,
   construct_most_worked_on_project_arr
 )
+  local time_years = require('dev-chronicles.core.time.years')
+
   start_date = start_date
     or time_years.get_previous_year(session_base.canonical_year_str, n_years_by_default - 1)
   end_date = end_date or session_base.canonical_year_str
+
+  local l_pointer_year = time_years.str_to_year(start_date)
+  local r_pointer_year = time_years.str_to_year(end_date)
+  if not (l_pointer_year and r_pointer_year) then
+    notify.warn(
+      'Start and end year must be valid (YYYY). [' .. start_date .. ' — ' .. end_date .. ']'
+    )
+    return
+  end
 
   local start_ts = time_years.convert_year_str_to_timestamp(start_date)
   local end_ts = time_years.convert_year_str_to_timestamp(end_date, true)
   local projects = data.projects
 
   if start_ts > end_ts then
-    notify.warn(('DevChronicles Error: start (%s) > end (%s)'):format(start_date, end_date))
+    notify.warn(('start year: (%s) > end year: (%s)'):format(start_date, end_date))
     return
   end
 
@@ -346,9 +356,6 @@ function M.get_dashboard_data_years(
   local max_project_time = 0
   local global_time_filtered = 0
   local most_worked_on_project_per_year = construct_most_worked_on_project_arr and {} or nil
-
-  local l_pointer_year = assert(tonumber(start_date), 'bad start_year')
-  local r_pointer_year = assert(tonumber(end_date), 'bad start_year')
 
   if projects then
     local i = 0

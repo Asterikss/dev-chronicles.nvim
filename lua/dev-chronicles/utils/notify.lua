@@ -30,4 +30,13 @@ function M.error(msg)
   M.log(level, msg)
 end
 
+---@param msg string
+function M.fatal(msg)
+  local lvl = vim.log.levels.ERROR
+  local full_msg = 'DevChronicles Fatal: ' .. msg
+  M.notify(full_msg, lvl)
+  M.log(lvl, msg)
+  error(full_msg, 2)
+end
+
 return M

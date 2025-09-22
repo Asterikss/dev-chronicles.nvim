@@ -9,7 +9,10 @@ local notify = require('dev-chronicles.utils.notify')
 ---@param end_of_year? boolean Should the end of year timestamp be returned
 ---@return integer: timestamp
 function M.convert_year_str_to_timestamp(year_str, end_of_year)
-  local year = assert(tonumber(year_str), 'invalid year string')
+  local year = M.str_to_year(year_str)
+  if not year then
+    notify.fatal('invalid year string')
+  end
   -- if end_of_year: bump to first of next year, otherwise first of this year
   local ts = os.time({
     year = year + (end_of_year and 1 or 0),
@@ -122,6 +125,15 @@ function M.is_year_in_range(year_str, start_year, end_year)
   end
 
   return start <= year and year <= ending
+end
+
+---@param year_str string (YYYY)
+---@return number?
+function M.str_to_year(year_str)
+  local y = tonumber(year_str)
+  if y and y >= 1 and y <= 9999 then
+    return y
+  end
 end
 
 return M

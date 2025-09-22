@@ -92,6 +92,10 @@ function M.dashboard(
     return
   end
 
+  if not dashboard_stats then
+    return
+  end
+
   local window_dimensions =
     get_window_dimensions(dashboard_type_options.window_width, dashboard_type_options.window_height)
 
