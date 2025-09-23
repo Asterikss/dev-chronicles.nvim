@@ -1,5 +1,7 @@
 local M = {}
 
+local render = require('dev-chronicles.core.render')
+
 function M.display_session_time()
   local format_time = require('dev-chronicles.core.time').format_time
   local _, session_active = require('dev-chronicles.api').get_session_info()
@@ -33,7 +35,7 @@ function M.display_session_time()
     }
   end
 
-  require('dev-chronicles.core.render').render({
+  render.render({
     lines = lines,
     highlights = highlights,
     window_dimensions = {
@@ -41,6 +43,47 @@ function M.display_session_time()
       row = math.floor((vim.o.lines - n_lines) * 0.35),
       width = width,
       height = n_lines,
+    },
+  })
+end
+
+function M.display_project_list(opts)
+  local data = require('dev-chronicles.utils.data').load_data(opts.data_file)
+  if not data then
+    return
+  end
+
+  local lines, highlights, lines_idx, width = {}, {}, 0, 0
+
+  for project_id, _ in pairs(data.projects) do
+    lines_idx = lines_idx + 1
+    lines[lines_idx] = project_id
+    width = math.max(width, #project_id)
+  end
+
+  table.sort(lines, function(a, b)
+    return data.projects[a].total_time > data.projects[b].total_time
+  end)
+
+  for i = 1, lines_idx do
+    highlights[i] = {
+      line = i,
+      col = 0,
+      end_col = -1,
+      hl_group = 'DevChroniclesAccent',
+    }
+  end
+
+  width = math.floor(width * 1.5)
+
+  render.render({
+    lines = lines,
+    highlights = highlights,
+    window_dimensions = {
+      col = math.floor((vim.o.columns - width) / 2),
+      row = math.floor((vim.o.lines - lines_idx) * 0.35),
+      width = width,
+      height = lines_idx,
     },
   })
 end

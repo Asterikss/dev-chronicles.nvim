@@ -1,7 +1,5 @@
 local M = {}
 
-local notify = require('dev-chronicles.utils.notify')
-
 ---@param panel_subtype chronicles.Panel.Subtype
 ---@param data chronicles.ChroniclesData
 ---@param opts chronicles.Options
@@ -17,6 +15,7 @@ function M.dashboard(
   session_base,
   session_time_seconds
 )
+  local notify = require('dev-chronicles.utils.notify')
   local dashboard_data_extraction = require('dev-chronicles.dashboard.data_extraction')
   local PanelSubtype = require('dev-chronicles.core.enums').PanelSubtype
   local get_window_dimensions = require('dev-chronicles.utils').get_window_dimensions

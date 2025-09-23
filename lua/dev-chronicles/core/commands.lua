@@ -10,6 +10,7 @@ end
 function M._setup_the_command(opts)
   local api = require('dev-chronicles.api')
   local enums = require('dev-chronicles.core.enums')
+  local panels = require('dev-chronicles.core.panels')
   local curr_month = require('dev-chronicles.core.time').get_month_str()
 
   vim.api.nvim_create_user_command('DevChronicles', function(command_opts)
@@ -53,11 +54,13 @@ function M._setup_the_command(opts)
             or vim.tbl_extend('error', session_base, { is_tracking = false })
         )
       )
+    elseif first_arg == 'list' then
+      panels.display_project_list(opts)
     elseif first_arg == 'abort' then
       api.abort_session()
       vim.notify('Session aborted')
     elseif first_arg == 'time' then
-      require('dev-chronicles.core.panels').display_session_time()
+      panels.display_session_time()
     elseif first_arg == 'finish' then
       api.finish_session()
       vim.notify('Session finished')
