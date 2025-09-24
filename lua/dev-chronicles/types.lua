@@ -220,6 +220,5 @@
 ---@field highlights table<string, { fg?: string, bg?: string, bold?: boolean, italic?: boolean, underline?: boolean }>
 ---@field data_file string Path to the data file
 ---@field log_file string Path to the log file
----@field for_dev_start_time? integer
----@field parsed_exclude_subdirs_relative_map? table<string, boolean> exclude_subdirs_relative as a map
+---@field runtime_opts { for_dev_start_time?: integer, parsed_exclude_subdirs_relative_map?: table<string, boolean>} -- exclude_subdirs_relative as a map
 ---@field extra_default_dashboard_bar_chars string[][][]

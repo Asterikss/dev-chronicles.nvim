@@ -148,8 +148,10 @@ local defaults = {
     DevChroniclesWindowBG = { bg = '#100E18' },
     DevChroniclesWindowTile = { bg = '#FFC0CB' },
   },
-  for_dev_start_time = nil,
-  parsed_exclude_subdirs_relative_map = nil,
+  runtime_opts = {
+    for_dev_start_time = nil,
+    parsed_exclude_subdirs_relative_map = nil,
+  },
   extra_default_dashboard_bar_chars = {
     {
       { ' ▼ ' },
@@ -222,13 +224,13 @@ function M.setup(opts)
   handle_paths_field('tracked_dirs')
   handle_paths_field('exclude_dirs_absolute')
 
-  if not merged.parsed_exclude_subdirs_relative_map then
+  if not merged.runtime_opts.parsed_exclude_subdirs_relative_map then
     ---@type table<string, boolean>
     local parsed_exclude_subdirs_relative_map = {}
     for _, subdir in ipairs(merged.exclude_subdirs_relative) do
       parsed_exclude_subdirs_relative_map[subdir] = true
     end
-    merged.parsed_exclude_subdirs_relative_map = parsed_exclude_subdirs_relative_map
+    merged.runtime_opts.parsed_exclude_subdirs_relative_map = parsed_exclude_subdirs_relative_map
   end
 
   if vim.fn.isabsolutepath(merged.data_file) ~= 1 then

@@ -14,14 +14,14 @@ function M.start_session(opts)
     opts.tracked_parent_dirs,
     opts.tracked_dirs,
     opts.exclude_dirs_absolute,
-    opts.parsed_exclude_subdirs_relative_map,
+    opts.runtime_opts.parsed_exclude_subdirs_relative_map,
     opts.differentiate_projects_by_folder_not_path
   )
 
   if project_id and project_name then
     session.project_id = project_id
     session.project_name = project_name
-    session.start_time = opts.for_dev_start_time or os.time()
+    session.start_time = opts.runtime_opts.for_dev_start_time or os.time()
     session.is_tracking = true
   end
 end
