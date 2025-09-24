@@ -112,6 +112,7 @@ function M.dashboard(
     lines = lines,
     highlights = highlights,
     window_dimensions = window_dimensions,
+    buf_name = 'Dev Chronicles Dashboard',
     window_title = dashboard_type_options.header.window_title,
     window_boarder = dashboard_type_options.window_border,
   }

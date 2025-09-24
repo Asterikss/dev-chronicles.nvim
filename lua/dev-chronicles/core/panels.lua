@@ -38,6 +38,7 @@ function M.display_session_time()
   render.render({
     lines = lines,
     highlights = highlights,
+    buf_name = 'Dev Chronicles Time',
     window_dimensions = {
       col = math.floor((vim.o.columns - width) / 2),
       row = math.floor((vim.o.lines - n_lines) * 0.35),
@@ -79,6 +80,7 @@ function M.display_project_list(opts)
   render.render({
     lines = lines,
     highlights = highlights,
+    buf_name = 'Dev Chronicles Project List',
     window_dimensions = {
       col = math.floor((vim.o.columns - width) / 2),
       row = math.floor((vim.o.lines - lines_idx) * 0.35),

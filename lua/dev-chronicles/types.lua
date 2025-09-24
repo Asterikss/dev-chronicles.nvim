@@ -104,8 +104,10 @@
 ---@field lines string[]
 ---@field highlights chronicles.Highlight[]
 ---@field window_dimensions chronicles.WindowDimensions
+---@field buf_name string
 ---@field window_title? string
 ---@field window_border? string[]
+---@field actions? table<string, function>
 
 -- --------------------------------------------
 -- Dev Chronicles Data

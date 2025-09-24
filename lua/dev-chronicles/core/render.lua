@@ -37,7 +37,19 @@ function M.render(panel_data)
     )
   end
 
+  local function get_current_context()
+    local line_idx = vim.api.nvim_win_get_cursor(win)[1]
+    local line_content = panel_data.lines[line_idx]
+    return {
+      line_idx = line_idx,
+      line_content = line_content,
+      buf = buf,
+      win = win,
+    }
+  end
+
   local opts = { buffer = buf, nowait = true, silent = true }
+
   vim.keymap.set('n', 'q', function()
     vim.api.nvim_win_close(win, true)
   end, opts)
@@ -45,13 +57,21 @@ function M.render(panel_data)
     vim.api.nvim_win_close(win, true)
   end, opts)
 
+  if panel_data.actions then
+    for key, callback in pairs(panel_data.actions) do
+      vim.keymap.set('n', key, function()
+        callback(get_current_context())
+      end, opts)
+    end
+  end
+
   vim.api.nvim_set_option_value('buftype', 'nofile', { buf = buf })
   vim.api.nvim_set_option_value('bufhidden', 'wipe', { buf = buf })
   vim.api.nvim_set_option_value('filetype', 'dev-chronicles', { buf = buf })
   vim.api.nvim_set_option_value('modifiable', false, { buf = buf })
   vim.api.nvim_set_option_value('readonly', true, { buf = buf })
 
-  vim.api.nvim_buf_set_name(buf, 'Dev Chronicles')
+  vim.api.nvim_buf_set_name(buf, panel_data.buf_name)
   vim.api.nvim_win_set_cursor(win, { 1, 0 })
 end
 
