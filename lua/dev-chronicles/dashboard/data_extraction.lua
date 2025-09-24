@@ -3,7 +3,6 @@ local M = {}
 local time = require('dev-chronicles.core.time')
 local notify = require('dev-chronicles.utils.notify')
 
--- TODO: return type
 ---@param data chronicles.ChroniclesData
 ---@param canonical_month_str string
 ---@param canonical_today_str string
@@ -11,6 +10,7 @@ local notify = require('dev-chronicles.utils.notify')
 ---@param show_time boolean
 ---@param time_period_str? string
 ---@param time_period_str_singular? string
+---@return chronicles.Dashboard.Data
 function M.get_dashboard_data_all(
   data,
   canonical_month_str,
@@ -20,10 +20,29 @@ function M.get_dashboard_data_all(
   time_period_str,
   time_period_str_singular
 )
+  local final_project_data_arr, project_arr_idx, max_project_time = {}, 0, 0
+
+  for project_id, project_data in pairs(data.projects) do
+    project_arr_idx = project_arr_idx + 1
+    final_project_data_arr[project_arr_idx] = {
+      id = project_id,
+      total_time = project_data.total_time,
+      last_worked = project_data.last_worked,
+      last_worked_canonical = project_data.last_worked_canonical,
+      first_worked = project_data.first_worked,
+      tags_map = project_data.tags_map,
+      global_time = project_data.total_time,
+    }
+    max_project_time = math.max(max_project_time, project_data.total_time)
+  end
+
+  ---@type chronicles.Dashboard.Data
   return {
     global_time = data.global_time,
     global_time_filtered = data.global_time,
-    projects_filtered_parsed = next(data.projects) ~= nil and data.projects,
+    final_project_data_arr = next(final_project_data_arr) ~= nil and final_project_data_arr or nil,
+    max_project_time = max_project_time,
+    does_include_curr_date = true,
     time_period_str = time.get_time_period_str_months(
       time.get_month_str(data.tracking_start),
       time.get_month_str(),
