@@ -134,10 +134,7 @@ end
 function M.get_previous_day(start_day, offset)
   offset = offset or 1
   if offset < 0 then
-    vim.notify(
-      'DevChronicles Warning: Offset, when getting previous day, cannot be '
-        .. 'smaller than 0. Setting it to 1'
-    )
+    notify.warn('Offset, when getting previous day, cannot be smaller than 0. Setting it to 1')
     offset = 1
   end
 
@@ -166,9 +163,7 @@ end
 function M.get_previous_month(start_month, offset)
   offset = offset or 1
   if offset < 0 then
-    vim.notify(
-      'DevChronicesl Warning: Offset, when getting previous month, cannot be smaller than 0. Setting it to one'
-    )
+    notify.warn('Offset, when getting previous month, cannot be smaller than 0. Setting it to 1')
     offset = 1
   end
 

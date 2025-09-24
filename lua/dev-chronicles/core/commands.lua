@@ -48,7 +48,7 @@ function M._setup_the_command(opts)
       api.panel(enums.PanelType.Dashboard, enums.PanelSubtype.Days, { start_offset = 6 }, opts)
     elseif first_arg == 'info' then
       local session_base, session_active = api.get_session_info(opts.extend_today_to_4am)
-      vim.notify(
+      notify.notify(
         vim.inspect(
           session_active and vim.tbl_extend('error', session_active, session_base)
             or vim.tbl_extend('error', session_base, { is_tracking = false })
@@ -58,20 +58,20 @@ function M._setup_the_command(opts)
       panels.display_project_list(opts)
     elseif first_arg == 'abort' then
       api.abort_session()
-      vim.notify('Session aborted')
+      notify.notify('Session aborted')
     elseif first_arg == 'time' then
       panels.display_session_time()
     elseif first_arg == 'finish' then
       api.finish_session()
-      vim.notify('Session finished')
+      notify.notify('Session finished')
     elseif first_arg == 'config' then
       if args[2] == 'default' then
-        vim.notify(vim.inspect(require('dev-chronicles.config').get_default_opts()))
+        notify.notify(vim.inspect(require('dev-chronicles.config').get_default_opts()))
       else
-        vim.notify(vim.inspect(opts))
+        notify.notify(vim.inspect(opts))
       end
     else
-      vim.notify(
+      notify.notify(
         'Usage: :DevChronicles [all | days [start_offset [end_offset]] |'
           .. 'months [start_date [end_date]] | today | week | info | abort]'
       )

@@ -1,5 +1,7 @@
 local M = {}
 
+local notify = require('dev-chronicles.utils.notify')
+
 ---@type chronicles.Options
 local options
 
@@ -238,33 +240,31 @@ function M.setup(opts)
   end
 
   if merged.dashboard.dashboard_months.n_by_default < 1 then
-    vim.notify('DevChronicles: n_months_by_default should be greter than 0')
+    notify.error('n_months_by_default should be greter than 0')
     return
   end
 
   if merged.dashboard.bar_spacing < 0 then
-    vim.notify('DevChronicles: bar_spacing should be a positive number')
+    notify.error('bar_spacing should be a positive number')
     return
   end
 
   if
     merged.dashboard.footer.let_proj_names_extend_bars_by_one and merged.dashboard.bar_spacing < 2
   then
-    vim.notify(
-      'DevChronicles: if let_proj_names_extend_bars_by_one is set to true then bar_spacing should be at least 2'
+    notify.error(
+      'if let_proj_names_extend_bars_by_one is set to true then bar_spacing should be at least 2'
     )
     return
   end
 
   if merged.dashboard.bar_header_extends_by * 2 > merged.dashboard.bar_spacing then
-    vim.notify(
-      'DevChronicles setup error: dashboard.bar_header_extends_by extends too much given dashboard.bar_spacing'
-    )
+    notify.error('dashboard.bar_header_extends_by extends too much given dashboard.bar_spacing')
+    return
   end
   if merged.dashboard.bar_footer_extends_by * 2 > merged.dashboard.bar_spacing then
-    vim.notify(
-      'DevChronicles setup error: dashboard.bar_footer_extends_by extends too much given dashboard.bar_spacing'
-    )
+    notify.error('dashboard.bar_footer_extends_by extends too much given dashboard.bar_spacing')
+    return
   end
 
   if
@@ -280,13 +280,13 @@ function M.setup(opts)
   end
 
   if
-    merged.dashboard.dashboard_days.n_by_default > 30
+    merged.dashboard.dashboard_days.n_by_default > 60
     or merged.dashboard.dashboard_days.n_by_default < 1
   then
-    vim.notify(
-      'DevChronicles setup error: dashboard.default_n_last_days_shown cannot be grater than 30 and smaller than 1. Setting it to 30'
+    notify.warn(
+      'dashboard.default_n_last_days_shown cannot be grater than 60 and smaller than 1. Setting it to 30'
     )
-    merged.dashboard.dashboard_days.n_by_default = 30
+    merged.dashboard.dashboard_days.n_by_default = 60
   end
 
   for hl_name, hl_opts in pairs(merged.highlights) do

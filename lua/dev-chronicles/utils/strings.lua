@@ -34,7 +34,6 @@ function M.format_project_name(project_name, max_width)
     end
   end
 
-  vim.notify(vim.inspect(ret))
   return ret
 end
 

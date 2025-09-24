@@ -77,8 +77,8 @@ function M._record_session(data_file, session_active, session_base, track_days)
   local data_utils = require('dev-chronicles.utils.data')
   local data = data_utils.load_data(data_file)
   if not data then
-    vim.notify(
-      'DevChronicles Error: Recording the session failed. No data returned from load_data()'
+    require('dev-chronicles.utils.notify').error(
+      'Recording the session failed. No data returned from load_data()'
     )
     return
   end

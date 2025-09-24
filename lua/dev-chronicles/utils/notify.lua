@@ -1,12 +1,13 @@
-local M = {}
+local M = { log_file = nil }
 
-local log_path = require('dev-chronicles.config').get_opts().log_file
+---@param log_file string
+function M.setup_notify(log_file)
+  M.log_file = log_file
+end
 
 function M.log(level, msg)
-  local f = io.open(log_path, 'a')
-  if f then
-    f:write(string.format('[%s] %s\n', level, msg))
-    f:close()
+  if M.log_file then
+    vim.fn.writefile({ ('[%s] %s'):format(level, msg) }, M.log_file, 'a')
   end
 end
 

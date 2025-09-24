@@ -15,6 +15,7 @@ function M.construct_bar_representation(
   bar_header_extends_by,
   bar_footer_extends_by
 )
+  local notify = require('dev-chronicles.utils.notify')
   local str_sub = require('dev-chronicles.utils.strings').str_sub
   local bar_representation = {}
   local return_bar_header_extends_by = bar_header_extends_by
@@ -32,8 +33,8 @@ function M.construct_bar_representation(
     elseif j == 3 then
       width = bar_width + (return_bar_footer_extends_by * 2)
     elseif j == 2 and next(pattern[j]) == nil then
-      vim.notify(
-        'DevChronicles Error: bar_chars BodyLevel (middle one) cannot be empty. Falling back to @ bar representation'
+      notify.warn(
+        'bar_chars BodyLevel (middle one) cannot be empty. Falling back to @ bar representation'
       )
       return M._construct_fallback_bar_representation(bar_width)
     end
@@ -59,8 +60,8 @@ function M.construct_bar_representation(
         n_to_fill_bar_width = width / row_chars_display_width
 
         if n_to_fill_bar_width ~= math.floor(n_to_fill_bar_width) then
-          vim.notify(
-            'DevChronicles: provided bar_chars row characters in '
+          notify.warn(
+            'Provided bar_chars row characters in '
               .. keys[j]
               .. ' level: '
               .. row_chars
