@@ -1,5 +1,6 @@
 local M = {}
 
+-- TODO: this should not be like that
 M._colors = {
   'DevChroniclesRed',
   'DevChroniclesBlue',

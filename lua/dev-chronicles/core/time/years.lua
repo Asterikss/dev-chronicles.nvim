@@ -1,6 +1,7 @@
 local M = {}
 
 local time = require('dev-chronicles.core.time')
+local time_days = require('dev-chronicles.core.time.days')
 local notify = require('dev-chronicles.utils.notify')
 
 ---Accepts a year string in format 'YYYY' and transforms it into a unix timestamp.
@@ -86,7 +87,7 @@ function M.get_time_period_str_years(
   end
 
   if does_end_at_curr_year then
-    local day, month, _ = time.extract_day_month_year(canonical_today_str)
+    local day, month, _ = time_days.extract_day_month_year(canonical_today_str)
     period = ('%s [%02d.%02d]'):format(period, day, month)
   end
 

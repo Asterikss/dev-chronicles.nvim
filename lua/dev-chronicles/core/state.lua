@@ -36,10 +36,11 @@ end
 ---@return chronicles.SessionBase, chronicles.SessionActive?
 function M.get_session_info(extend_today_to_4am)
   local time = require('dev-chronicles.core.time')
+  local time_days = require('dev-chronicles.core.time.days')
 
   local now_ts = os.time()
   local canonical_ts, canonical_today_str =
-    time.get_canonical_curr_ts_and_day_str(extend_today_to_4am)
+    time_days.get_canonical_curr_ts_and_day_str(extend_today_to_4am)
 
   ---@type chronicles.SessionBase
   local session_base = {

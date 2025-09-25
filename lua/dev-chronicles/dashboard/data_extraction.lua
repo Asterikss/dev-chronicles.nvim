@@ -219,15 +219,17 @@ function M.get_dashboard_data_days(
   time_period_str_singular,
   construct_most_worked_on_project_arr
 )
+  local time_days = require('dev-chronicles.core.time.days')
+
   start_offset = start_offset or n_days_by_default - 1
   end_offset = end_offset or 0
 
   local DAY_SEC = 86400 -- 24 * 60 * 60
-  local start_str = time.get_previous_day(canonical_today_str, start_offset)
-  local end_str = time.get_previous_day(canonical_today_str, end_offset)
-  local start_ts = time.convert_day_str_to_timestamp(start_str)
-  local end_ts = time.convert_day_str_to_timestamp(end_str, true)
-  local canonical_today_timestamp = time.convert_day_str_to_timestamp(canonical_today_str)
+  local start_str = time_days.get_previous_day(canonical_today_str, start_offset)
+  local end_str = time_days.get_previous_day(canonical_today_str, end_offset)
+  local start_ts = time_days.convert_day_str_to_timestamp(start_str)
+  local end_ts = time_days.convert_day_str_to_timestamp(end_str, true)
+  local canonical_today_timestamp = time_days.convert_day_str_to_timestamp(canonical_today_str)
   local projects = data.projects
 
   if start_ts > end_ts then
@@ -253,7 +255,7 @@ function M.get_dashboard_data_days(
       local day_max_time = 0
       ---@type string|boolean
       local day_max_project = false
-      local key = time.get_day_str(ts)
+      local key = time_days.get_day_str(ts)
 
       for project_id, project_data in pairs(projects) do
         local day_time = project_data.by_day[key]
@@ -305,7 +307,7 @@ function M.get_dashboard_data_days(
     max_project_time = max_project_time,
     does_include_curr_date = canonical_today_timestamp >= start_ts
       and canonical_today_timestamp <= end_ts,
-    time_period_str = time.get_time_period_str_days(
+    time_period_str = time_days.get_time_period_str_days(
       start_offset - end_offset + 1,
       start_str,
       end_str,
