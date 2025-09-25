@@ -2,46 +2,6 @@ local M = {}
 
 local format_time = require('dev-chronicles.core.time').format_time
 
-M._colors = {
-  'DevChroniclesRed',
-  'DevChroniclesBlue',
-  'DevChroniclesPurple',
-  'DevChroniclesGreen',
-  'DevChroniclesYellow',
-  'DevChroniclesMagenta',
-  'DevChroniclesLightPurple',
-  'DevChroniclesOrange',
-}
-
-M.BarLevel = {
-  Header = 'Header',
-  Body = 'Body',
-  Footer = 'Footer',
-}
-
----Calculates number of projects to keep and the chart starting column
----@param bar_width integer
----@param bar_spacing integer
----@param max_chart_width integer
----@param n_projects integer
----@param win_width integer
----@return integer, integer: n_projects_to_keep, chart_start_col
-function M.calc_chart_stats(bar_width, bar_spacing, max_chart_width, n_projects, win_width)
-  if n_projects < 1 then
-    return 0, -1
-  end
-  -- total_width = k_bars * bar_width + (k_bars - 1) * bar_spacing
-  -- k_bars * bar_width + (k_bars - 1) * bar_spacing <= max_chart_width
-  -- k_bars * (bar_width + bar_spacing) - bar_spacing <= max_chart_width
-  local max_n_bars = math.floor((max_chart_width + bar_spacing) / (bar_width + bar_spacing))
-  local n_projects_to_keep = math.min(n_projects, max_n_bars)
-
-  local chart_width = (n_projects_to_keep * bar_width) + ((n_projects_to_keep - 1) * bar_spacing)
-  local chart_start_col = math.floor((win_width - chart_width) / 2)
-
-  return n_projects_to_keep, chart_start_col
-end
-
 ---Adds 4 line header. Monster func
 ---@param lines string[]
 ---@param highlights chronicles.Highlight[]
@@ -276,147 +236,6 @@ function M.set_header_lines_highlights(
   M.set_hline_lines_highlights(lines, highlights, win_width, '─', 'DevChroniclesAccent')
 end
 
----@param arr_projects chronicles.Dashboard.FinalProjectData[]
----@param len_arr_projects integer
----@param n_projects_to_keep integer
----@param sort boolean
----@param by_last_worked boolean
----@param asc boolean
----@return chronicles.Dashboard.FinalProjectData[], integer
-function M.sort_and_cutoff_projects(
-  arr_projects,
-  len_arr_projects,
-  n_projects_to_keep,
-  sort,
-  by_last_worked,
-  asc
-)
-  if sort then
-    table.sort(arr_projects, function(a, b)
-      if by_last_worked then
-        if asc then
-          return a.last_worked < b.last_worked
-        else
-          return a.last_worked > b.last_worked
-        end
-      else
-        if asc then
-          return a.total_time < b.total_time
-        else
-          return a.total_time > b.total_time
-        end
-      end
-    end)
-  end
-
-  if n_projects_to_keep == len_arr_projects then
-    return arr_projects, len_arr_projects
-  end
-
-  local arr_projects_filtered = {}
-
-  if asc then
-    for i = math.max(1, len_arr_projects - n_projects_to_keep + 1), len_arr_projects do
-      table.insert(arr_projects_filtered, arr_projects[i])
-    end
-  else
-    for i = 1, math.min(n_projects_to_keep, len_arr_projects) do
-      table.insert(arr_projects_filtered, arr_projects[i])
-    end
-  end
-
-  return arr_projects_filtered, #arr_projects_filtered
-end
-
----@param arr_projects chronicles.Dashboard.FinalProjectData[]
----@param max_time integer
----@param max_bar_height integer
----@param chart_start_col integer
----@param bar_width integer
----@param bar_spacing integer
----@param let_proj_names_extend_bars_by_one boolean
----@param random_bars_coloring boolean
----@param projects_sorted_ascending boolean
----@param bar_header_realized_rows_tbl string[]
----@param differentiate_projects_by_folder_not_path boolean
----@return chronicles.Dashboard.BarData[], integer, table<string, string>
-function M.create_bars_data(
-  arr_projects,
-  max_time,
-  max_bar_height,
-  chart_start_col,
-  bar_width,
-  bar_spacing,
-  let_proj_names_extend_bars_by_one,
-  random_bars_coloring,
-  projects_sorted_ascending,
-  bar_header_realized_rows_tbl,
-  differentiate_projects_by_folder_not_path
-)
-  local string_utils = require('dev-chronicles.utils.strings')
-  local shuffle = require('dev-chronicles.utils').shuffle
-
-  ---@type chronicles.Dashboard.BarData[]
-  local bars_data = {}
-  ---@type table<string, string>
-  local project_id_to_color = {}
-  local max_lines_proj_names = 0
-  local n_projects = #arr_projects
-  local colors = M._colors
-  local n_colors = #colors
-  local color_index
-
-  if random_bars_coloring then
-    colors = vim.deepcopy(M._colors)
-    shuffle(colors)
-    color_index = 1
-  end
-
-  for i, project in ipairs(arr_projects) do
-    local bar_height = math.max(1, math.floor((project.total_time / max_time) * max_bar_height))
-
-    local color
-    if random_bars_coloring then
-      -- All colors were used
-      if color_index > n_colors then
-        shuffle(colors)
-        color_index = 1
-      end
-      color = colors[color_index]
-      color_index = color_index + 1
-    else
-      color = projects_sorted_ascending and colors[((n_projects - i) % n_colors) + 1]
-        or colors[((i - 1) % n_colors) + 1]
-    end
-
-    local project_id = project.id
-    project_id_to_color[project_id] = color
-
-    local project_name = differentiate_projects_by_folder_not_path and project_id
-      or string_utils.get_project_name(project_id)
-    local project_name_tbl = string_utils.format_project_name(
-      project_name,
-      bar_width + (let_proj_names_extend_bars_by_one and 2 or 0)
-    )
-    max_lines_proj_names = math.max(max_lines_proj_names, #project_name_tbl)
-
-    table.insert(bars_data, {
-      project_name_tbl = project_name_tbl,
-      project_time = project.total_time,
-      height = bar_height,
-      color = color,
-      start_col = chart_start_col + (i - 1) * (bar_width + bar_spacing),
-      width = bar_width,
-      current_bar_level = (next(bar_header_realized_rows_tbl) ~= nil) and M.BarLevel.Header
-        or M.BarLevel.Body,
-      curr_bar_representation_index = 1,
-      global_project_time = project.global_time,
-    })
-  end
-
-  return bars_data, max_lines_proj_names, project_id_to_color
-end
-
 --- If global_time_line is set, then it overrides 3rd lines line
 ---@param lines string[]
 ---@param highlights chronicles.Highlight[]
@@ -568,6 +387,7 @@ function M.set_bars_lines_highlights(
   bar_width,
   win_width
 )
+  local BarLevel = require('dev-chronicles.core.enums').BarLevel
   local str_sub = require('dev-chronicles.utils.strings').str_sub
   local len_bar_header_rows = #bar_representation.header.realized_rows
   local len_bar_body_rows = #bar_representation.body.realized_rows
@@ -587,7 +407,7 @@ function M.set_bars_lines_highlights(
         local char_display_widths
         local bar_representation_index
 
-        if bar.current_bar_level == M.BarLevel.Header then
+        if bar.current_bar_level == BarLevel.Header then
           offset = bar_header_extends_by
           pos = bar.start_col - offset
           bar_representation_index = bar.curr_bar_representation_index
@@ -596,15 +416,15 @@ function M.set_bars_lines_highlights(
           char_display_widths = bar_representation.header.char_display_widths
 
           if bar_representation_index + 1 > len_bar_header_rows then
-            bar.current_bar_level = M.BarLevel.Body
+            bar.current_bar_level = BarLevel.Body
             bar.curr_bar_representation_index = 1
           else
             bar.curr_bar_representation_index = bar_representation_index + 1
           end
-        elseif bar.current_bar_level == M.BarLevel.Footer or row == len_bar_footer_rows then
+        elseif bar.current_bar_level == BarLevel.Footer or row == len_bar_footer_rows then
           if row == len_bar_footer_rows then
             bar_representation_index = 1
-            bar.current_bar_level = M.BarLevel.Footer
+            bar.current_bar_level = BarLevel.Footer
           else
             bar_representation_index = bar.curr_bar_representation_index
           end
@@ -615,7 +435,7 @@ function M.set_bars_lines_highlights(
           row_codepoint_counts = bar_representation.footer.row_codepoint_counts
           char_display_widths = bar_representation.footer.char_display_widths
           bar.curr_bar_representation_index = bar.curr_bar_representation_index + 1
-        elseif bar.current_bar_level == M.BarLevel.Body then
+        elseif bar.current_bar_level == BarLevel.Body then
           offset = 0
           pos = bar.start_col
           bar_representation_index = bar.curr_bar_representation_index
@@ -742,32 +562,6 @@ function M.set_project_names_lines_highlights(
 
     table.insert(lines, table.concat(line_chars))
   end
-end
-
-function M.calc_max_bar_height(initial_max_bar_height, thresholds, max_time)
-  for i, threshold in ipairs(thresholds) do
-    if max_time < threshold * 3600 then
-      return math.floor((i / (#thresholds + 1)) * initial_max_bar_height)
-    end
-  end
-  return initial_max_bar_height
-end
-
----@param final_project_data_arr chronicles.Dashboard.FinalProjectData[]
----@param min_proj_time_to_display_proj integer
----@return chronicles.Dashboard.FinalProjectData[]
-function M.filter_by_min_time(final_project_data_arr, min_proj_time_to_display_proj)
-  local out = {}
-  local len_out = 0
-
-  for _, project_data in ipairs(final_project_data_arr) do
-    if project_data.total_time >= min_proj_time_to_display_proj then
-      len_out = len_out + 1
-      out[len_out] = project_data
-    end
-  end
-
-  return out
 end
 
 ---@param lines string[]

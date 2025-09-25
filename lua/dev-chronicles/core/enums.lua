@@ -14,4 +14,10 @@ M.PanelSubtype = {
   All = 'All',
 }
 
+M.BarLevel = {
+  Header = 'Header',
+  Body = 'Body',
+  Footer = 'Footer',
+}
+
 return M
