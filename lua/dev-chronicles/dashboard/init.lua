@@ -103,6 +103,7 @@ function M.dashboard(
     dashboard_type_options,
     window_dimensions.width,
     window_dimensions.height,
+    opts,
     top_projects,
     session_time_seconds
   )
@@ -123,18 +124,27 @@ end
 ---@param dashboard_type_opts chronicles.Options.Dashboard.Section
 ---@param win_width integer
 ---@param win_height integer
+---@param plugin_opts chronicles.Options
 ---@param top_projects? chronicles.Dashboard.TopProjectsArray
 ---@param curr_session_time? integer
----@return string[], table: Lines, Highlights
+---@return string[], chronicles.Highlight[]
 function M.create_dashboard_content(
   data,
   dashboard_type_opts,
   win_width,
   win_height,
+  plugin_opts,
   top_projects,
   curr_session_time
 )
+  local dashboard_content = require('dev-chronicles.dashboard.content')
   local dashboard_logic = require('dev-chronicles.dashboard.logic')
+  local dashboard_utils = require('dev-chronicles.utils.dashboard')
+  local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
+  local dashboard_opts = plugin_opts.dashboard
+  local differentiate_projects_by_folder_not_path =
+    plugin_opts.differentiate_projects_by_folder_not_path
+
   local lines = {}
   local highlights = {}
 
@@ -144,8 +154,6 @@ function M.create_dashboard_content(
     -- TODO: display logs
     return lines, highlights
   end
-
-  local dashboard_content = require('dev-chronicles.dashboard.content')
 
   local arr_projects = data.final_project_data_arr
   if arr_projects == nil then
@@ -159,12 +167,6 @@ function M.create_dashboard_content(
       top_projects
     )
   end
-
-  local dashboard_opts = require('dev-chronicles.config').get_opts().dashboard
-  local dashboard_utils = require('dev-chronicles.utils.dashboard')
-  local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
-  local differentiate_projects_by_folder_not_path =
-    require('dev-chronicles.config').get_opts().differentiate_projects_by_folder_not_path
 
   local chart_height = win_height - 7 -- header_height + footer_height
   local max_chart_width = win_width - 4 -- margins

@@ -175,7 +175,7 @@ function M.get_dashboard_data_months(
   return {
     global_time = data.global_time,
     global_time_filtered = global_time_filtered,
-    final_project_data_arr = next(arr_projects) and arr_projects or nil,
+    final_project_data_arr = next(arr_projects) ~= nil and arr_projects or nil,
     max_project_time = max_project_time,
     does_include_curr_date = time.is_month_in_range(
       session_base.canonical_month_str,
@@ -301,7 +301,7 @@ function M.get_dashboard_data_days(
   return {
     global_time = data.global_time,
     global_time_filtered = global_time_filtered,
-    final_project_data_arr = next(arr_projects) and arr_projects or nil,
+    final_project_data_arr = next(arr_projects) ~= nil and arr_projects or nil,
     max_project_time = max_project_time,
     does_include_curr_date = canonical_today_timestamp >= start_ts
       and canonical_today_timestamp <= end_ts,
@@ -440,7 +440,7 @@ function M.get_dashboard_data_years(
   return {
     global_time = data.global_time,
     global_time_filtered = global_time_filtered,
-    final_project_data_arr = next(arr_projects) and arr_projects or nil,
+    final_project_data_arr = next(arr_projects) ~= nil and arr_projects or nil,
     max_project_time = max_project_time,
     does_include_curr_date = time_years.is_year_in_range(
       session_base.canonical_year_str,

@@ -11,7 +11,7 @@ function M._setup_the_command(opts)
   local api = require('dev-chronicles.api')
   local enums = require('dev-chronicles.core.enums')
   local panels = require('dev-chronicles.core.panels')
-  local curr_month = require('dev-chronicles.core.time').get_month_str()
+  local notify = require('dev-chronicles.utils.notify')
 
   vim.api.nvim_create_user_command('DevChronicles', function(command_opts)
     local args = command_opts.fargs
@@ -87,7 +87,7 @@ function M._setup_the_command(opts)
         if split[2] == 'days' then
           return { '30' }
         elseif split[2] == 'months' then
-          return { curr_month }
+          return { 'MM.YYYY' }
         elseif split[2] == 'config' then
           return { 'default' }
         end
@@ -96,11 +96,6 @@ function M._setup_the_command(opts)
   })
 end
 
--- -@param data_file string
--- -@param track_days boolean
--- -@param min_session_time integer
--- -@param extend_today_to_4am boolean
--- M._setup_autocmds = function(data_file, track_days, min_session_time, extend_today_to_4am)
 ---@param opts chronicles.Options
 function M._setup_autocmds(opts)
   local group = vim.api.nvim_create_augroup('DevChronicles', { clear = true })
