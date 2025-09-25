@@ -88,6 +88,8 @@ function M._setup_the_command(opts)
           return { '30' }
         elseif split[2] == 'months' then
           return { 'MM.YYYY' }
+        elseif split[2] == 'years' then
+          return { 'YYYY' }
         elseif split[2] == 'config' then
           return { 'default' }
         end

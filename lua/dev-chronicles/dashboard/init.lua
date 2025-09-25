@@ -139,7 +139,6 @@ function M.create_dashboard_content(
 )
   local dashboard_content = require('dev-chronicles.dashboard.content')
   local dashboard_logic = require('dev-chronicles.dashboard.logic')
-  local dashboard_utils = require('dev-chronicles.utils.dashboard')
   local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
   local dashboard_opts = plugin_opts.dashboard
   local differentiate_projects_by_folder_not_path =
@@ -223,7 +222,7 @@ function M.create_dashboard_content(
     dashboard_type_opts.bar_chars and dashboard_type_opts.bar_chars or dashboard_opts.bar_chars
   )
 
-  local bar_representation = dashboard_utils.construct_bar_representation(
+  local bar_representation = dashboard_logic.construct_bar_representation(
     bar_repr,
     dashboard_opts.bar_width,
     dashboard_opts.bar_header_extends_by,
