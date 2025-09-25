@@ -36,6 +36,13 @@ function M.get_previous_year(start_year, offset)
   return tostring(year - offset)
 end
 
+---@param timestamp? integer
+---@return string
+function M.get_year_str(timestamp)
+  ---@type string
+  return os.date('%Y', timestamp)
+end
+
 ---Format the time period between `start_year` and `end_year`.
 ---If `end_year` is the current year the period ends at the current date.
 ---If `time_period_str` is supplied, it is used for formatting instead.

@@ -1,6 +1,7 @@
 local M = {}
 
 local time = require('dev-chronicles.core.time')
+local time_months = require('dev-chronicles.core.time.months')
 local notify = require('dev-chronicles.utils.notify')
 
 ---@param data chronicles.ChroniclesData
@@ -43,9 +44,9 @@ function M.get_dashboard_data_all(
     final_project_data_arr = next(final_project_data_arr) ~= nil and final_project_data_arr or nil,
     max_project_time = max_project_time,
     does_include_curr_date = true,
-    time_period_str = time.get_time_period_str_months(
-      time.get_month_str(data.tracking_start),
-      time.get_month_str(),
+    time_period_str = time_months.get_time_period_str_months(
+      time_months.get_month_str(data.tracking_start),
+      time_months.get_month_str(),
       canonical_month_str,
       canonical_today_str,
       show_date_period,
@@ -80,15 +81,15 @@ function M.get_dashboard_data_months(
   construct_most_worked_on_project_arr
 )
   start_date = start_date
-    or time.get_previous_month(session_base.canonical_month_str, n_months_by_default - 1)
+    or time_months.get_previous_month(session_base.canonical_month_str, n_months_by_default - 1)
   end_date = end_date or session_base.canonical_month_str
 
-  local l_pointer_month, l_pointer_year = time.extract_month_year(start_date)
-  local r_pointer_month, r_pointer_year = time.extract_month_year(end_date)
+  local l_pointer_month, l_pointer_year = time_months.extract_month_year(start_date)
+  local r_pointer_month, r_pointer_year = time_months.extract_month_year(end_date)
 
   local orig_month, orig_year = l_pointer_month, l_pointer_year
-  local start_ts = time.convert_month_str_to_timestamp(start_date)
-  local end_ts = time.convert_month_str_to_timestamp(end_date, true)
+  local start_ts = time_months.convert_month_str_to_timestamp(start_date)
+  local end_ts = time_months.convert_month_str_to_timestamp(end_date, true)
   local projects = data.projects
 
   if start_ts > end_ts then
@@ -177,12 +178,12 @@ function M.get_dashboard_data_months(
     global_time_filtered = global_time_filtered,
     final_project_data_arr = next(arr_projects) ~= nil and arr_projects or nil,
     max_project_time = max_project_time,
-    does_include_curr_date = time.is_month_in_range(
+    does_include_curr_date = time_months.is_month_in_range(
       session_base.canonical_month_str,
       start_date,
       end_date
     ),
-    time_period_str = time.get_time_period_str_months(
+    time_period_str = time_months.get_time_period_str_months(
       start_date,
       end_date,
       session_base.canonical_month_str,

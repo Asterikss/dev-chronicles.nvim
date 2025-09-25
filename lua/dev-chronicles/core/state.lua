@@ -35,8 +35,9 @@ end
 ---@param extend_today_to_4am boolean
 ---@return chronicles.SessionBase, chronicles.SessionActive?
 function M.get_session_info(extend_today_to_4am)
-  local time = require('dev-chronicles.core.time')
   local time_days = require('dev-chronicles.core.time.days')
+  local time_months = require('dev-chronicles.core.time.months')
+  local time_years = require('dev-chronicles.core.time.years')
 
   local now_ts = os.time()
   local canonical_ts, canonical_today_str =
@@ -46,8 +47,8 @@ function M.get_session_info(extend_today_to_4am)
   local session_base = {
     canonical_ts = canonical_ts,
     canonical_today_str = canonical_today_str,
-    canonical_month_str = time.get_month_str(canonical_ts),
-    canonical_year_str = time.get_year_str(canonical_ts),
+    canonical_month_str = time_months.get_month_str(canonical_ts),
+    canonical_year_str = time_years.get_year_str(canonical_ts),
     now_ts = now_ts,
   }
 
