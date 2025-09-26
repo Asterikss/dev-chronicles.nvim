@@ -48,9 +48,9 @@ function M._split_string_given_max_width(project_name, max_width, n_splits)
   for i = 1, n_splits do
     if #project_name > max_width then
       if i == n_splits then
-        table.insert(ret, project_name:sub(i, max_width - 1) .. '…') -- '~'
+        table.insert(ret, project_name:sub(1, max_width - 1) .. '…')
       else
-        table.insert(ret, project_name:sub(i, max_width))
+        table.insert(ret, project_name:sub(1, max_width))
       end
       project_name = project_name:sub(max_width + 1)
     else
@@ -103,7 +103,7 @@ end
 ---@param project_id string
 ---@return string
 function M.get_project_name(project_id)
-  return project_id:match('([^/]+)/?$') or project_id
+  return project_id:match('([^/]+)/*$') or project_id
 end
 
 return M
