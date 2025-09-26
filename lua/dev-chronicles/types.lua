@@ -146,22 +146,25 @@
 ---@field super_extra_duper_wide_bars boolean
 ---@field min_top_projects_len_to_show integer
 
+---@class chronicles.Options.Dashboard.Header.TotalTime
+---@field as_hours_max boolean
+---@field as_hours_min boolean
+---@field round_hours_above_one boolean
+---@field format_str string
+
 ---@class chronicles.Options.Dashboard.Header
 ---@field show_date_period boolean
 ---@field show_time boolean
 ---@field time_period_str string?
 ---@field time_period_str_singular string?
----@field total_time_as_hours_max boolean
----@field total_time_as_hours_min boolean
----@field total_time_round_hours_above_one boolean
 ---@field show_current_session_time boolean
 ---@field show_global_time_for_each_project boolean
 ---@field show_global_time_only_if_differs boolean
 ---@field proj_global_total_time_round_hours_above_one boolean
 ---@field color_global_proj_times_like_bars boolean
----@field total_time_format_str string
 ---@field prettify boolean
 ---@field window_title string
+---@field total_time chronicles.Options.Dashboard.Header.TotalTime
 ---@field top_projects chronicles.Options.Dashboard.Header.TopProjects
 
 ---@class chronicles.Options.Dashboard.Sorting
@@ -169,14 +172,16 @@
 ---@field sort_by_last_worked_not_total_time boolean
 ---@field ascending boolean
 
+---@class chronicles.Options.Dashboard.Base.ProjectTotalTime
+---@field as_hours_max boolean
+---@field as_hours_min boolean
+---@field round_hours_above_one boolean
+
 ---@class chronicles.Options.Dashboard.Base
 ---@field header chronicles.Options.Dashboard.Header
 ---@field sorting chronicles.Options.Dashboard.Sorting
 ---@field dynamic_bar_height_thresholds any?
 ---@field n_by_default integer
----@field proj_total_time_as_hours_max boolean
----@field proj_total_time_as_hours_min boolean
----@field proj_total_time_round_hours_above_one boolean
 ---@field random_bars_coloring boolean
 ---@field bars_coloring_follows_sorting_in_order boolean
 ---@field color_proj_times_like_bars boolean
@@ -185,6 +190,7 @@
 ---@field window_width number
 ---@field window_border? string[]
 ---@field bar_chars any?
+---@field project_total_time chronicles.Options.Dashboard.Base.ProjectTotalTime
 
 ---@class chronicles.Options.Dashboard.Section : chronicles.Options.Dashboard.Base
 ---@field header chronicles.Options.Dashboard.Header

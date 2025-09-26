@@ -25,13 +25,14 @@ function M.set_header_lines_highlights(
   top_projects,
   project_id_to_color
 )
+  local total_time_opts = header_dashboard_type_opts.total_time
   local left_header = string.format(
-    header_dashboard_type_opts.total_time_format_str,
+    total_time_opts.format_str,
     format_time(
       global_time_filtered,
-      header_dashboard_type_opts.total_time_as_hours_max,
-      header_dashboard_type_opts.total_time_as_hours_min,
-      header_dashboard_type_opts.total_time_round_hours_above_one
+      total_time_opts.as_hours_max,
+      total_time_opts.as_hours_min,
+      total_time_opts.round_hours_above_one
     )
   )
   if
@@ -245,9 +246,7 @@ end
 ---@param show_global_time_for_each_project boolean
 ---@param show_global_time_only_if_differs boolean
 ---@param color_global_proj_times_like_bars boolean
----@param proj_total_time_as_hours_max boolean
----@param proj_total_time_as_hours_min boolean
----@param proj_total_time_round_hours_above_one boolean
+---@param project_total_time chronicles.Options.Dashboard.Base.ProjectTotalTime
 ---@param proj_global_total_time_round_hours_above_one boolean
 function M.set_time_labels_above_bars(
   lines,
@@ -258,9 +257,7 @@ function M.set_time_labels_above_bars(
   show_global_time_for_each_project,
   show_global_time_only_if_differs,
   color_global_proj_times_like_bars,
-  proj_total_time_as_hours_max,
-  proj_total_time_as_hours_min,
-  proj_total_time_round_hours_above_one,
+  project_total_time,
   proj_global_total_time_round_hours_above_one
 )
   -- Helper function to place a formatted time string onto a character array.
@@ -282,8 +279,8 @@ function M.set_time_labels_above_bars(
   )
     local time_str = format_time(
       time_to_format,
-      proj_total_time_as_hours_max,
-      proj_total_time_as_hours_min,
+      project_total_time.as_hours_max,
+      project_total_time.as_hours_min,
       round_hours_above_one
     )
     local len_time_str = #time_str

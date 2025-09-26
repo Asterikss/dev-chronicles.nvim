@@ -268,9 +268,7 @@ function M.create_dashboard_content(
     dashboard_type_opts.header.show_global_time_for_each_project,
     dashboard_type_opts.header.show_global_time_only_if_differs,
     dashboard_type_opts.header.color_global_proj_times_like_bars,
-    dashboard_type_opts.proj_total_time_as_hours_max,
-    dashboard_type_opts.proj_total_time_as_hours_min,
-    dashboard_type_opts.proj_total_time_round_hours_above_one,
+    dashboard_type_opts.project_total_time,
     dashboard_type_opts.header.proj_global_total_time_round_hours_above_one
   )
 
