@@ -242,47 +242,38 @@ end
 ---@param highlights chronicles.Highlight[]
 ---@param bars_data chronicles.Dashboard.BarData[]
 ---@param win_width integer
----@param color_proj_times_like_bars boolean
----@param show_global_time_for_each_project boolean
----@param show_global_time_only_if_differs boolean
----@param color_global_proj_times_like_bars boolean
 ---@param project_total_time chronicles.Options.Dashboard.Base.ProjectTotalTime
----@param proj_global_total_time_round_hours_above_one boolean
+---@param project_global_time chronicles.Options.Dashboard.Header.ProjectGlobalTime
 function M.set_time_labels_above_bars(
   lines,
   highlights,
   bars_data,
   win_width,
-  color_proj_times_like_bars,
-  show_global_time_for_each_project,
-  show_global_time_only_if_differs,
-  color_global_proj_times_like_bars,
   project_total_time,
-  proj_global_total_time_round_hours_above_one
+  project_global_time
 )
   -- Helper function to place a formatted time string onto a character array.
   ---@param target_line string[]
   ---@param time_to_format integer
   ---@param bar_start_col integer
   ---@param bar_width integer
-  ---@param color? string
   ---@param highlights_insert_positon integer
+  ---@param color? string
+  ---@param as_hours_max boolean
+  ---@param as_hours_min boolean
   ---@param round_hours_above_one boolean
   local function place_label(
     target_line,
     time_to_format,
     bar_start_col,
     bar_width,
-    color,
     highlights_insert_positon,
+    color,
+    as_hours_max,
+    as_hours_min,
     round_hours_above_one
   )
-    local time_str = format_time(
-      time_to_format,
-      project_total_time.as_hours_max,
-      project_total_time.as_hours_min,
-      round_hours_above_one
-    )
+    local time_str = format_time(time_to_format, as_hours_max, as_hours_min, round_hours_above_one)
     local len_time_str = #time_str
     local label_start = bar_start_col + math.floor((bar_width - len_time_str) / 2)
 
@@ -306,24 +297,26 @@ function M.set_time_labels_above_bars(
   local time_line = vim.split(string.rep(' ', win_width), '')
 
   local global_time_line
-  if show_global_time_for_each_project then
+  if project_global_time.enable then
     global_time_line = vim.split(string.rep(' ', win_width), '')
   end
 
   for _, bar in ipairs(bars_data) do
     if global_time_line then
       if
-        bar.global_project_time
-        and (not show_global_time_only_if_differs or bar.global_project_time ~= bar.project_time)
+        not project_global_time.show_only_if_differs
+        or bar.global_project_time ~= bar.project_time
       then
         place_label(
           global_time_line,
           bar.global_project_time,
           bar.start_col,
           bar.width,
-          color_global_proj_times_like_bars and bar.color or nil,
           3,
-          proj_global_total_time_round_hours_above_one
+          project_global_time.color_like_bars and bar.color or nil,
+          project_global_time.as_hours_max,
+          project_global_time.as_hours_min,
+          project_global_time.round_hours_above_one
         )
       end
     end
@@ -333,9 +326,11 @@ function M.set_time_labels_above_bars(
       bar.project_time,
       bar.start_col,
       bar.width,
-      color_proj_times_like_bars and bar.color or nil,
       highlights_insert_positon,
-      proj_total_time_round_hours_above_one
+      project_total_time.color_like_bars and bar.color or nil,
+      project_total_time.as_hours_max,
+      project_total_time.as_hours_min,
+      project_total_time.round_hours_above_one
     )
   end
 
@@ -352,7 +347,7 @@ function M.set_time_labels_above_bars(
   end
 
   table.insert(lines, table.concat(time_line))
-  if not color_proj_times_like_bars then
+  if not project_total_time.color_like_bars then
     table.insert(highlights, {
       line = highlights_insert_positon,
       col = 0,

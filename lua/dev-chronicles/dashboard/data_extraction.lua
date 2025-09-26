@@ -1,6 +1,5 @@
 local M = {}
 
-local time = require('dev-chronicles.core.time')
 local time_months = require('dev-chronicles.core.time.months')
 local notify = require('dev-chronicles.utils.notify')
 

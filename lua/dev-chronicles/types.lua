@@ -49,7 +49,7 @@
 ---@field last_worked_canonical integer
 ---@field first_worked integer
 ---@field tags_map table<string, any>
----@field global_time integer?
+---@field global_time integer
 
 ---@alias chronicles.Dashboard.FinalProjectDataMap table<string, chronicles.Dashboard.FinalProjectData>
 
@@ -70,7 +70,7 @@
 ---@field width integer
 ---@field current_bar_level chronicles.BarLevel
 ---@field curr_bar_representation_index integer
----@field global_project_time integer?
+---@field global_project_time integer
 
 ---@class (exact) chronicles.BarLevelRepresentation
 ---@field realized_rows string[]
@@ -146,11 +146,18 @@
 ---@field super_extra_duper_wide_bars boolean
 ---@field min_top_projects_len_to_show integer
 
----@class chronicles.Options.Dashboard.Header.TotalTime
+---@class chronicles.Options.Dashboard.TotalTimeBase
 ---@field as_hours_max boolean
 ---@field as_hours_min boolean
 ---@field round_hours_above_one boolean
+
+---@class chronicles.Options.Dashboard.Header.TotalTime: chronicles.Options.Dashboard.TotalTimeBase
 ---@field format_str string
+
+---@class chronicles.Options.Dashboard.Header.ProjectGlobalTime: chronicles.Options.Dashboard.TotalTimeBase
+---@field enable boolean
+---@field show_only_if_differs boolean
+---@field color_like_bars boolean
 
 ---@class chronicles.Options.Dashboard.Header
 ---@field show_date_period boolean
@@ -158,13 +165,10 @@
 ---@field time_period_str string?
 ---@field time_period_str_singular string?
 ---@field show_current_session_time boolean
----@field show_global_time_for_each_project boolean
----@field show_global_time_only_if_differs boolean
----@field proj_global_total_time_round_hours_above_one boolean
----@field color_global_proj_times_like_bars boolean
 ---@field prettify boolean
 ---@field window_title string
 ---@field total_time chronicles.Options.Dashboard.Header.TotalTime
+---@field project_global_time chronicles.Options.Dashboard.Header.ProjectGlobalTime
 ---@field top_projects chronicles.Options.Dashboard.Header.TopProjects
 
 ---@class chronicles.Options.Dashboard.Sorting
@@ -172,10 +176,8 @@
 ---@field sort_by_last_worked_not_total_time boolean
 ---@field ascending boolean
 
----@class chronicles.Options.Dashboard.Base.ProjectTotalTime
----@field as_hours_max boolean
----@field as_hours_min boolean
----@field round_hours_above_one boolean
+---@class chronicles.Options.Dashboard.Base.ProjectTotalTime: chronicles.Options.Dashboard.TotalTimeBase
+---@field color_like_bars boolean
 
 ---@class chronicles.Options.Dashboard.Base
 ---@field header chronicles.Options.Dashboard.Header
@@ -184,7 +186,6 @@
 ---@field n_by_default integer
 ---@field random_bars_coloring boolean
 ---@field bars_coloring_follows_sorting_in_order boolean
----@field color_proj_times_like_bars boolean
 ---@field min_proj_time_to_display_proj integer
 ---@field window_height number
 ---@field window_width number

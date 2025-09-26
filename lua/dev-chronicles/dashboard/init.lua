@@ -264,12 +264,8 @@ function M.create_dashboard_content(
     highlights,
     bars_data,
     win_width,
-    dashboard_type_opts.color_proj_times_like_bars,
-    dashboard_type_opts.header.show_global_time_for_each_project,
-    dashboard_type_opts.header.show_global_time_only_if_differs,
-    dashboard_type_opts.header.color_global_proj_times_like_bars,
     dashboard_type_opts.project_total_time,
-    dashboard_type_opts.header.proj_global_total_time_round_hours_above_one
+    dashboard_type_opts.header.project_global_time
   )
 
   dashboard_content.set_bars_lines_highlights(

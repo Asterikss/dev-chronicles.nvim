@@ -20,10 +20,6 @@ local dashboard_section_header_opts = {
   time_period_str = nil,
   time_period_str_singular = nil,
   show_current_session_time = true,
-  show_global_time_for_each_project = true,
-  show_global_time_only_if_differs = true,
-  proj_global_total_time_round_hours_above_one = true,
-  color_global_proj_times_like_bars = false,
   prettify = true,
   window_title = ' Dev Chronicles ',
   total_time = {
@@ -31,6 +27,14 @@ local dashboard_section_header_opts = {
     as_hours_min = true,
     round_hours_above_one = true,
     format_str = 'total time: %s',
+  },
+  project_global_time = {
+    enable = true,
+    show_only_if_differs = true,
+    color_like_bars = false,
+    as_hours_max = true,
+    as_hours_min = true,
+    round_hours_above_one = true,
   },
   top_projects = {
     enable = true,
@@ -56,7 +60,6 @@ local dashboard_section_base = {
   n_by_default = 2,
   random_bars_coloring = false,
   bars_coloring_follows_sorting_in_order = true,
-  color_proj_times_like_bars = false,
   min_proj_time_to_display_proj = 0,
   window_height = 0.8,
   window_width = 0.8,
@@ -66,6 +69,7 @@ local dashboard_section_base = {
     as_hours_max = true,
     as_hours_min = true,
     round_hours_above_one = true,
+    color_like_bars = false,
   },
 }
 
