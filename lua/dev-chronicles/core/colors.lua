@@ -19,6 +19,7 @@ function M.setup_colors()
     { 'DevChroniclesPurple', { fg = '#6c5ce7', bold = true } },
     { 'DevChroniclesOrange', { fg = '#ffa500', bold = true } },
     { 'DevChroniclesLightPurple', { fg = '#a29bfe', bold = true } },
+    { 'DevChroniclesBackupColor', { fg = '#fff588', bold = true } },
   }
 
   local tbl_idx = 0
@@ -91,7 +92,13 @@ function M._get_or_create_default_highlight(hl_name)
     return hl_name
   end
 
-  vim.api.nvim_set_hl(0, hl_name, M._default_colors[hl_name])
+  local color_specs = M._default_colors[hl_name]
+  if not color_specs then
+    hl_name = 'DevChroniclesBackupColor'
+    color_specs = M._default_colors[hl_name]
+  end
+
+  vim.api.nvim_set_hl(0, hl_name, color_specs)
   M._highlights_cache[hl_name] = true
 
   return hl_name
