@@ -4,7 +4,7 @@ local M = {}
 function M.init(opts)
   math.randomseed(os.time())
   require('dev-chronicles.utils.notify').setup_notify(opts.log_file)
-  require('dev-chronicles.core.colors').setup_colors()
+  require('dev-chronicles.core.colors').setup_colors(opts.highlights)
   require('dev-chronicles.core.commands').setup_commands(opts)
 end
 

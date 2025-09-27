@@ -299,10 +299,6 @@ function M.setup(opts)
     merged.dashboard.dashboard_days.n_by_default = 60
   end
 
-  for hl_name, hl_opts in pairs(merged.highlights) do
-    vim.api.nvim_set_hl(0, hl_name, hl_opts)
-  end
-
   ---@type chronicles.Options
   options = merged
 
