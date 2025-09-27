@@ -1,6 +1,7 @@
 local M = {}
 
 local render = require('dev-chronicles.core.render')
+local colors = require('dev-chronicles.core.colors')
 
 function M.display_session_time()
   local format_time = require('dev-chronicles.core.time').format_time
@@ -65,6 +66,9 @@ function M.display_project_list(opts)
     ['?'] = function(_)
       M.show_project_help()
     end,
+    ['D'] = function(context)
+      M._mark_project(data.projects, context, 'D', 'DevChroniclesRed')
+    end,
     ['I'] = function(context)
       M.show_project_info(data.projects, context)
     end,
@@ -108,9 +112,9 @@ function M.show_project_help()
     'Help | Project List',
     '',
     'Keybindings:',
-    '  ?     - Show this help',
-    '  D     - Mark project for deletion',
     '  I     - Show project information',
+    '  D     - Mark project for deletion',
+    '  ?     - Show this help',
     '  q/Esc - Close window',
   }
   local max_width = 0
@@ -195,4 +199,42 @@ function M.show_project_info(projects_data, context)
     },
   })
 end
+
+---@param data_projects chronicles.ChroniclesData.ProjectData[]
+---@param context chronicles.Panel.Context
+function M._mark_project(data_projects, context, symbol, hl_name)
+  local project_name = context.line_content:sub(3)
+
+  local marked_line
+  if context.line_content:sub(1, 1) == symbol then
+    marked_line = '  ' .. project_name
+  else
+    marked_line = symbol .. ' ' .. project_name
+  end
+
+  vim.api.nvim_set_option_value('modifiable', true, { buf = context.buf })
+  vim.api.nvim_buf_set_lines(
+    context.buf,
+    context.line_idx - 1,
+    context.line_idx,
+    false,
+    { marked_line }
+  )
+  vim.api.nvim_set_option_value('modifiable', false, { buf = context.buf })
+
+  if data_projects[project_name].color then
+    colors.apply_highlight_hex(
+      context.buf,
+      data_projects[project_name].color,
+      context.line_idx - 1,
+      2,
+      -1
+    )
+  else
+    colors.apply_highlight(context.buf, 'DevChroniclesAccent', context.line_idx - 1, 2, -1)
+  end
+
+  colors.apply_highlight(context.buf, hl_name, context.line_idx - 1, 0, 1)
+end
+
 return M

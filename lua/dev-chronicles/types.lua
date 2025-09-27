@@ -110,6 +110,12 @@
 ---@field window_border? string[]
 ---@field actions? table<string, function>
 
+---@class chronicles.Panel.Context
+---@field line_idx integer
+---@field line_content string
+---@field buf integer
+---@field win integer
+
 -- --------------------------------------------
 -- Dev Chronicles Data
 -- --------------------------------------------

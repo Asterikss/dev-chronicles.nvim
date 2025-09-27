@@ -1,5 +1,7 @@
 local M = {}
 
+M._namespace = vim.api.nvim_create_namespace('dev-chronicles')
+
 ---@type table<string, {fg: string, bold: boolean}>
 M._default_project_colors = {}
 
@@ -108,6 +110,16 @@ function M._get_or_create_default_highlight(hl_name)
   M._highlights_cache[hl_name] = true
 
   return hl_name
+end
+
+function M.apply_highlight(buf, hl_name, line_idx, col, end_col)
+  hl_name = M._get_or_create_default_highlight(hl_name)
+  vim.api.nvim_buf_add_highlight(buf, M._namespace, hl_name, line_idx, col, end_col)
+end
+
+function M.apply_highlight_hex(buf, hex, line_idx, col, end_col)
+  local hl_name = M._get_or_create_highlight(hex)
+  vim.api.nvim_buf_add_highlight(buf, M._namespace, hl_name, line_idx, col, end_col)
 end
 
 return M
