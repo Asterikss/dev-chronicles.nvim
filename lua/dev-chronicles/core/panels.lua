@@ -59,12 +59,14 @@ function M.display_project_list(opts)
   for project_id, _ in pairs(data.projects) do
     lines_idx = lines_idx + 1
     lines[lines_idx] = project_id
-    width = math.max(width, #project_id)
   end
 
   local actions = {
     ['?'] = function(_)
       M.show_project_help()
+    end,
+    ['I'] = function(context)
+      M.show_project_info(data.projects, context)
     end,
   }
 
@@ -73,6 +75,10 @@ function M.display_project_list(opts)
   end)
 
   for i = 1, lines_idx do
+    local line = '  ' .. lines[i]
+    lines[i] = line
+    width = math.max(width, #line)
+
     highlights[i] = {
       line = i,
       col = 0,
@@ -132,7 +138,7 @@ function M.show_project_help()
   render.render({
     lines = help_lines,
     highlights = highlights,
-    buf_name = 'Dev Chronicles Project List Help',
+    buf_name = 'Dev Chronicles Project List - Help',
     window_dimensions = {
       col = math.floor((vim.o.columns - max_width) / 2),
       row = math.floor((vim.o.lines - len_help_lines) / 2),
@@ -142,4 +148,51 @@ function M.show_project_help()
   })
 end
 
+---@param projects_data chronicles.ChroniclesData.ProjectData[]
+---@param context chronicles.Panel.Context
+function M.show_project_info(projects_data, context)
+  local format_time = require('dev-chronicles.core.time').format_time
+  local get_day_str = require('dev-chronicles.core.time.days').get_day_str
+
+  local project_data = projects_data[context.line_content:sub(3)]
+  if not project_data then
+    return
+  end
+
+  local tags = {}
+  for tag, _ in pairs(project_data.tags_map) do
+    table.insert(tags, tag)
+  end
+
+  local lines = {
+    'total time:   ' .. format_time(project_data.total_time),
+    'first worked: ' .. get_day_str(project_data.first_worked),
+    'last_worked:  ' .. get_day_str(project_data.last_worked),
+    'color:        ' .. tostring(project_data.color),
+    'tags:         ' .. table.concat(tags, ', '),
+  }
+
+  local highlights, n_lines, max_width = {}, #lines, 0
+  for i = 1, n_lines do
+    highlights[i] = {
+      line = i,
+      col = 0,
+      end_col = -1,
+      hl_group = 'DevChroniclesAccent',
+    }
+    max_width = math.max(max_width, #lines[i])
+  end
+
+  render.render({
+    lines = lines,
+    highlights = highlights,
+    buf_name = 'Dev Chronicles Project List - Project Info',
+    window_dimensions = {
+      col = math.floor((vim.o.columns - max_width) / 2),
+      row = math.floor((vim.o.lines - n_lines) / 2),
+      width = max_width,
+      height = n_lines,
+    },
+  })
+end
 return M

@@ -37,9 +37,10 @@ function M.render(panel_data)
     )
   end
 
+  ---@return chronicles.Panel.Context
   local function get_current_context()
     local line_idx = vim.api.nvim_win_get_cursor(win)[1]
-    local line_content = panel_data.lines[line_idx]
+    local line_content = vim.api.nvim_buf_get_lines(buf, line_idx - 1, line_idx, false)[1]
     return {
       line_idx = line_idx,
       line_content = line_content,
@@ -69,7 +70,6 @@ function M.render(panel_data)
   vim.api.nvim_set_option_value('bufhidden', 'wipe', { buf = buf })
   vim.api.nvim_set_option_value('filetype', 'dev-chronicles', { buf = buf })
   vim.api.nvim_set_option_value('modifiable', false, { buf = buf })
-  vim.api.nvim_set_option_value('readonly', true, { buf = buf })
 
   vim.api.nvim_buf_set_name(buf, panel_data.buf_name)
   vim.api.nvim_win_set_cursor(win, { 1, 0 })
