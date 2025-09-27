@@ -50,6 +50,7 @@
 ---@field first_worked integer
 ---@field tags_map table<string, any>
 ---@field global_time integer
+---@field color string?
 
 ---@alias chronicles.Dashboard.FinalProjectDataMap table<string, chronicles.Dashboard.FinalProjectData>
 
@@ -121,6 +122,7 @@
 ---@field last_worked integer
 ---@field last_worked_canonical integer
 ---@field tags_map table<string, any>
+---@field color string?
 
 ---@class (exact) chronicles.ChroniclesData
 ---@field global_time integer

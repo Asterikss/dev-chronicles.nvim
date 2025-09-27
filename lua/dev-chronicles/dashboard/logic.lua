@@ -1,17 +1,5 @@
 local M = {}
 
--- TODO: this should not be like that
-M._colors = {
-  'DevChroniclesRed',
-  'DevChroniclesBlue',
-  'DevChroniclesPurple',
-  'DevChroniclesGreen',
-  'DevChroniclesYellow',
-  'DevChroniclesMagenta',
-  'DevChroniclesLightPurple',
-  'DevChroniclesOrange',
-}
-
 ---Unrolls provided bar representation pattern to match the width of each BarLevel. Upon
 ---failure, returns the fallback bar representation consisting of `@`. Also returns
 ---codepoints counts for all the rows and char display width for each character in
@@ -249,50 +237,33 @@ function M.create_bars_data(
 )
   local string_utils = require('dev-chronicles.utils.strings')
   local BarLevel = require('dev-chronicles.core.enums').BarLevel
-  local shuffle = require('dev-chronicles.utils').shuffle
+  local get_project_color = require('dev-chronicles.core.colors').closure_get_project_color(
+    random_bars_coloring,
+    projects_sorted_ascending,
+    #arr_projects
+  )
 
   ---@type chronicles.Dashboard.BarData[]
   local bars_data = {}
   ---@type table<string, string>
   local project_id_to_color = {}
   local max_lines_proj_names = 0
-  local n_projects = #arr_projects
-  local colors = M._colors
-  local n_colors = #colors
-  local color_index
-
-  if random_bars_coloring then
-    colors = vim.deepcopy(M._colors)
-    shuffle(colors)
-    color_index = 1
-  end
 
   for i, project in ipairs(arr_projects) do
     local bar_height = math.max(1, math.floor((project.total_time / max_time) * max_bar_height))
-
-    local color
-    if random_bars_coloring then
-      -- All colors were used
-      if color_index > n_colors then
-        shuffle(colors)
-        color_index = 1
-      end
-      color = colors[color_index]
-      color_index = color_index + 1
-    else
-      color = projects_sorted_ascending and colors[((n_projects - i) % n_colors) + 1]
-        or colors[((i - 1) % n_colors) + 1]
-    end
+    local color = get_project_color(i, project.color)
 
     local project_id = project.id
     project_id_to_color[project_id] = color
 
     local project_name = differentiate_projects_by_folder_not_path and project_id
       or string_utils.get_project_name(project_id)
+
     local project_name_tbl = string_utils.format_project_name(
       project_name,
       bar_width + (let_proj_names_extend_bars_by_one and 2 or 0)
     )
+
     max_lines_proj_names = math.max(max_lines_proj_names, #project_name_tbl)
 
     table.insert(bars_data, {
@@ -329,6 +300,10 @@ function M.filter_by_min_time(final_project_data_arr, min_proj_time_to_display_p
   return out
 end
 
+---@param initial_max_bar_height integer
+---@param thresholds any -- TODO: consolidate thresholds
+---@param max_time integer
+---@return integer
 function M.calc_max_bar_height(initial_max_bar_height, thresholds, max_time)
   for i, threshold in ipairs(thresholds) do
     if max_time < threshold * 3600 then

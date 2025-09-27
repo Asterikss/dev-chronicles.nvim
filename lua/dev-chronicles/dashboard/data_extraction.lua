@@ -20,7 +20,9 @@ function M.get_dashboard_data_all(
   time_period_str,
   time_period_str_singular
 )
-  local final_project_data_arr, project_arr_idx, max_project_time = {}, 0, 0
+  ---@type chronicles.Dashboard.FinalProjectData[]
+  local final_project_data_arr
+  local project_arr_idx, max_project_time = 0, 0
 
   for project_id, project_data in pairs(data.projects) do
     project_arr_idx = project_arr_idx + 1
@@ -32,6 +34,7 @@ function M.get_dashboard_data_all(
       first_worked = project_data.first_worked,
       tags_map = project_data.tags_map,
       global_time = project_data.total_time,
+      color = project_data.color,
     }
     max_project_time = math.max(max_project_time, project_data.total_time)
   end
@@ -133,6 +136,7 @@ function M.get_dashboard_data_months(
               first_worked = project_data.first_worked,
               tags_map = project_data.tags_map,
               global_time = project_data.total_time,
+              color = project_data.color,
             }
             projects_filtered_parsed[project_id] = filtered_project_data
             len_arr_projects = len_arr_projects + 1
@@ -270,6 +274,7 @@ function M.get_dashboard_data_days(
               first_worked = project_data.first_worked,
               tags_map = project_data.tags_map,
               global_time = project_data.total_time,
+              color = project_data.color,
             }
             projects_filtered_parsed[project_id] = accum_proj_data
             len_arr_projects = len_arr_projects + 1
@@ -403,6 +408,7 @@ function M.get_dashboard_data_years(
               first_worked = project_data.first_worked,
               tags_map = project_data.tags_map,
               global_time = project_data.total_time,
+              color = project_data.color,
             }
             projects_filtered_parsed[project_id] = filtered_project_data
             len_arr_projects = len_arr_projects + 1

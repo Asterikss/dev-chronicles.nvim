@@ -7,6 +7,7 @@ local notify = require('dev-chronicles.utils.notify')
 function M.load_data(file_path)
   if vim.fn.filereadable(file_path) == 0 then
     local current_timestamp = os.time()
+    ---@type chronicles.ChroniclesData
     return {
       global_time = 0,
       tracking_start = current_timestamp,
