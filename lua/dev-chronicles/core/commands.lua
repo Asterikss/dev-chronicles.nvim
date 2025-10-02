@@ -10,7 +10,6 @@ end
 function M._setup_the_command(opts)
   local api = require('dev-chronicles.api')
   local enums = require('dev-chronicles.core.enums')
-  local panels = require('dev-chronicles.core.panels')
   local notify = require('dev-chronicles.utils.notify')
 
   vim.api.nvim_create_user_command('DevChronicles', function(command_opts)
@@ -55,12 +54,12 @@ function M._setup_the_command(opts)
         )
       )
     elseif first_arg == 'list' then
-      panels.display_project_list(opts)
+      require('dev-chronicles.panels.project_list').display_project_list(opts)
     elseif first_arg == 'abort' then
       api.abort_session()
       notify.notify('Session aborted')
     elseif first_arg == 'time' then
-      panels.display_session_time()
+      require('dev-chronicles.panels.session_time').display_session_time()
     elseif first_arg == 'finish' then
       api.finish_session()
       notify.notify('Session finished')

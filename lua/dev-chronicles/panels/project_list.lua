@@ -1,53 +1,6 @@
 local M = {}
 
 local render = require('dev-chronicles.core.render')
-local colors = require('dev-chronicles.core.colors')
-
-function M.display_session_time()
-  local format_time = require('dev-chronicles.core.time').format_time
-  local _, session_active = require('dev-chronicles.api').get_session_info()
-
-  local lines, width
-  if session_active then
-    local session_time_str = ' ' .. format_time(session_active.session_time_seconds) .. ' '
-    local project_name = ' ' .. session_active.project_name .. ' '
-    width = math.max(#session_time_str, #project_name)
-
-    lines = {
-      '',
-      string.rep(' ', math.floor((width - #session_time_str) / 2)) .. session_time_str,
-      '',
-      string.rep(' ', math.floor((width - #project_name) / 2)) .. project_name,
-      '',
-    }
-  else
-    lines = { '', ' Not working on a tracked project ', '' }
-    width = #lines[2]
-  end
-
-  local n_lines = #lines
-  local highlights = {}
-  for i = 1, n_lines do
-    highlights[i] = {
-      line = i,
-      col = 0,
-      end_col = -1,
-      hl_group = 'DevChroniclesAccent',
-    }
-  end
-
-  render.render({
-    lines = lines,
-    highlights = highlights,
-    buf_name = 'Dev Chronicles Time',
-    window_dimensions = {
-      col = math.floor((vim.o.columns - width) / 2),
-      row = math.floor((vim.o.lines - n_lines) * 0.35),
-      width = width,
-      height = n_lines,
-    },
-  })
-end
 
 function M.display_project_list(opts)
   local data = require('dev-chronicles.utils.data').load_data(opts.data_file)
@@ -64,13 +17,13 @@ function M.display_project_list(opts)
 
   local actions = {
     ['?'] = function(_)
-      M.show_project_help()
+      M._show_project_help()
     end,
     ['D'] = function(context)
       M._mark_project(data.projects, context, 'D', 'DevChroniclesRed')
     end,
     ['I'] = function(context)
-      M.show_project_info(data.projects, context)
+      M._show_project_info(data.projects, context)
     end,
   }
 
@@ -107,7 +60,7 @@ function M.display_project_list(opts)
   })
 end
 
-function M.show_project_help()
+function M._show_project_help()
   local help_lines = {
     'Help | Project List',
     '',
@@ -154,7 +107,7 @@ end
 
 ---@param projects_data chronicles.ChroniclesData.ProjectData[]
 ---@param context chronicles.Panel.Context
-function M.show_project_info(projects_data, context)
+function M._show_project_info(projects_data, context)
   local format_time = require('dev-chronicles.core.time').format_time
   local get_day_str = require('dev-chronicles.core.time.days').get_day_str
 
@@ -203,6 +156,7 @@ end
 ---@param data_projects chronicles.ChroniclesData.ProjectData[]
 ---@param context chronicles.Panel.Context
 function M._mark_project(data_projects, context, symbol, hl_name)
+  local colors = require('dev-chronicles.core.colors')
   local project_name = context.line_content:sub(3)
 
   local marked_line
