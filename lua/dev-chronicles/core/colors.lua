@@ -39,6 +39,10 @@ function M.setup_colors(default_highlights)
   end
 end
 
+---@param random_bars_coloring boolean
+---@param projects_sorted_ascending boolean
+---@param n_projects integer
+---@return function
 function M.closure_get_project_color(random_bars_coloring, projects_sorted_ascending, n_projects)
   local shuffle = require('dev-chronicles.utils').shuffle
 
@@ -112,14 +116,40 @@ function M._get_or_create_default_highlight(hl_name)
   return hl_name
 end
 
+---@param buf integer
+---@param hl_name string
+---@param line_idx integer
+---@param col integer
+---@param end_col integer
 function M.apply_highlight(buf, hl_name, line_idx, col, end_col)
   hl_name = M._get_or_create_default_highlight(hl_name)
   vim.api.nvim_buf_add_highlight(buf, M._namespace, hl_name, line_idx, col, end_col)
 end
 
+---@param buf integer
+---@param hex string
+---@param line_idx integer
+---@param col integer
+---@param end_col integer
 function M.apply_highlight_hex(buf, hex, line_idx, col, end_col)
   local hl_name = M._get_or_create_highlight(hex)
   vim.api.nvim_buf_add_highlight(buf, M._namespace, hl_name, line_idx, col, end_col)
+end
+
+---@param buf integer
+---@param highlights chronicles.Highlight
+function M.apply_highlights(buf, highlights)
+  local ns = M._namespace
+  for _, hl in ipairs(highlights) do
+    vim.api.nvim_buf_add_highlight(
+      buf,
+      ns,
+      hl.hl_group,
+      hl.line - 1,
+      hl.col,
+      hl.end_col == -1 and -1 or hl.end_col
+    )
+  end
 end
 
 return M

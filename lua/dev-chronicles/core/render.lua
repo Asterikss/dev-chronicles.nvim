@@ -25,22 +25,13 @@ function M.render(panel_data)
 
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, panel_data.lines)
 
-  local ns_id = vim.api.nvim_create_namespace('dev_chronicles_dashboard')
-  for _, hl in ipairs(panel_data.highlights) do
-    vim.api.nvim_buf_add_highlight(
-      buf,
-      ns_id,
-      hl.hl_group,
-      hl.line - 1, -- Convert to 0-indexed
-      hl.col,
-      hl.end_col == -1 and -1 or hl.end_col
-    )
-  end
+  require('dev-chronicles.core.colors').apply_highlights(buf, panel_data.highlights)
 
   ---@return chronicles.Panel.Context
   local function get_current_context()
     local line_idx = vim.api.nvim_win_get_cursor(win)[1]
     local line_content = vim.api.nvim_buf_get_lines(buf, line_idx - 1, line_idx, false)[1]
+    ---@type chronicles.Panel.Context
     return {
       line_idx = line_idx,
       line_content = line_content,
