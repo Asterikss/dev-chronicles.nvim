@@ -193,9 +193,7 @@ function M.create_dashboard_content(
     arr_projects,
     len_arr_projects,
     n_projects_to_keep,
-    dashboard_type_opts.sorting.enable,
-    dashboard_type_opts.sorting.sort_by_last_worked_not_total_time,
-    dashboard_type_opts.sorting.ascending
+    dashboard_type_opts.sorting
   )
 
   if len_arr_projects < 1 then

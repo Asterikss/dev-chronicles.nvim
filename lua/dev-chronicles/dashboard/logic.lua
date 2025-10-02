@@ -161,28 +161,19 @@ end
 ---@param arr_projects chronicles.Dashboard.FinalProjectData[]
 ---@param len_arr_projects integer
 ---@param n_projects_to_keep integer
----@param sort boolean
----@param by_last_worked boolean
----@param asc boolean
+---@param sorting chronicles.Options.Dashboard.Sorting
 ---@return chronicles.Dashboard.FinalProjectData[], integer
-function M.sort_and_cutoff_projects(
-  arr_projects,
-  len_arr_projects,
-  n_projects_to_keep,
-  sort,
-  by_last_worked,
-  asc
-)
-  if sort then
+function M.sort_and_cutoff_projects(arr_projects, len_arr_projects, n_projects_to_keep, sorting)
+  if sorting.enable then
     table.sort(arr_projects, function(a, b)
-      if by_last_worked then
-        if asc then
+      if sorting.sort_by_last_worked_not_total_time then
+        if sorting.ascending then
           return a.last_worked < b.last_worked
         else
           return a.last_worked > b.last_worked
         end
       else
-        if asc then
+        if sorting.ascending then
           return a.total_time < b.total_time
         else
           return a.total_time > b.total_time
@@ -197,7 +188,7 @@ function M.sort_and_cutoff_projects(
 
   local arr_projects_filtered = {}
 
-  if asc then
+  if sorting.ascending then
     for i = math.max(1, len_arr_projects - n_projects_to_keep + 1), len_arr_projects do
       table.insert(arr_projects_filtered, arr_projects[i])
     end

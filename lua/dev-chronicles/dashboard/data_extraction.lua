@@ -21,7 +21,7 @@ function M.get_dashboard_data_all(
   time_period_str_singular
 )
   ---@type chronicles.Dashboard.FinalProjectData[]
-  local final_project_data_arr
+  local final_project_data_arr = {}
   local project_arr_idx, max_project_time = 0, 0
 
   for project_id, project_data in pairs(data.projects) do
