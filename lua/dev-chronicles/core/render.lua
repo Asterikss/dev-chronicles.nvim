@@ -1,6 +1,7 @@
 local M = {}
 
 ---@param panel_data chronicles.Panel.Data
+---@return integer: buffer
 function M.render(panel_data)
   local buf = vim.api.nvim_create_buf(false, true)
 
@@ -64,6 +65,8 @@ function M.render(panel_data)
 
   vim.api.nvim_buf_set_name(buf, panel_data.buf_name)
   vim.api.nvim_win_set_cursor(win, { 1, 0 })
+  vim.cmd.redraw()
+  return buf
 end
 
 return M

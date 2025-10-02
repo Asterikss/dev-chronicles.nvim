@@ -84,7 +84,11 @@ end
 ---@param hex_color string
 ---@return string
 function M._get_or_create_highlight(hex_color)
-  local normalized = hex_color:gsub('^#', ''):lower()
+  local normalized = M.check_and_normalize_hex_color(hex_color)
+  if not normalized then
+    return M._get_or_create_default_highlight('DevChroniclesBackupColor')
+  end
+
   local hl_name = 'DevChroniclesCustom' .. normalized:upper()
 
   if M._highlights_cache[hl_name] then
@@ -150,6 +154,16 @@ function M.apply_highlights(buf, highlights)
       hl.end_col == -1 and -1 or hl.end_col
     )
   end
+end
+
+---@param hex string
+---@return string?
+function M.check_and_normalize_hex_color(hex)
+  local h = hex
+    and hex
+      :gsub('%s+', '')
+      :match('^#?([%da-fA-F][%da-fA-F][%da-fA-F][%da-fA-F][%da-fA-F][%da-fA-F])$')
+  return h and h:lower()
 end
 
 return M

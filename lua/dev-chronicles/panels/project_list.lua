@@ -1,6 +1,9 @@
 local M = {}
 
+local colors = require('dev-chronicles.core.colors')
 local render = require('dev-chronicles.core.render')
+
+M._changes = {}
 
 function M.display_project_list(opts)
   local data = require('dev-chronicles.utils.data').load_data(opts.data_file)
@@ -24,6 +27,9 @@ function M.display_project_list(opts)
     end,
     ['I'] = function(context)
       M._show_project_info(data.projects, context)
+    end,
+    ['C'] = function(context)
+      M._change_project_color(data.projects, context)
     end,
   }
 
@@ -156,7 +162,6 @@ end
 ---@param data_projects chronicles.ChroniclesData.ProjectData[]
 ---@param context chronicles.Panel.Context
 function M._mark_project(data_projects, context, symbol, hl_name)
-  local colors = require('dev-chronicles.core.colors')
   local project_name = context.line_content:sub(3)
 
   local marked_line
@@ -189,6 +194,125 @@ function M._mark_project(data_projects, context, symbol, hl_name)
   end
 
   colors.apply_highlight(context.buf, hl_name, context.line_idx - 1, 0, 1)
+end
+
+---@param data_projects chronicles.ChroniclesData.ProjectData[]
+---@param context chronicles.Panel.Context
+function M._change_project_color(data_projects, context)
+  local project_name = context.line_content:sub(3)
+  local project_data = data_projects[project_name]
+
+  if not project_data then
+    return
+  end
+
+  local current_color = project_data.color
+  local new_color_line_default, new_color_line_index, new_color_line_default_text_end =
+    'New:      ', 5, 4
+  local new_color
+
+  local lines = {
+    project_name .. ' — Change Color',
+    '',
+    '',
+    'Current:  ' .. (current_color and current_color .. ' ████████' or 'None'),
+    new_color_line_default,
+    '',
+    '',
+    'Input "nil" to remove the existing color',
+    'Press c/C to change the color again',
+    'Press Enter to confirm',
+    'Press q/Esc to cancel',
+  }
+
+  local n_lines, max_width, highlights = #lines, 0, {}
+  for i = 1, n_lines do
+    max_width = math.max(max_width, #lines[i])
+    highlights[i] = {
+      line = i,
+      col = 0,
+      end_col = -1,
+      hl_group = 'DevChroniclesAccent',
+    }
+  end
+
+  local function prompt(buf)
+    vim.ui.input({
+      prompt = 'Enter new hex color: ',
+    }, function(user_input)
+      local hex_candidate = colors.check_and_normalize_hex_color(user_input)
+      local new_color_line = new_color_line_default
+
+      if hex_candidate then
+        new_color_line = new_color_line .. '#' .. hex_candidate .. '  ████████'
+        new_color = hex_candidate
+      else
+        new_color_line = new_color_line .. 'Not a color: ' .. user_input
+      end
+
+      vim.api.nvim_set_option_value('modifiable', true, { buf = buf })
+      vim.api.nvim_buf_set_lines(
+        buf,
+        new_color_line_index - 1,
+        new_color_line_index,
+        false,
+        { new_color_line }
+      )
+      vim.api.nvim_set_option_value('modifiable', false, { buf = buf })
+
+      if hex_candidate then
+        colors.apply_highlight_hex(
+          buf,
+          hex_candidate,
+          new_color_line_index - 1,
+          new_color_line_default_text_end,
+          -1
+        )
+
+        colors.apply_highlight(
+          buf,
+          'DevChroniclesAccent',
+          new_color_line_index - 1,
+          0,
+          new_color_line_default_text_end
+        )
+      else
+        colors.apply_highlight(buf, 'DevChroniclesAccent', new_color_line_index - 1, 0, -1)
+      end
+    end)
+  end
+
+  local function confirm_new_color(win)
+    if not M._changes.new_colors then
+      M._changes.new_colors = {}
+    end
+    M._changes.new_colors[project_name] = new_color
+    vim.api.nvim_win_close(win, true)
+    data_projects[project_name].color = new_color
+    M._mark_project(data_projects, context, 'C', 'DevChroniclesLightPurple')
+  end
+
+  local buf = render.render({
+    lines = lines,
+    highlights = highlights,
+    buf_name = 'Dev Chronicles Project List - Change Project Color',
+    actions = {
+      ['C'] = function(window_context)
+        prompt(window_context.buf)
+      end,
+      ['<CR>'] = function(window_context)
+        confirm_new_color(window_context.win)
+      end,
+    },
+    window_dimensions = {
+      col = math.floor((vim.o.columns - max_width) / 2),
+      row = math.floor((vim.o.lines - n_lines) / 2),
+      width = max_width,
+      height = n_lines,
+    },
+  })
+
+  prompt(buf)
 end
 
 return M
