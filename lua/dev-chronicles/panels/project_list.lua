@@ -4,9 +4,7 @@ local colors = require('dev-chronicles.core.colors')
 local render = require('dev-chronicles.core.render')
 local notify = require('dev-chronicles.utils.notify')
 
----@class chronicles.ProjectList.Changes
----@field new_colors? table<string, string>
----@field to_be_deleted? table<string, boolean>
+---@type chronicles.SessionState.Changes
 M._changes = {}
 
 function M.display_project_list(opts)
@@ -22,6 +20,7 @@ function M.display_project_list(opts)
     lines[lines_idx] = project_id
   end
 
+  ---@type chronicles.Panel.Actions
   local actions = {
     ['?'] = function(_)
       M._show_project_help()
@@ -31,6 +30,9 @@ function M.display_project_list(opts)
     end,
     ['C'] = function(context)
       M._change_project_color(data.projects, context)
+    end,
+    ['<CR>'] = function(context)
+      M._confirm_choices(context.win)
     end,
     ['D'] = function(context)
       M._mark_project(data.projects, context, 'D', 'DevChroniclesRed', true, function(project_id)
@@ -345,6 +347,119 @@ function M._change_project_color(data_projects, context)
   })
 
   prompt(buf)
+end
+
+---@param win integer
+function M._confirm_choices(win)
+  if not M._changes or next(M._changes) == nil then
+    notify.warn('Nothing to confim')
+    return
+  end
+
+  local lines, highlights, lines_idx, max_width, hl_index = {}, {}, 1, 0, 1
+  lines[lines_idx] = 'Changes:'
+  highlights[hl_index] = {
+    line = lines_idx,
+    col = 0,
+    end_col = -1,
+    hl_group = 'DevChroniclesAccent',
+  }
+
+  if M._changes.new_colors then
+    lines[lines_idx + 1] = ''
+    lines[lines_idx + 2] = 'New project colors:'
+    lines_idx = lines_idx + 2
+    hl_index = hl_index + 1
+    highlights[hl_index] = {
+      line = lines_idx,
+      col = 0,
+      end_col = -1,
+      hl_group = colors._get_or_create_default_highlight('DevChroniclesBlue'),
+    }
+    max_width = math.max(max_width, #lines[lines_idx])
+    for project_id, new_color in pairs(M._changes.new_colors) do
+      lines_idx = lines_idx + 1
+      lines[lines_idx] = '   ' .. project_id .. ' -> #' .. new_color
+      hl_index = hl_index + 1
+      local hl_name = colors._get_or_create_highlight(new_color)
+      highlights[hl_index] = {
+        line = lines_idx,
+        col = 0,
+        end_col = -1,
+        hl_group = hl_name,
+      }
+      max_width = math.max(max_width, #lines[lines_idx])
+    end
+  end
+
+  if M._changes.to_be_deleted then
+    local hl_red = colors._get_or_create_default_highlight('DevChroniclesRed')
+    lines[lines_idx + 1] = ''
+    lines[lines_idx + 2] = 'Projects to be deleted:'
+    lines_idx = lines_idx + 2
+
+    hl_index = hl_index + 1
+    highlights[hl_index] = {
+      line = lines_idx,
+      col = 0,
+      end_col = -1,
+      hl_group = hl_red,
+    }
+
+    max_width = math.max(max_width, #lines[lines_idx])
+    for project_id, _ in pairs(M._changes.to_be_deleted) do
+      lines_idx = lines_idx + 1
+      lines[lines_idx] = '   X ' .. project_id
+
+      hl_index = hl_index + 1
+      highlights[hl_index] = {
+        line = lines_idx,
+        col = 0,
+        end_col = -1,
+        hl_group = hl_red,
+      }
+
+      max_width = math.max(max_width, #lines[lines_idx])
+    end
+  end
+
+  lines[lines_idx + 1] = ''
+  lines[lines_idx + 2] = ''
+  lines[lines_idx + 3] = 'Enter to confirm. q/Esc to cancel'
+  lines_idx = lines_idx + 3
+
+  hl_index = hl_index + 1
+  highlights[hl_index] = {
+    line = lines_idx,
+    col = 0,
+    end_col = -1,
+    hl_group = 'DevChroniclesAccent',
+  }
+  max_width = math.max(max_width, #lines[lines_idx])
+
+  render.render({
+    lines = lines,
+    highlights = highlights,
+    buf_name = 'Dev Chronicles Project List - Confirmation',
+    actions = {
+      ['<CR>'] = function(context)
+        if not M._changes or next(M._changes) == nil then
+          notify.warn('Nothing to confim')
+          return
+        end
+        require('dev-chronicles.core.state').set_changes(M._changes)
+        M._changes = nil
+        vim.api.nvim_win_close(context.win, true)
+        vim.api.nvim_win_close(win, true)
+      end,
+    },
+    window_dimensions = {
+      col = math.floor((vim.o.columns - max_width) / 2),
+      row = math.floor((vim.o.lines - lines_idx) / 2),
+      width = max_width,
+      height = lines_idx,
+    },
+  })
 end
 
 return M

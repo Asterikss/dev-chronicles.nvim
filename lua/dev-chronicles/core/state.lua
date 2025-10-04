@@ -4,6 +4,8 @@ local M = {}
 local session = {
   project_id = nil,
   start_time = nil,
+  project_name = nil,
+  changes = nil,
   is_tracking = false,
 }
 
@@ -81,6 +83,14 @@ function M.abort_session()
   session.is_tracking = false
   session.start_time = nil
   session.project_id = nil
+  session.project_name = nil
+  session.changes = nil
+end
+
+---@param changes chronicles.SessionState.Changes
+function M.set_changes(changes)
+  vim.notify(vim.inspect(changes))
+  session.changes = vim.deepcopy(changes)
 end
 
 return M

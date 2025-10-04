@@ -17,10 +17,15 @@
 ---| 'Body'
 ---| 'Footer'
 
+---@class chronicles.SessionState.Changes
+---@field new_colors? table<string, string>
+---@field to_be_deleted? table<string, boolean>
+
 ---@class chronicles.SessionState
 ---@field project_id? string
 ---@field project_name? string
 ---@field start_time? integer
+---@field changes? chronicles.SessionState.Changes
 ---@field is_tracking boolean
 
 ---@class chronicles.SessionBase
@@ -101,6 +106,8 @@
 ---@field end_col integer
 ---@field hl_group string
 
+---@alias chronicles.Panel.Actions table<string, fun(context: chronicles.Panel.Context)>
+
 ---@class chronicles.Panel.Data
 ---@field lines string[]
 ---@field highlights chronicles.Highlight[]
@@ -108,7 +115,7 @@
 ---@field buf_name string
 ---@field window_title? string
 ---@field window_border? string[]
----@field actions? table<string, function>
+---@field actions? chronicles.Panel.Actions
 
 ---@class chronicles.Panel.Context
 ---@field line_idx integer
