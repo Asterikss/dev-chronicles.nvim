@@ -42,7 +42,7 @@ end
 ---@param random_bars_coloring boolean
 ---@param projects_sorted_ascending boolean
 ---@param n_projects integer
----@return function
+---@return fun(i: integer, project_color?: string): string
 function M.closure_get_project_color(random_bars_coloring, projects_sorted_ascending, n_projects)
   local shuffle = require('dev-chronicles.utils').shuffle
 
@@ -57,6 +57,7 @@ function M.closure_get_project_color(random_bars_coloring, projects_sorted_ascen
 
   ---@param i integer loop index
   ---@param project_color string?
+  ---@return string
   return function(i, project_color)
     if project_color then
       return M._get_or_create_highlight(project_color)

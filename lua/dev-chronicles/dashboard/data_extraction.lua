@@ -108,6 +108,7 @@ function M.get_dashboard_data_months(
   local len_arr_projects = 0
   local max_project_time = 0
   local global_time_filtered = 0
+  ---@type chronicles.Dashboard.TopProjectsArray?
   local most_worked_on_project_per_month = construct_most_worked_on_project_arr and {} or nil
 
   if projects then
@@ -250,6 +251,7 @@ function M.get_dashboard_data_days(
   local len_arr_projects = 0
   local max_project_time = 0
   local global_time_filtered = 0
+  ---@type chronicles.Dashboard.TopProjectsArray?
   local most_worked_on_project_per_day = construct_most_worked_on_project_arr and {} or nil
 
   if projects then
@@ -382,6 +384,7 @@ function M.get_dashboard_data_years(
   local len_arr_projects = 0
   local max_project_time = 0
   local global_time_filtered = 0
+  ---@type chronicles.Dashboard.TopProjectsArray?
   local most_worked_on_project_per_year = construct_most_worked_on_project_arr and {} or nil
 
   if projects then

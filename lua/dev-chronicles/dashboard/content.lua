@@ -2,7 +2,7 @@ local M = {}
 
 local format_time = require('dev-chronicles.core.time').format_time
 
----Adds 4 line header. Monster func
+---Adds 4 line header. Monster function
 ---@param lines string[]
 ---@param highlights chronicles.Highlight[]
 ---@param time_period_str string
@@ -71,7 +71,7 @@ function M.set_header_lines_highlights(
   local right_header_highlight_start_col = nil
   local decorator_right_highlight_start_col = nil
 
-  ---@type integer|nil -- I know... I don't want to calculate #top_projects twice
+  ---@type integer? -- I know... I don't want to calculate #top_projects twice
   local len_top_projects = top_projects and #top_projects
 
   if
@@ -140,11 +140,11 @@ function M.set_header_lines_highlights(
         -- project_id being false signifies that no projects were worked on
         -- during this period.
         --
-        -- A project (project_id) that is present in top_projects could have
-        -- been removed from projects to be displayed (e.g., it would not fit on
-        -- the screen). In this situation project_id_to_color would also be
-        -- missing it, a different highlight is provided in this situation, to
-        -- signify that.
+        -- A project (project_id) listed in top_projects might not be shown on
+        -- screen (for example, if it doesn’t fit on the screen). In that case,
+        -- project_id_to_color won’t contain it, and a distinct highlight is
+        -- used to indicate that this time period had a most-worked-on project
+        -- that isn’t currently displayed.
         local color = project_id and (project_id_to_color[project_id] or 'DevChroniclesLightGray')
           or 'DevChroniclesGrayedOut'
 
