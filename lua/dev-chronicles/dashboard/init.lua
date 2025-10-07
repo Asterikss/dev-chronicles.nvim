@@ -244,7 +244,7 @@ function M.create_dashboard_content(
     differentiate_projects_by_folder_not_path
   )
 
-  dashboard_content.set_header_lines_highlights(
+  dashboard_content.set_header_lines_hl(
     lines,
     highlights,
     data.time_period_str,
@@ -257,7 +257,7 @@ function M.create_dashboard_content(
     project_id_to_color
   )
 
-  dashboard_content.set_time_labels_above_bars(
+  dashboard_content.set_time_labels_above_bars_lines_hl(
     lines,
     highlights,
     bars_data,
@@ -266,7 +266,7 @@ function M.create_dashboard_content(
     dashboard_type_opts.header.project_global_time
   )
 
-  dashboard_content.set_bars_lines_highlights(
+  dashboard_content.set_bars_lines_hl(
     lines,
     highlights,
     bars_data,
@@ -278,9 +278,9 @@ function M.create_dashboard_content(
     win_width
   )
 
-  dashboard_content.set_hline_lines_highlights(lines, highlights, win_width)
+  dashboard_content.set_hline_lines_hl(lines, highlights, win_width)
 
-  dashboard_content.set_project_names_lines_highlights(
+  dashboard_content.set_project_names_lines_hl(
     lines,
     highlights,
     bars_data,

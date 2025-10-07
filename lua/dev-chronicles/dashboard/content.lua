@@ -13,7 +13,7 @@ local format_time = require('dev-chronicles.core.time').format_time
 ---@param curr_session_time_seconds? integer
 ---@param top_projects? chronicles.Dashboard.TopProjectsArray
 ---@param project_id_to_color table<string, string>
-function M.set_header_lines_highlights(
+function M.set_header_lines_hl(
   lines,
   highlights,
   time_period_str,
@@ -234,7 +234,7 @@ function M.set_header_lines_highlights(
   lines[2] = header_line2
   lines[3] = ''
 
-  M.set_hline_lines_highlights(lines, highlights, win_width, '─', 'DevChroniclesAccent')
+  M.set_hline_lines_hl(lines, highlights, win_width, '─', 'DevChroniclesAccent')
 end
 
 --- If global_time_line is set, then it overrides 3rd lines line
@@ -244,7 +244,7 @@ end
 ---@param win_width integer
 ---@param project_total_time chronicles.Options.Dashboard.Base.ProjectTotalTime
 ---@param project_global_time chronicles.Options.Dashboard.Header.ProjectGlobalTime
-function M.set_time_labels_above_bars(
+function M.set_time_labels_above_bars_lines_hl(
   lines,
   highlights,
   bars_data,
@@ -368,7 +368,7 @@ end
 ---@param vertical_space_for_bars integer
 ---@param bar_width integer
 ---@param win_width integer
-function M.set_bars_lines_highlights(
+function M.set_bars_lines_hl(
   lines,
   highlights,
   bars_data,
@@ -482,7 +482,7 @@ end
 ---@param win_width integer
 ---@param char? string
 ---@param hl_group? string
-function M.set_hline_lines_highlights(lines, highlights, win_width, char, hl_group)
+function M.set_hline_lines_hl(lines, highlights, win_width, char, hl_group)
   table.insert(lines, string.rep(char or '▔', win_width))
   table.insert(highlights, {
     line = #lines,
@@ -498,7 +498,7 @@ end
 ---@param max_lines_proj_names integer
 ---@param let_proj_names_extend_bars_by_one boolean
 ---@param win_width integer
-function M.set_project_names_lines_highlights(
+function M.set_project_names_lines_hl(
   lines,
   highlights,
   bars_data,
@@ -574,7 +574,7 @@ function M.handle_no_projects_lines_hl(
   header_dashboard_type_opts,
   top_projects
 )
-  M.set_header_lines_highlights(
+  M.set_header_lines_hl(
     lines,
     highlights,
     data.time_period_str,
@@ -587,7 +587,7 @@ function M.handle_no_projects_lines_hl(
     {}
   )
 
-  require('dev-chronicles.utils').set_no_data_mess_lines_highlights(
+  require('dev-chronicles.utils').set_no_data_mess_lines_hl(
     lines,
     highlights,
     win_width,

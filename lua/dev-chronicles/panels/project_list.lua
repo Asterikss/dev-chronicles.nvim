@@ -270,7 +270,7 @@ function M._change_project_color(data_projects, context)
       line = current_color_line_index,
       col = current_color_line_default_text_end,
       end_col = -1,
-      hl_group = colors._get_or_create_highlight(current_color),
+      hl_group = colors.get_or_create_highlight(current_color),
     }
   end
 
@@ -387,7 +387,7 @@ function M._confirm_choices(win)
       line = lines_idx,
       col = 0,
       end_col = -1,
-      hl_group = colors._get_or_create_default_highlight('DevChroniclesBlue'),
+      hl_group = colors.get_or_create_default_highlight('DevChroniclesBlue'),
     }
     max_width = math.max(max_width, #lines[lines_idx])
     for project_id, new_color in pairs(M._changes.new_colors) do
@@ -395,10 +395,10 @@ function M._confirm_choices(win)
 
       local hl_name
       if not new_color then
-        hl_name = colors._get_or_create_default_highlight('DevChroniclesAccent')
+        hl_name = colors.get_or_create_default_highlight('DevChroniclesAccent')
         color_changes_line = color_changes_line .. 'None'
       else
-        hl_name = colors._get_or_create_highlight(new_color)
+        hl_name = colors.get_or_create_highlight(new_color)
         color_changes_line = color_changes_line .. '#' .. new_color
       end
 
@@ -422,7 +422,7 @@ function M._confirm_choices(win)
     lines[lines_idx + 2] = 'Projects to be deleted:'
     lines_idx = lines_idx + 2
 
-    local hl_red = colors._get_or_create_default_highlight('DevChroniclesRed')
+    local hl_red = colors.get_or_create_default_highlight('DevChroniclesRed')
     hl_index = hl_index + 1
     highlights[hl_index] = {
       line = lines_idx,

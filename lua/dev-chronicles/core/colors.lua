@@ -60,7 +60,7 @@ function M.closure_get_project_color(random_bars_coloring, projects_sorted_ascen
   ---@return string
   return function(i, project_color)
     if project_color then
-      return M._get_or_create_highlight(project_color)
+      return M.get_or_create_highlight(project_color)
     end
 
     local hl_name
@@ -78,16 +78,16 @@ function M.closure_get_project_color(random_bars_coloring, projects_sorted_ascen
         or color_keys[((i - 1) % n_colors) + 1]
     end
 
-    return M._get_or_create_default_highlight(hl_name)
+    return M.get_or_create_default_highlight(hl_name)
   end
 end
 
 ---@param hex_color string
 ---@return string
-function M._get_or_create_highlight(hex_color)
+function M.get_or_create_highlight(hex_color)
   local normalized = M.check_and_normalize_hex_color(hex_color)
   if not normalized then
-    return M._get_or_create_default_highlight('DevChroniclesBackupColor')
+    return M.get_or_create_default_highlight('DevChroniclesBackupColor')
   end
 
   local hl_name = 'DevChroniclesCustom' .. normalized:upper()
@@ -104,7 +104,7 @@ end
 
 ---@param hl_name string
 ---@return string
-function M._get_or_create_default_highlight(hl_name)
+function M.get_or_create_default_highlight(hl_name)
   if M._highlights_cache[hl_name] then
     return hl_name
   end
@@ -127,7 +127,7 @@ end
 ---@param col integer
 ---@param end_col integer
 function M.apply_highlight(buf, hl_name, line_idx, col, end_col)
-  hl_name = M._get_or_create_default_highlight(hl_name)
+  hl_name = M.get_or_create_default_highlight(hl_name)
   vim.api.nvim_buf_add_highlight(buf, M._namespace, hl_name, line_idx, col, end_col)
 end
 
@@ -137,7 +137,7 @@ end
 ---@param col integer
 ---@param end_col integer
 function M.apply_highlight_hex(buf, hex, line_idx, col, end_col)
-  local hl_name = M._get_or_create_highlight(hex)
+  local hl_name = M.get_or_create_highlight(hex)
   vim.api.nvim_buf_add_highlight(buf, M._namespace, hl_name, line_idx, col, end_col)
 end
 
