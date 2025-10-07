@@ -97,6 +97,7 @@ function M._show_project_help()
     '  I     - Show project information',
     "  C     - Change project's color",
     '  D     - Mark project for deletion',
+    '  M     - Merge two projects (Not impl.)',
     '  ?     - Show this help',
     '  q/Esc - Close window',
   }
@@ -231,6 +232,7 @@ function M._change_project_color(data_projects, context)
     return
   end
 
+  ---@type string?, chronicles.StringOrFalse?
   local current_color, new_color = project_data.color, nil
   local current_color_line_default, current_color_line_index, current_color_line_default_text_end =
     'Current:  ', 4, 9
@@ -285,6 +287,9 @@ function M._change_project_color(data_projects, context)
       if hex_candidate then
         new_color_line = new_color_line .. '#' .. hex_candidate .. '  ████████'
         new_color = hex_candidate
+      elseif user_input == 'nil' then
+        new_color_line = new_color_line .. 'None'
+        new_color = false
       else
         new_color_line = new_color_line .. 'Not a color: ' .. user_input
       end
@@ -319,12 +324,16 @@ function M._change_project_color(data_projects, context)
   end
 
   local function confirm_new_color(win)
+    if new_color == nil then
+      notify.warn('Invalid color selected')
+      return
+    end
     if not M._changes.new_colors then
       M._changes.new_colors = {}
     end
     M._changes.new_colors[project_name] = new_color
     vim.api.nvim_win_close(win, true)
-    data_projects[project_name].color = new_color
+    data_projects[project_name].color = (new_color ~= false) and new_color or nil
     M._mark_project(data_projects, context, 'C', 'DevChroniclesBlue', false)
   end
 
@@ -358,6 +367,7 @@ function M._confirm_choices(win)
     return
   end
 
+  local any_changes = false
   local lines, highlights, lines_idx, max_width, hl_index = {}, {}, 1, 0, 1
   lines[lines_idx] = 'Changes:'
   highlights[hl_index] = {
@@ -367,7 +377,8 @@ function M._confirm_choices(win)
     hl_group = 'DevChroniclesAccent',
   }
 
-  if M._changes.new_colors then
+  if M._changes.new_colors and next(M._changes.new_colors) ~= nil then
+    any_changes = true
     lines[lines_idx + 1] = ''
     lines[lines_idx + 2] = 'New project colors:'
     lines_idx = lines_idx + 2
@@ -380,10 +391,21 @@ function M._confirm_choices(win)
     }
     max_width = math.max(max_width, #lines[lines_idx])
     for project_id, new_color in pairs(M._changes.new_colors) do
+      local color_changes_line = '   ' .. project_id .. ' -> '
+
+      local hl_name
+      if not new_color then
+        hl_name = colors._get_or_create_default_highlight('DevChroniclesAccent')
+        color_changes_line = color_changes_line .. 'None'
+      else
+        hl_name = colors._get_or_create_highlight(new_color)
+        color_changes_line = color_changes_line .. '#' .. new_color
+      end
+
       lines_idx = lines_idx + 1
-      lines[lines_idx] = '   ' .. project_id .. ' -> #' .. new_color
+      lines[lines_idx] = color_changes_line
+
       hl_index = hl_index + 1
-      local hl_name = colors._get_or_create_highlight(new_color)
       highlights[hl_index] = {
         line = lines_idx,
         col = 0,
@@ -394,12 +416,13 @@ function M._confirm_choices(win)
     end
   end
 
-  if M._changes.to_be_deleted then
-    local hl_red = colors._get_or_create_default_highlight('DevChroniclesRed')
+  if M._changes.to_be_deleted and next(M._changes.to_be_deleted) ~= nil then
+    any_changes = true
     lines[lines_idx + 1] = ''
     lines[lines_idx + 2] = 'Projects to be deleted:'
     lines_idx = lines_idx + 2
 
+    local hl_red = colors._get_or_create_default_highlight('DevChroniclesRed')
     hl_index = hl_index + 1
     highlights[hl_index] = {
       line = lines_idx,
@@ -423,6 +446,11 @@ function M._confirm_choices(win)
 
       max_width = math.max(max_width, #lines[lines_idx])
     end
+  end
+
+  if not any_changes then
+    notify.warn('Nothing to confirm')
+    return
   end
 
   lines[lines_idx + 1] = ''

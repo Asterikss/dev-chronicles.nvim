@@ -17,8 +17,10 @@
 ---| 'Body'
 ---| 'Footer'
 
+---@alias chronicles.StringOrFalse string|false
+
 ---@class chronicles.SessionState.Changes
----@field new_colors? table<string, string>
+---@field new_colors? table<string, chronicles.StringOrFalse>
 ---@field to_be_deleted? table<string, boolean>
 
 ---@class chronicles.SessionState
@@ -88,7 +90,7 @@
 ---@field body chronicles.BarLevelRepresentation
 ---@field footer chronicles.BarLevelRepresentation
 
----@alias chronicles.Dashboard.TopProjectsArray (string|boolean)[]
+---@alias chronicles.Dashboard.TopProjectsArray chronicles.StringOrFalse[]
 
 -- --------------------------------------------
 -- Panel Data
