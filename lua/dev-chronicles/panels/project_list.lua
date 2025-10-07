@@ -196,15 +196,12 @@ function M._mark_project(data_projects, context, symbol, hl_name, toggle_selecti
     marked_line = symbol .. ' ' .. project_name
   end
 
-  vim.api.nvim_set_option_value('modifiable', true, { buf = context.buf })
-  vim.api.nvim_buf_set_lines(
-    context.buf,
-    context.line_idx - 1,
-    context.line_idx,
-    false,
-    { marked_line }
-  )
-  vim.api.nvim_set_option_value('modifiable', false, { buf = context.buf })
+  local ok, err =
+    render.set_lines({ marked_line }, context.buf, context.line_idx - 1, context.line_idx)
+  if not ok then
+    notify.error('Failed to set buffer lines: ' .. err)
+    return
+  end
 
   if data_projects[project_name].color then
     colors.apply_highlight_hex(
@@ -292,15 +289,12 @@ function M._change_project_color(data_projects, context)
         new_color_line = new_color_line .. 'Not a color: ' .. user_input
       end
 
-      vim.api.nvim_set_option_value('modifiable', true, { buf = buf })
-      vim.api.nvim_buf_set_lines(
-        buf,
-        new_color_line_index - 1,
-        new_color_line_index,
-        false,
-        { new_color_line }
-      )
-      vim.api.nvim_set_option_value('modifiable', false, { buf = buf })
+      local ok, err =
+        render.set_lines({ new_color_line }, buf, new_color_line_index - 1, new_color_line_index)
+      if not ok then
+        notify.error('Failed to set buffer lines: ' .. err)
+        return
+      end
 
       if hex_candidate then
         colors.apply_highlight_hex(

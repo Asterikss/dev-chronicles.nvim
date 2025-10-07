@@ -69,4 +69,13 @@ function M.render(panel_data)
   return buf
 end
 
+function M.set_lines(lines, buf, start_idx, end_idx)
+  vim.api.nvim_set_option_value('modifiable', true, { buf = buf })
+  local ok, err = pcall(function()
+    vim.api.nvim_buf_set_lines(buf, start_idx, end_idx, false, lines)
+  end)
+  vim.api.nvim_set_option_value('modifiable', false, { buf = buf })
+  return ok, err
+end
+
 return M
