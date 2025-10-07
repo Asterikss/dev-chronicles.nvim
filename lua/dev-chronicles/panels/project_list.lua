@@ -1,11 +1,8 @@
 local M = {}
 
 local colors = require('dev-chronicles.core.colors')
-local render = require('dev-chronicles.core.render')
 local notify = require('dev-chronicles.utils.notify')
-
----@type chronicles.SessionState.Changes
-M._changes = {}
+local render = require('dev-chronicles.core.render')
 
 function M.display_project_list(opts)
   local data = require('dev-chronicles.utils.data').load_data(opts.data_file)
@@ -13,11 +10,22 @@ function M.display_project_list(opts)
     return
   end
 
+  -- The default mappings for `q` and `<Esc>` are currently not overridden, so
+  -- apart from initializing, this line also clears the `_changes` table
+  -- between executions.
+  ---@type chronicles.SessionState.Changes
+  M._changes = {}
+
   local lines, highlights, lines_idx, width = {}, {}, 0, 0
 
   for project_id, _ in pairs(data.projects) do
     lines_idx = lines_idx + 1
     lines[lines_idx] = project_id
+  end
+
+  if lines_idx == 0 then
+    notify.warn('No projects')
+    return
   end
 
   ---@type chronicles.Panel.Actions
@@ -444,11 +452,11 @@ function M._confirm_choices(win)
     actions = {
       ['<CR>'] = function(context)
         if not M._changes or next(M._changes) == nil then
-          notify.warn('Nothing to confim')
+          notify.warn('Nothing to confirm')
           return
         end
         require('dev-chronicles.core.state').set_changes(M._changes)
-        M._changes = nil
+        M._changes = {}
         vim.api.nvim_win_close(context.win, true)
         vim.api.nvim_win_close(win, true)
       end,
