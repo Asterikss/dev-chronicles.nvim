@@ -249,6 +249,9 @@ function M.setup(opts)
     merged.log_file = vim.fn.stdpath('data') .. '/dev-chronicles/' .. merged.log_file
   end
 
+  vim.fn.mkdir(vim.fn.fnamemodify(merged.data_file, ':h'), 'p')
+  vim.fn.mkdir(vim.fn.fnamemodify(merged.log_file, ':h'), 'p')
+
   if merged.dashboard.dashboard_months.n_by_default < 1 then
     notify.error('n_months_by_default should be greter than 0')
     return
