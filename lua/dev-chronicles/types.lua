@@ -224,6 +224,7 @@
 ---@field bar_spacing integer spacing between each column
 ---@field bar_chars string[][][] All the bar representation patterns
 ---@field use_extra_default_dashboard_bar_chars boolean
+---@field dsh_days_today_force_as_hours_min_false boolean
 ---@field footer chronicles.Options.Dashboard.Footer
 ---@field dashboard_days chronicles.Options.Dashboard.Section
 ---@field dashboard_months chronicles.Options.Dashboard.Section

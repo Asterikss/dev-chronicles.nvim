@@ -20,10 +20,11 @@ function M.dashboard(
   local PanelSubtype = require('dev-chronicles.core.enums').PanelSubtype
   local get_window_dimensions = require('dev-chronicles.utils').get_window_dimensions
 
+  ---@type chronicles.Dashboard.Data?
   local dashboard_stats
   ---@type chronicles.Dashboard.TopProjectsArray?
-  local top_projects = nil
-  ---@type chronicles.Options.Dashboard.Section
+  local top_projects
+  ---@type chronicles.Options.Dashboard.Section?
   local dashboard_type_options
 
   local start_offset = panel_subtype_args.start_offset
@@ -34,7 +35,17 @@ function M.dashboard(
   end
 
   if panel_subtype == PanelSubtype.Days then
-    dashboard_type_options = opts.dashboard.dashboard_days
+    if
+      opts.dashboard.dsh_days_today_force_as_hours_min_false
+      and start_offset == 0
+      and opts.dashboard.dashboard_days.project_total_time.as_hours_min
+    then
+      dashboard_type_options = vim.deepcopy(opts.dashboard.dashboard_days)
+      dashboard_type_options.project_total_time.as_hours_min = false
+    else
+      dashboard_type_options = opts.dashboard.dashboard_days
+    end
+
     dashboard_stats, top_projects = dashboard_data_extraction.get_dashboard_data_days(
       data,
       session_base.canonical_today_str,
