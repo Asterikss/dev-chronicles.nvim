@@ -21,8 +21,7 @@ function M.update_chronicles_data_with_curr_session(data, session_active, sessio
       total_time = 0,
       by_day = {},
       by_year = {},
-      tags_map = {},
-      first_worked = session_active.start_time,
+      first_worked = now_ts,
       last_worked = now_ts,
       last_worked_canonical = canonical_ts,
     }
@@ -104,7 +103,6 @@ function M._record_session(data_file, session_active, session_base, track_days)
       last_worked_canonical = canonical_end_ts,
       by_year = {},
       by_day = {},
-      tags_map = {},
     }
     data.projects[project_id] = project
   end

@@ -116,7 +116,7 @@ function M.get_dashboard_data_months(
     while true do
       i = i + 1
       local month_max_time = 0
-      ---@type string|boolean
+      ---@type chronicles.StringOrFalse
       local month_max_project = false
 
       local year_str = string.format('%d', l_pointer_year)
@@ -259,7 +259,7 @@ function M.get_dashboard_data_days(
     for ts = start_ts, end_ts, DAY_SEC do
       i = i + 1
       local day_max_time = 0
-      ---@type string|boolean
+      ---@type chronicles.StringOrFalse
       local day_max_project = false
       local key = time_days.get_day_str(ts)
 
@@ -392,7 +392,7 @@ function M.get_dashboard_data_years(
     while true do
       i = i + 1
       local year_max_time = 0
-      ---@type string|boolean
+      ---@type chronicles.StringOrFalse
       local year_max_project = false
       local year_str = tostring(l_pointer_year)
 

@@ -145,7 +145,7 @@ function M._show_project_info(projects_data, context)
   end
 
   local tags = {}
-  for tag, _ in pairs(project_data.tags_map) do
+  for tag, _ in pairs(project_data.tags_map or {}) do
     table.insert(tags, tag)
   end
 
