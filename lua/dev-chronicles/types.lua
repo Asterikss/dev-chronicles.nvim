@@ -69,6 +69,7 @@
 ---@field max_project_time integer
 ---@field does_include_curr_date boolean
 ---@field time_period_str string
+---@field top_projects? chronicles.Dashboard.TopProjectsArray
 
 ---@class (exact) chronicles.Dashboard.BarData
 ---@field project_name_tbl string[]

@@ -22,8 +22,6 @@ function M.dashboard(
 
   ---@type chronicles.Dashboard.Data?
   local dashboard_stats
-  ---@type chronicles.Dashboard.TopProjectsArray?
-  local top_projects
   ---@type chronicles.Options.Dashboard.Section?
   local dashboard_type_options
 
@@ -46,7 +44,7 @@ function M.dashboard(
       dashboard_type_options = opts.dashboard.dashboard_days
     end
 
-    dashboard_stats, top_projects = dashboard_data_extraction.get_dashboard_data_days(
+    dashboard_stats = dashboard_data_extraction.get_dashboard_data_days(
       data,
       session_base.canonical_today_str,
       start_offset,
@@ -71,7 +69,7 @@ function M.dashboard(
     )
   elseif panel_subtype == PanelSubtype.Months then
     dashboard_type_options = opts.dashboard.dashboard_months
-    dashboard_stats, top_projects = dashboard_data_extraction.get_dashboard_data_months(
+    dashboard_stats = dashboard_data_extraction.get_dashboard_data_months(
       data,
       session_base,
       panel_subtype_args.start_date,
@@ -85,7 +83,7 @@ function M.dashboard(
     )
   elseif panel_subtype == PanelSubtype.Years then
     dashboard_type_options = opts.dashboard.dashboard_years
-    dashboard_stats, top_projects = dashboard_data_extraction.get_dashboard_data_years(
+    dashboard_stats = dashboard_data_extraction.get_dashboard_data_years(
       data,
       session_base,
       panel_subtype_args.start_date,
@@ -115,7 +113,6 @@ function M.dashboard(
     window_dimensions.width,
     window_dimensions.height,
     opts,
-    top_projects,
     session_time_seconds
   )
 
@@ -136,7 +133,6 @@ end
 ---@param win_width integer
 ---@param win_height integer
 ---@param plugin_opts chronicles.Options
----@param top_projects? chronicles.Dashboard.TopProjectsArray
 ---@param curr_session_time? integer
 ---@return string[], chronicles.Highlight[]
 function M.create_dashboard_content(
@@ -145,7 +141,6 @@ function M.create_dashboard_content(
   win_width,
   win_height,
   plugin_opts,
-  top_projects,
   curr_session_time
 )
   local dashboard_content = require('dev-chronicles.dashboard.content')
@@ -173,8 +168,7 @@ function M.create_dashboard_content(
       data,
       win_width,
       win_height,
-      dashboard_type_opts.header,
-      top_projects
+      dashboard_type_opts.header
     )
   end
 
@@ -214,8 +208,7 @@ function M.create_dashboard_content(
       data,
       win_width,
       win_height,
-      dashboard_type_opts.header,
-      top_projects
+      dashboard_type_opts.header
     )
   end
 
@@ -264,7 +257,7 @@ function M.create_dashboard_content(
     data.does_include_curr_date,
     dashboard_type_opts.header,
     curr_session_time,
-    top_projects,
+    data.top_projects,
     project_id_to_color
   )
 

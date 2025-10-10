@@ -69,7 +69,7 @@ end
 ---@param time_period_str? string
 ---@param time_period_str_singular? string
 ---@param construct_most_worked_on_project_arr boolean
----@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
+---@return chronicles.Dashboard.Data?
 function M.get_dashboard_data_months(
   data,
   session_base,
@@ -197,8 +197,8 @@ function M.get_dashboard_data_months(
       time_period_str,
       time_period_str_singular
     ),
-  },
-    most_worked_on_project_per_month
+    top_projects = most_worked_on_project_per_month,
+  }
 end
 
 ---@param data chronicles.ChroniclesData
@@ -211,7 +211,7 @@ end
 ---@param time_period_str? string
 ---@param time_period_str_singular? string
 ---@param construct_most_worked_on_project_arr boolean
----@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
+---@return chronicles.Dashboard.Data?
 function M.get_dashboard_data_days(
   data,
   canonical_today_str,
@@ -324,8 +324,8 @@ function M.get_dashboard_data_days(
       time_period_str,
       time_period_str_singular
     ),
-  },
-    most_worked_on_project_per_day
+    top_projects = most_worked_on_project_per_day,
+  }
 end
 
 ---@param data chronicles.ChroniclesData
@@ -338,7 +338,7 @@ end
 ---@param time_period_str? string
 ---@param time_period_str_singular? string
 ---@param construct_most_worked_on_project_arr boolean
----@return chronicles.Dashboard.Data?, chronicles.Dashboard.TopProjectsArray?
+---@return chronicles.Dashboard.Data?
 function M.get_dashboard_data_years(
   data,
   session_base,
@@ -468,8 +468,8 @@ function M.get_dashboard_data_years(
       time_period_str,
       time_period_str_singular
     ),
-  },
-    most_worked_on_project_per_year
+    top_projects = most_worked_on_project_per_year,
+  }
 end
 
 ---@param projects table<string, chronicles.ChroniclesData.ProjectData>

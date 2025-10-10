@@ -562,17 +562,14 @@ end
 ---@param win_width integer
 ---@param win_height integer
 ---@param header_dashboard_type_opts chronicles.Options.Dashboard.Header
----@param top_projects any
----@return any
----@return any
+---@return string[], chronicles.Highlight[]
 function M.handle_no_projects_lines_hl(
   lines,
   highlights,
   data,
   win_width,
   win_height,
-  header_dashboard_type_opts,
-  top_projects
+  header_dashboard_type_opts
 )
   M.set_header_lines_hl(
     lines,
@@ -583,7 +580,7 @@ function M.handle_no_projects_lines_hl(
     data.does_include_curr_date,
     header_dashboard_type_opts,
     nil,
-    top_projects,
+    data.top_projects,
     {}
   )
 
