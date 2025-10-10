@@ -131,6 +131,20 @@ function M._record_session(data_file, session_active, session_base, track_days)
     project.by_day[today_key] = (project.by_day[today_key] or 0) + duration_sec
   end
 
+  local changes = session_base.changes
+  if changes then
+    for project_id_to_change, new_color_or_false in pairs(changes.new_colors or {}) do
+      local project_to_change = data.projects[project_id_to_change]
+      if project_to_change then
+        project_to_change.color = new_color_or_false or nil
+      end
+    end
+
+    for project_id_to_change, _ in pairs(changes.to_be_deleted or {}) do
+      data.projects[project_id_to_change] = nil
+    end
+  end
+
   data_utils.save_data(data, data_file)
 end
 

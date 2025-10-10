@@ -52,6 +52,7 @@ function M.get_session_info(extend_today_to_4am)
     canonical_month_str = time_months.get_month_str(canonical_ts),
     canonical_year_str = time_years.get_year_str(canonical_ts),
     now_ts = now_ts,
+    changes = vim.deepcopy(session.changes),
   }
 
   if not session.is_tracking then
@@ -61,9 +62,10 @@ function M.get_session_info(extend_today_to_4am)
   local start_time, project_id, project_name =
     session.start_time, session.project_id, session.project_name
   if not (start_time and project_id and project_name) then
-    error(
-      "DevChronicles Internal Error: Session's is_tracking is set to true, but its start_time or project_id is missing"
+    require('dev-chronicles.utils.notify').fatal(
+      "Session's is_tracking is set to true, but its start_time or project_id is missing"
     )
+    error()
   end
 
   local session_time_seconds = now_ts - start_time
@@ -89,7 +91,6 @@ end
 
 ---@param changes chronicles.SessionState.Changes
 function M.set_changes(changes)
-  vim.notify(vim.inspect(changes))
   session.changes = vim.deepcopy(changes)
 end
 

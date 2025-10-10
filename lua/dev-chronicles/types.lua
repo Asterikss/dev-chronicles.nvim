@@ -36,6 +36,7 @@
 ---@field canonical_month_str string
 ---@field canonical_year_str string
 ---@field now_ts integer
+---@field changes? chronicles.SessionState.Changes
 
 ---@class chronicles.SessionActive
 ---@field project_id string
