@@ -243,6 +243,7 @@
 ---@field track_days boolean
 ---@field extend_today_to_4am boolean
 ---@field dashboard chronicles.Options.Dashboard
+---@field project_list { show_help_hint: boolean }
 ---@field highlights table<string, { fg?: string, bg?: string, bold?: boolean, italic?: boolean, underline?: boolean }>
 ---@field data_file string Path to the data file
 ---@field log_file string Path to the log file

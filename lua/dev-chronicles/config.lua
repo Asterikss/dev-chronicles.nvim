@@ -83,7 +83,7 @@ local function make_dashboard_section(opts)
   )
 end
 
----@class chronicles.Options
+---@type chronicles.Options
 local defaults = {
   tracked_parent_dirs = {},
   tracked_dirs = {},
@@ -147,6 +147,9 @@ local defaults = {
       window_width = 1,
       window_border = { '╳', '━', '╳', '┃', '╳', '━', '╳', '┃' },
     }),
+  },
+  project_list = {
+    show_help_hint = true,
   },
   highlights = {
     DevChroniclesAccent = { fg = '#ffffff', bold = true },

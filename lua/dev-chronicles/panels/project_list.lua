@@ -6,6 +6,7 @@ local render = require('dev-chronicles.core.render')
 
 M.project_list_indent = 2
 
+---@param opts chronicles.Options
 function M.display_project_list(opts)
   local data = require('dev-chronicles.utils.data').load_data(opts.data_file)
   if not data then
@@ -88,15 +89,17 @@ function M.display_project_list(opts)
     }
   end
 
-  table.insert(lines, '')
-  table.insert(lines, 'Press `?` for help')
-  lines_idx = #lines
-  table.insert(highlights, {
-    line = lines_idx,
-    col = 0,
-    end_col = -1,
-    hl_group = 'DevChroniclesAccent',
-  })
+  if opts.project_list.show_help_hint then
+    table.insert(lines, '')
+    table.insert(lines, 'Press `?` for help')
+    lines_idx = #lines
+    table.insert(highlights, {
+      line = lines_idx,
+      col = 0,
+      end_col = -1,
+      hl_group = 'DevChroniclesAccent',
+    })
+  end
 
   width = width + 1
 
@@ -123,11 +126,13 @@ function M._show_project_help()
     "  C     - Change project's color",
     '  D     - Mark project for deletion',
     '  M     - Merge two projects (Not impl.)',
+    '  Enter - Confirm changes',
+    '  q/Esc - Exit and abort changes',
     '  ?     - Show this help',
-    '  q/Esc - Close window',
     '',
     'Changes are permanently applied upon closing Neovim.',
     '`:DevChronicles abort` discards the changes made.',
+    'Disable project_list.show_help_hint to hide the help hint.',
   }
 
   local max_width, highlights, n_lines = 0, {}, #lines
