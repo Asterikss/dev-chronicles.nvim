@@ -4,6 +4,8 @@ local colors = require('dev-chronicles.core.colors')
 local notify = require('dev-chronicles.utils.notify')
 local render = require('dev-chronicles.core.render')
 
+M.project_list_indent = 2
+
 function M.display_project_list(opts)
   local data = require('dev-chronicles.utils.data').load_data(opts.data_file)
   if not data then
@@ -60,8 +62,21 @@ function M.display_project_list(opts)
     return data.projects[a].total_time > data.projects[b].total_time
   end)
 
+  local indent = string.rep(' ', M.project_list_indent)
+
   for i = 1, lines_idx do
-    local line = '  ' .. lines[i]
+    local line_with_only_proj_name = lines[i]
+    local project_color = data.projects[line_with_only_proj_name].color
+
+    local hl_name
+    if project_color then
+      hl_name = colors.get_or_create_highlight(project_color)
+    else
+      hl_name = 'DevChroniclesAccent'
+    end
+
+    local line = indent .. lines[i]
+
     lines[i] = line
     width = math.max(width, #line)
 
@@ -69,11 +84,21 @@ function M.display_project_list(opts)
       line = i,
       col = 0,
       end_col = -1,
-      hl_group = 'DevChroniclesAccent',
+      hl_group = hl_name,
     }
   end
 
-  width = math.floor(width * 1.5)
+  table.insert(lines, '')
+  table.insert(lines, 'Press `?` for help')
+  lines_idx = #lines
+  table.insert(highlights, {
+    line = lines_idx,
+    col = 0,
+    end_col = -1,
+    hl_group = 'DevChroniclesAccent',
+  })
+
+  width = width + 1
 
   render.render({
     lines = lines,
@@ -100,6 +125,9 @@ function M._show_project_help()
     '  M     - Merge two projects (Not impl.)',
     '  ?     - Show this help',
     '  q/Esc - Close window',
+    '',
+    'Changes are permanently applied upon closing Neovim.',
+    '`:DevChronicles abort` discards the changes made.',
   }
 
   local max_width, highlights, n_lines = 0, {}, #lines
@@ -133,13 +161,13 @@ function M._show_project_help()
   })
 end
 
----@param projects_data chronicles.ChroniclesData.ProjectData[]
+---@param data_projects chronicles.ChroniclesData.ProjectData[]
 ---@param context chronicles.Panel.Context
-function M._show_project_info(projects_data, context)
+function M._show_project_info(data_projects, context)
   local format_time = require('dev-chronicles.core.time').format_time
   local get_day_str = require('dev-chronicles.core.time.days').get_day_str
 
-  local project_data = projects_data[context.line_content:sub(3)]
+  local project_data = data_projects[context.line_content:sub(M.project_list_indent + 1)]
   if not project_data then
     return
   end
@@ -188,7 +216,11 @@ end
 ---@param toggle_selection boolean
 ---@param callback? function
 function M._mark_project(data_projects, context, symbol, hl_name, toggle_selection, callback)
-  local project_name = context.line_content:sub(3)
+  local project_name = context.line_content:sub(M.project_list_indent + 1)
+  local project_data = data_projects[project_name]
+  if not project_data then
+    return
+  end
 
   local marked_line
   if toggle_selection and context.line_content:sub(1, 1) == symbol then
@@ -204,7 +236,7 @@ function M._mark_project(data_projects, context, symbol, hl_name, toggle_selecti
     return
   end
 
-  if data_projects[project_name].color then
+  if project_data.color then
     colors.apply_highlight_hex(
       context.buf,
       data_projects[project_name].color,
@@ -225,9 +257,8 @@ end
 ---@param data_projects chronicles.ChroniclesData.ProjectData[]
 ---@param context chronicles.Panel.Context
 function M._change_project_color(data_projects, context)
-  local project_name = context.line_content:sub(3)
+  local project_name = context.line_content:sub(M.project_list_indent + 1)
   local project_data = data_projects[project_name]
-
   if not project_data then
     return
   end
@@ -248,7 +279,7 @@ function M._change_project_color(data_projects, context)
     new_color_line_default,
     '',
     '',
-    'Input "nil" to remove the existing color',
+    'Input `nil` to remove the existing color',
     'Press C to change the color again',
     'Press Enter to confirm',
     'Press q/Esc to cancel',

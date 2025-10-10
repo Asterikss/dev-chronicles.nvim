@@ -25,7 +25,7 @@ function M.setup_colors(default_highlights)
     { 'DevChroniclesBackupColor', { fg = '#fff588', bold = true } },
   }
 
-  -- Preserve the order of color definitions.
+  -- Preserve the order of colors
   local tbl_idx = 0
   for _, entry in ipairs(default_project_colors_definitions) do
     local name, opts = entry[1], entry[2]
