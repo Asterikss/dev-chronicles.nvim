@@ -119,6 +119,7 @@
 ---@field window_title? string
 ---@field window_border? string[]
 ---@field actions? chronicles.Panel.Actions
+---@field cursor_position? {row: integer, col: integer}
 
 ---@class chronicles.Panel.Context
 ---@field line_idx integer

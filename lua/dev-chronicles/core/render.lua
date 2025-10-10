@@ -62,9 +62,20 @@ function M.render(panel_data)
   vim.api.nvim_set_option_value('bufhidden', 'wipe', { buf = buf })
   vim.api.nvim_set_option_value('filetype', 'dev-chronicles', { buf = buf })
   vim.api.nvim_set_option_value('modifiable', false, { buf = buf })
+  vim.api.nvim_set_option_value('scrolloff', 0, { win = win })
+  vim.api.nvim_set_option_value('sidescrolloff', 0, { win = win })
 
   vim.api.nvim_buf_set_name(buf, panel_data.buf_name)
-  vim.api.nvim_win_set_cursor(win, { 1, 0 })
+
+  if panel_data.cursor_position then
+    vim.api.nvim_win_set_cursor(
+      win,
+      { panel_data.cursor_position.row, panel_data.cursor_position.col }
+    )
+  else
+    vim.api.nvim_win_set_cursor(win, { 1, 0 })
+  end
+
   vim.cmd.redraw()
   return buf
 end

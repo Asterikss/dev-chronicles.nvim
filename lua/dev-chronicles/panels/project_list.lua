@@ -114,6 +114,10 @@ function M.display_project_list(opts)
       width = width,
       height = lines_idx,
     },
+    cursor_position = {
+      row = 1,
+      col = 1,
+    },
   })
 end
 
