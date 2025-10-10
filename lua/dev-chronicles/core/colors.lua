@@ -25,6 +25,7 @@ function M.setup_colors(default_highlights)
     { 'DevChroniclesBackupColor', { fg = '#fff588', bold = true } },
   }
 
+  -- Preserve the order of color definitions.
   local tbl_idx = 0
   for _, entry in ipairs(default_project_colors_definitions) do
     local name, opts = entry[1], entry[2]
@@ -42,23 +43,21 @@ end
 ---@param random_bars_coloring boolean
 ---@param projects_sorted_ascending boolean
 ---@param n_projects integer
----@return fun(i: integer, project_color?: string): string
+---@return fun(project_color?: string): string
 function M.closure_get_project_color(random_bars_coloring, projects_sorted_ascending, n_projects)
   local shuffle = require('dev-chronicles.utils').shuffle
 
   local color_keys = M._default_project_colors_keys
   local n_colors = #color_keys
-  local color_index
+  local color_index = 1
 
   if random_bars_coloring then
     shuffle(color_keys)
-    color_index = 1
   end
 
-  ---@param i integer loop index
   ---@param project_color string?
   ---@return string
-  return function(i, project_color)
+  return function(project_color)
     if project_color then
       return M.get_or_create_highlight(project_color)
     end
@@ -71,12 +70,14 @@ function M.closure_get_project_color(random_bars_coloring, projects_sorted_ascen
         color_index = 1
       end
       hl_name = color_keys[color_index]
-      color_index = color_index + 1
     else
       -- Sequential color cycling
-      hl_name = projects_sorted_ascending and color_keys[((n_projects - i) % n_colors) + 1]
-        or color_keys[((i - 1) % n_colors) + 1]
+      hl_name = projects_sorted_ascending
+          and color_keys[((n_projects - color_index) % n_colors) + 1]
+        or color_keys[((color_index - 1) % n_colors) + 1]
     end
+
+    color_index = color_index + 1
 
     return M.get_or_create_default_highlight(hl_name)
   end

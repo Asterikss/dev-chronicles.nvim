@@ -242,7 +242,7 @@ function M.create_bars_data(
 
   for i, project in ipairs(arr_projects) do
     local bar_height = math.max(1, math.floor((project.total_time / max_time) * max_bar_height))
-    local color = get_project_color(i, project.color)
+    local color = get_project_color(project.color)
 
     local project_id = project.id
     project_id_to_color[project_id] = color
