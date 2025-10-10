@@ -91,7 +91,7 @@ function M.display_project_list(opts)
 
   if opts.project_list.show_help_hint then
     table.insert(lines, '')
-    table.insert(lines, 'Press `?` for help')
+    table.insert(lines, 'Press ? for help')
     lines_idx = #lines
     table.insert(highlights, {
       line = lines_idx,

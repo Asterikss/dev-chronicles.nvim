@@ -159,6 +159,7 @@ local defaults = {
     DevChroniclesLightGray = { fg = '#d3d3d3', bold = true },
     DevChroniclesWindowBG = { bg = '#100E18' },
     DevChroniclesWindowTile = { bg = '#FFC0CB' },
+    DevChroniclesBackupColor = { fg = '#fff588', bold = true },
   },
   runtime_opts = {
     for_dev_start_time = nil,
