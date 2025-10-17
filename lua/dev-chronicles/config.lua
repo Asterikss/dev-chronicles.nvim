@@ -52,7 +52,7 @@ local dashboard_section_sorting_opts = {
   ascending = true,
 }
 
----@type chronicles.Options.Dashboard.Base
+---@type chronicles.Options.Dashboard.Section
 local dashboard_section_base = {
   header = dashboard_section_header_opts,
   sorting = dashboard_section_sorting_opts,

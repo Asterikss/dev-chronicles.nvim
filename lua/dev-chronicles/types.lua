@@ -196,10 +196,10 @@
 ---@field sort_by_last_worked_not_total_time boolean
 ---@field ascending boolean
 
----@class chronicles.Options.Dashboard.Base.ProjectTotalTime: chronicles.Options.Dashboard.TotalTimeBase
+---@class chronicles.Options.Dashboard.Section.ProjectTotalTime: chronicles.Options.Dashboard.TotalTimeBase
 ---@field color_like_bars boolean
 
----@class chronicles.Options.Dashboard.Base
+---@class chronicles.Options.Dashboard.Section
 ---@field header chronicles.Options.Dashboard.Header
 ---@field sorting chronicles.Options.Dashboard.Sorting
 ---@field dynamic_bar_height_thresholds any?
@@ -211,11 +211,7 @@
 ---@field window_width number
 ---@field window_border? string[]
 ---@field bar_chars any?
----@field project_total_time chronicles.Options.Dashboard.Base.ProjectTotalTime
-
----@class chronicles.Options.Dashboard.Section : chronicles.Options.Dashboard.Base
----@field header chronicles.Options.Dashboard.Header
----@field sorting chronicles.Options.Dashboard.Sorting
+---@field project_total_time chronicles.Options.Dashboard.Section.ProjectTotalTime
 
 ---@class chronicles.Options.Dashboard.Footer
 ---@field let_proj_names_extend_bars_by_one boolean

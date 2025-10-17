@@ -239,7 +239,7 @@ end
 ---@param highlights chronicles.Highlight[]
 ---@param bars_data chronicles.Dashboard.BarData[]
 ---@param win_width integer
----@param project_total_time chronicles.Options.Dashboard.Base.ProjectTotalTime
+---@param project_total_time chronicles.Options.Dashboard.Section.ProjectTotalTime
 ---@param project_global_time chronicles.Options.Dashboard.Header.ProjectGlobalTime
 function M.set_time_labels_above_bars_lines_hl(
   lines,
