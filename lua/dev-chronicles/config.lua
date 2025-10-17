@@ -25,7 +25,7 @@ local dashboard_section_header_opts = {
   total_time = {
     as_hours_max = true,
     as_hours_min = true,
-    round_hours_above_one = true,
+    round_hours_ge_x = 1,
     format_str = 'total time: %s',
   },
   project_global_time = {
@@ -34,7 +34,7 @@ local dashboard_section_header_opts = {
     color_like_bars = false,
     as_hours_max = true,
     as_hours_min = true,
-    round_hours_above_one = true,
+    round_hours_ge_x = 1,
   },
   top_projects = {
     enable = true,
@@ -68,7 +68,7 @@ local dashboard_section_base = {
   project_total_time = {
     as_hours_max = true,
     as_hours_min = true,
-    round_hours_above_one = true,
+    round_hours_ge_x = 1,
     color_like_bars = false,
   },
 }

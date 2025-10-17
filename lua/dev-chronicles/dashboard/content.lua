@@ -32,7 +32,7 @@ function M.set_header_lines_hl(
       global_time_filtered,
       total_time_opts.as_hours_max,
       total_time_opts.as_hours_min,
-      total_time_opts.round_hours_above_one
+      total_time_opts.round_hours_ge_x
     )
   )
   if
@@ -40,10 +40,7 @@ function M.set_header_lines_hl(
     and curr_session_time_seconds
     and does_include_curr_date
   then
-    left_header = left_header
-      .. ' ('
-      .. format_time(curr_session_time_seconds, true, false, false)
-      .. ')'
+    left_header = left_header .. ' (' .. format_time(curr_session_time_seconds, true, false) .. ')'
   end
 
   local right_header = time_period_str
@@ -261,7 +258,7 @@ function M.set_time_labels_above_bars_lines_hl(
   ---@param color? string
   ---@param as_hours_max boolean
   ---@param as_hours_min boolean
-  ---@param round_hours_above_one boolean
+  ---@param round_hours_ge_x? integer
   local function place_label(
     target_line,
     time_to_format,
@@ -271,9 +268,9 @@ function M.set_time_labels_above_bars_lines_hl(
     color,
     as_hours_max,
     as_hours_min,
-    round_hours_above_one
+    round_hours_ge_x
   )
-    local time_str = format_time(time_to_format, as_hours_max, as_hours_min, round_hours_above_one)
+    local time_str = format_time(time_to_format, as_hours_max, as_hours_min, round_hours_ge_x)
     local len_time_str = #time_str
     local label_start = bar_start_col + math.floor((bar_width - len_time_str) / 2)
 
@@ -316,7 +313,7 @@ function M.set_time_labels_above_bars_lines_hl(
           project_global_time.color_like_bars and bar.color or nil,
           project_global_time.as_hours_max,
           project_global_time.as_hours_min,
-          project_global_time.round_hours_above_one
+          project_global_time.round_hours_ge_x
         )
       end
     end
@@ -330,7 +327,7 @@ function M.set_time_labels_above_bars_lines_hl(
       project_total_time.color_like_bars and bar.color or nil,
       project_total_time.as_hours_max,
       project_total_time.as_hours_min,
-      project_total_time.round_hours_above_one
+      project_total_time.round_hours_ge_x
     )
   end
 

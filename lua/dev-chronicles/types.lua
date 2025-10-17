@@ -169,7 +169,7 @@
 ---@class chronicles.Options.Dashboard.TotalTimeBase
 ---@field as_hours_max boolean
 ---@field as_hours_min boolean
----@field round_hours_above_one boolean
+---@field round_hours_ge_x? integer
 
 ---@class chronicles.Options.Dashboard.Header.TotalTime: chronicles.Options.Dashboard.TotalTimeBase
 ---@field format_str string

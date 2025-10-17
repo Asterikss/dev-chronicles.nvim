@@ -4,9 +4,9 @@ local M = {}
 ---@param seconds integer Seconds
 ---@param max_hours? boolean Should the maximal unit be hours (default true)
 ---@param min_hours? boolean Should the minimal unit be hours (default false)
----@param round_hours_above_one? boolean Should hours above 1 be rounded (default false)
+---@param round_hours_ge_x? integer Should hours above X be rounded (no rounding by default)
 ---@return string
-function M.format_time(seconds, max_hours, min_hours, round_hours_above_one)
+function M.format_time(seconds, max_hours, min_hours, round_hours_ge_x)
   max_hours = (max_hours == nil) and true or max_hours
 
   if seconds == 0 then
@@ -28,8 +28,9 @@ function M.format_time(seconds, max_hours, min_hours, round_hours_above_one)
   end
 
   if max_hours or seconds < 86400 then
-    if round_hours_above_one then
-      return ('%dh'):format(math.floor((seconds / 3600) + 0.5))
+    local n_hours = seconds / 3600
+    if round_hours_ge_x and n_hours >= round_hours_ge_x then
+      return ('%dh'):format(math.floor(n_hours + 0.5))
     end
     return ('%.1fh'):format(seconds / 3600)
   end
