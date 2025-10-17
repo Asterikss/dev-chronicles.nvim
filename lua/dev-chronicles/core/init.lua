@@ -59,7 +59,7 @@ function M.is_project(
   for _, parent_dir in ipairs(tracked_parent_dirs) do
     if cwd:find(parent_dir, 1, true) == 1 then
       -- Get the first directory after the parent_dir
-      local first_dir = cwd:sub(#parent_dir):match('([^/]+)')
+      local first_dir = cwd:sub(#parent_dir):match('([^/]+/)')
       if first_dir then
         if parsed_exclude_subdirs_relative_map[first_dir] then
           return

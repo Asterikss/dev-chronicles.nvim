@@ -214,7 +214,7 @@ function M.setup(opts)
     ---@type table<string, boolean>
     local parsed_exclude_subdirs_relative_map = {}
     for _, subdir in ipairs(merged.exclude_subdirs_relative) do
-      parsed_exclude_subdirs_relative_map[subdir] = true
+      parsed_exclude_subdirs_relative_map[utils.expand(subdir)] = true
     end
     merged.runtime_opts.parsed_exclude_subdirs_relative_map = parsed_exclude_subdirs_relative_map
   end
