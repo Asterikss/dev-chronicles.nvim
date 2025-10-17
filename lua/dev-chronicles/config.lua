@@ -105,7 +105,7 @@ local defaults = {
       { {}, { '▉' }, {} },
     },
     use_extra_default_dashboard_bar_chars = true,
-    dsh_days_today_force_as_hours_min_false = true,
+    dsh_days_today_force_precise_time = true,
     footer = {
       let_proj_names_extend_bars_by_one = true,
     },
