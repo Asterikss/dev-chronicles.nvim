@@ -43,18 +43,16 @@ function M.display_project_list(opts)
       M._change_project_color(data.projects, context)
     end,
     ['<CR>'] = function(context)
-      M._confirm_choices(context.win)
+      M._confirm_choices(context.win, data)
     end,
     ['D'] = function(context)
       M._mark_project(data.projects, context, 'D', 'DevChroniclesRed', true, function(project_id)
         if not M._changes.to_be_deleted then
           M._changes.to_be_deleted = {}
         end
-        if M._changes.to_be_deleted[project_id] == nil then
-          M._changes.to_be_deleted[project_id] = true
-        else
-          M._changes.to_be_deleted[project_id] = nil
-        end
+        M._changes.to_be_deleted[project_id] = (M._changes.to_be_deleted[project_id] == nil)
+            and true
+          or nil
       end)
     end,
   }
@@ -245,17 +243,21 @@ function M._mark_project(data_projects, context, symbol, hl_name, toggle_selecti
     return
   end
 
-  if project_data.color then
-    colors.apply_highlight_hex(
-      context.buf,
-      data_projects[project_name].color,
-      context.line_idx - 1,
-      2,
-      -1
-    )
+  ---@type chronicles.StringOrFalse?
+  local project_color
+
+  if M._changes.new_colors and M._changes.new_colors[project_name] ~= nil then
+    project_color = M._changes.new_colors[project_name]
+  else
+    project_color = project_data.color
+  end
+
+  if project_color then
+    colors.apply_highlight_hex(context.buf, project_color, context.line_idx - 1, 2, -1)
   else
     colors.apply_highlight(context.buf, 'DevChroniclesAccent', context.line_idx - 1, 2, -1)
   end
+
   colors.apply_highlight(context.buf, hl_name, context.line_idx - 1, 0, 1)
 
   if callback then
@@ -273,7 +275,7 @@ function M._change_project_color(data_projects, context)
   end
 
   ---@type string?, chronicles.StringOrFalse?
-  local current_color, new_color = project_data.color, nil
+  local current_color, new_color_or_false = project_data.color, nil
   local current_color_line_default, current_color_line_index, current_color_line_default_text_end =
     'Current:  ', 4, 9
   local new_color_line_default, new_color_line_index, new_color_line_default_text_end =
@@ -326,10 +328,10 @@ function M._change_project_color(data_projects, context)
 
       if hex_candidate then
         new_color_line = new_color_line .. '#' .. hex_candidate .. '  ████████'
-        new_color = hex_candidate
+        new_color_or_false = hex_candidate
       elseif user_input == 'nil' then
         new_color_line = new_color_line .. 'None'
-        new_color = false
+        new_color_or_false = false
       else
         new_color_line = new_color_line .. 'Not a color: ' .. user_input
       end
@@ -364,16 +366,17 @@ function M._change_project_color(data_projects, context)
   end
 
   local function confirm_new_color(win)
-    if new_color == nil then
+    if new_color_or_false == nil then
       notify.warn('Invalid color selected')
       return
     end
+
     if not M._changes.new_colors then
       M._changes.new_colors = {}
     end
-    M._changes.new_colors[project_name] = new_color
+    M._changes.new_colors[project_name] = new_color_or_false
+
     vim.api.nvim_win_close(win, true)
-    data_projects[project_name].color = (new_color ~= false) and new_color or nil
     M._mark_project(data_projects, context, 'C', 'DevChroniclesBlue', false)
   end
 
@@ -401,8 +404,9 @@ function M._change_project_color(data_projects, context)
 end
 
 ---@param win integer
-function M._confirm_choices(win)
-  if not M._changes or next(M._changes) == nil then
+---@param data chronicles.ChroniclesData
+function M._confirm_choices(win, data)
+  if next(M._changes) == nil then
     notify.warn('Nothing to confim')
     return
   end
@@ -513,10 +517,19 @@ function M._confirm_choices(win)
     buf_name = 'Dev Chronicles Project List - Confirmation',
     actions = {
       ['<CR>'] = function(context)
-        if not M._changes or next(M._changes) == nil then
+        if next(M._changes) == nil then
           notify.warn('Nothing to confirm')
           return
         end
+
+        for project_id, new_color_or_false in pairs(M._changes.new_colors or {}) do
+          data.projects[project_id].color = new_color_or_false or nil
+        end
+
+        for project_id, _ in pairs(M._changes.to_be_deleted or {}) do
+          data.projects[project_id] = nil
+        end
+
         require('dev-chronicles.core.state').set_changes(M._changes)
         M._changes = {}
         vim.api.nvim_win_close(context.win, true)
