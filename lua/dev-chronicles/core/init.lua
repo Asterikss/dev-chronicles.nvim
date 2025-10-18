@@ -65,7 +65,7 @@ function M.is_project(
           return
         end
 
-        local project_id = parent_dir .. first_dir
+        local project_id = parent_dir .. first_dir .. '/'
         return (differentiate_projects_by_folder_not_path and first_dir or unexpand(project_id)),
           first_dir
       end
