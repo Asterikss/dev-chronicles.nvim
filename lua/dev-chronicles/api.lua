@@ -21,7 +21,8 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
 
   local session_base, session_active = get_session_info(opts.extend_today_to_4am)
   if session_active then
-    data = update_chronicles_data_with_curr_session(data, session_active, session_base)
+    data =
+      update_chronicles_data_with_curr_session(vim.deepcopy(data), session_active, session_base)
   end
 
   ---@type chronicles.Panel.Data?

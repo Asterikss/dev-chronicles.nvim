@@ -2,9 +2,27 @@ local M = {}
 
 local notify = require('dev-chronicles.utils.notify')
 
+---@type {file_path: string?, file_mtime: integer?, data: chronicles.ChroniclesData?}
+local chronicles_data_cache = {
+  file_path = nil,
+  file_mtime = nil,
+  data = nil,
+}
+
 ---@param file_path string
 ---@return chronicles.ChroniclesData?
 function M.load_data(file_path)
+  local file_stat = vim.loop.fs_stat(file_path)
+  local current_mtime = file_stat and file_stat.mtime.sec or 0
+
+  if
+    current_mtime == chronicles_data_cache.file_mtime
+    and chronicles_data_cache.file_path == file_path
+    and chronicles_data_cache.data
+  then
+    return chronicles_data_cache.data
+  end
+
   if vim.fn.filereadable(file_path) == 0 then
     local current_timestamp = os.time()
     ---@type chronicles.ChroniclesData
@@ -28,6 +46,12 @@ function M.load_data(file_path)
     notify.error('Failed loading data from disk: Could not decode json')
     return
   end
+
+  chronicles_data_cache = {
+    file_path = file_path,
+    file_mtime = current_mtime,
+    data = data,
+  }
 
   return data
 end
