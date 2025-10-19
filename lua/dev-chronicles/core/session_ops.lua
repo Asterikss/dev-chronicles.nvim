@@ -1,20 +1,20 @@
 local M = {}
 
+---Updates ChroniclesData in place with data from the current session.
 ---@param data chronicles.ChroniclesData
 ---@param session_active chronicles.SessionActive
 ---@param session_base chronicles.SessionBase
+---@param track_days boolean
 ---@return chronicles.ChroniclesData
-function M.update_chronicles_data_with_curr_session(data, session_active, session_base)
-  local session_time_sec = session_active.session_time_seconds
-  data.global_time = data.global_time + session_time_sec
-
+function M.update_chronicles_data_with_curr_session(data, session_active, session_base, track_days)
+  local session_time = session_active.session_time_seconds
   local now_ts = session_base.now_ts
   local canonical_ts = session_base.canonical_ts
   local today_key = session_base.canonical_today_str
   local curr_month_key = session_base.canonical_month_str
   local curr_year_key = session_base.canonical_year_str
-  local current_project = data.projects[session_active.project_id]
 
+  local current_project = data.projects[session_active.project_id]
   if not current_project then
     ---@type chronicles.ChroniclesData.ProjectData
     current_project = {
@@ -37,15 +37,22 @@ function M.update_chronicles_data_with_curr_session(data, session_active, sessio
     current_project.by_year[curr_year_key] = year_data
   end
 
+  data.global_time = data.global_time + session_time
+  data.last_data_write = now_ts
+
   current_project.by_year[curr_year_key].by_month[curr_month_key] = (
     current_project.by_year[curr_year_key].by_month[curr_month_key] or 0
-  ) + session_time_sec
+  ) + session_time
   current_project.by_year[curr_year_key].total_time = current_project.by_year[curr_year_key].total_time
-    + session_time_sec
-  current_project.by_day[today_key] = (current_project.by_day[today_key] or 0) + session_time_sec
-  current_project.total_time = current_project.total_time + session_time_sec
+    + session_time
+  current_project.total_time = current_project.total_time + session_time
   current_project.last_worked = now_ts
   current_project.last_worked_canonical = canonical_ts
+  current_project.first_worked = math.min(current_project.first_worked, canonical_ts)
+
+  if track_days then
+    current_project.by_day[today_key] = (current_project.by_day[today_key] or 0) + session_time
+  end
 
   return data
 end
@@ -57,22 +64,11 @@ end
 function M.end_session(data_file, track_days, min_session_time, extend_today_to_4am)
   local state = require('dev-chronicles.core.state')
   local session_base, session_active = state.get_session_info(extend_today_to_4am)
-  if not session_active then
+
+  if not session_active and not session_base.changes then
     return
   end
 
-  if session_active.session_time_seconds >= min_session_time then
-    M._record_session(data_file, session_active, session_base, track_days)
-  end
-
-  state.abort_session()
-end
-
----@param data_file string
----@param session_active chronicles.SessionActive
----@param session_base chronicles.SessionBase
----@param track_days boolean
-function M._record_session(data_file, session_active, session_base, track_days)
   local data_utils = require('dev-chronicles.utils.data')
   local data = data_utils.load_data(data_file)
   if not data then
@@ -82,70 +78,26 @@ function M._record_session(data_file, session_active, session_base, track_days)
     return
   end
 
-  local end_ts = session_base.now_ts
-  local canonical_end_ts = session_base.canonical_ts
-  local today_key = session_base.canonical_today_str
-  local month_key = session_base.canonical_month_str
-  local year_key = session_base.canonical_year_str
-  local duration_sec = session_active.session_time_seconds
-  local project_id = session_active.project_id
-
-  data.global_time = data.global_time + duration_sec
-  data.last_data_write = end_ts
-
-  local project = data.projects[project_id]
-  if not project then
-    ---@type chronicles.ChroniclesData.ProjectData
-    project = {
-      total_time = 0,
-      first_worked = canonical_end_ts,
-      last_worked = end_ts,
-      last_worked_canonical = canonical_end_ts,
-      by_year = {},
-      by_day = {},
-    }
-    data.projects[project_id] = project
+  if session_active and session_active.session_time_seconds >= min_session_time then
+    M.update_chronicles_data_with_curr_session(data, session_active, session_base, track_days)
   end
 
-  project.first_worked = math.min(project.first_worked, canonical_end_ts)
-  project.total_time = project.total_time + duration_sec
-  project.last_worked_canonical = canonical_end_ts
-  project.last_worked = end_ts
-
-  local year_data = project.by_year[year_key]
-  if not year_data then
-    year_data = {
-      total_time = 0,
-      by_month = {},
-    }
-    project.by_year[year_key] = year_data
-  end
-
-  project.by_year[year_key].by_month[month_key] = (
-    project.by_year[year_key].by_month[month_key] or 0
-  ) + duration_sec
-
-  project.by_year[year_key].total_time = project.by_year[year_key].total_time + duration_sec
-
-  if track_days then
-    project.by_day[today_key] = (project.by_day[today_key] or 0) + duration_sec
-  end
-
-  local changes = session_base.changes
-  if changes then
-    for project_id_to_change, new_color_or_false in pairs(changes.new_colors or {}) do
+  if session_base.changes then
+    for project_id_to_change, new_color_or_false in pairs(session_base.changes.new_colors or {}) do
       local project_to_change = data.projects[project_id_to_change]
       if project_to_change then
         project_to_change.color = new_color_or_false or nil
       end
     end
 
-    for project_id_to_change, _ in pairs(changes.to_be_deleted or {}) do
+    for project_id_to_change, _ in pairs(session_base.changes.to_be_deleted or {}) do
       data.projects[project_id_to_change] = nil
     end
   end
 
   data_utils.save_data(data, data_file)
+
+  state.abort_session()
 end
 
 return M
