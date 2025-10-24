@@ -42,4 +42,37 @@ function M.format_time(seconds, max_hours, min_hours, round_hours_ge_x)
   return ('%d days'):format(n_days)
 end
 
+---@param start_ts integer
+---@param end_ts integer
+---@retrun string
+function M.get_time_period_str(start_ts, end_ts)
+  if end_ts <= start_ts then
+    return ''
+  end
+
+  local total_seconds = end_ts - start_ts
+  local total_days = math.floor(total_seconds / 86400)
+
+  local years = math.floor(total_days / 365)
+  local days = total_days - years * 365
+
+  local months = math.floor(days / 30)
+  days = days - months * 30
+
+  local parts = {}
+  if years > 0 then
+    table.insert(parts, years .. ' year' .. (years > 1 and 's' or ''))
+  end
+  if months > 0 then
+    table.insert(parts, months .. ' month' .. (months > 1 and 's' or ''))
+  end
+  if days > 0 or #parts == 0 then
+    table.insert(parts, days .. ' day' .. (days > 1 and 's' or ''))
+  end
+
+  table.insert(parts, '(' .. total_days .. ' day' .. (days > 1 and 's' or '') .. ')')
+
+  return table.concat(parts, ' ')
+end
+
 return M

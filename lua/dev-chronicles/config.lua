@@ -144,7 +144,7 @@ local defaults = {
       },
       sorting = { sort_by_last_worked_not_total_time = false },
       window_height = 0.85,
-      window_width = 1,
+      window_width = 0.99,
       window_border = { '╳', '━', '╳', '┃', '╳', '━', '╳', '┃' },
     }),
   },

@@ -1,25 +1,12 @@
 local M = {}
 
-local time_months = require('dev-chronicles.core.time.months')
 local notify = require('dev-chronicles.utils.notify')
 
 ---@param data chronicles.ChroniclesData
----@param canonical_month_str string
----@param canonical_today_str string
----@param show_date_period boolean
----@param show_time boolean
----@param time_period_str? string
----@param time_period_str_singular? string
 ---@return chronicles.Dashboard.Data
-function M.get_dashboard_data_all(
-  data,
-  canonical_month_str,
-  canonical_today_str,
-  show_date_period,
-  show_time,
-  time_period_str,
-  time_period_str_singular
-)
+function M.get_dashboard_data_all(data)
+  local time = require('dev-chronicles.core.time')
+
   ---@type chronicles.Dashboard.FinalProjectData[]
   local final_project_data_arr = {}
   local project_arr_idx, max_project_time = 0, 0
@@ -46,16 +33,7 @@ function M.get_dashboard_data_all(
     final_project_data_arr = next(final_project_data_arr) ~= nil and final_project_data_arr or nil,
     max_project_time = max_project_time,
     does_include_curr_date = true,
-    time_period_str = time_months.get_time_period_str_months(
-      time_months.get_month_str(data.tracking_start),
-      time_months.get_month_str(),
-      canonical_month_str,
-      canonical_today_str,
-      show_date_period,
-      show_time,
-      time_period_str,
-      time_period_str_singular
-    ),
+    time_period_str = time.get_time_period_str(data.tracking_start, os.time()),
   }
 end
 
@@ -82,6 +60,8 @@ function M.get_dashboard_data_months(
   time_period_str_singular,
   construct_most_worked_on_project_arr
 )
+  local time_months = require('dev-chronicles.core.time.months')
+
   start_date = start_date
     or time_months.get_previous_month(session_base.canonical_month_str, n_months_by_default - 1)
   end_date = end_date or session_base.canonical_month_str
