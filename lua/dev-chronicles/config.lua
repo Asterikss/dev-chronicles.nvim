@@ -92,7 +92,10 @@ local defaults = {
   sort_tracked_parent_dirs = false,
   differentiate_projects_by_folder_not_path = true,
   min_session_time = 15,
-  track_days = true,
+  track_days = {
+    enable = true,
+    optimize_storage_for_x_days = 30,
+  },
   extend_today_to_4am = true,
   data_file = 'dev-chronicles.json',
   log_file = 'log.dev-chronicles.log',

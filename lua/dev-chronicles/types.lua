@@ -230,6 +230,10 @@
 ---@field dashboard_years chronicles.Options.Dashboard.Section
 ---@field dashboard_all chronicles.Options.Dashboard.Section
 
+---@class chronicles.Options.TrackDays
+---@field enable boolean
+---@field optimize_storage_for_x_days? integer
+
 ---@class chronicles.Options
 ---@field tracked_parent_dirs string[] List of parent dirs to track
 ---@field tracked_dirs string[] List of dir paths to track
@@ -238,7 +242,7 @@
 ---@field sort_tracked_parent_dirs boolean If paths are not supplied from longest to shortest, then they need to be sorted like that
 ---@field differentiate_projects_by_folder_not_path boolean
 ---@field min_session_time integer Minimum session time in seconds
----@field track_days boolean
+---@field track_days chronicles.Options.TrackDays
 ---@field extend_today_to_4am boolean
 ---@field dashboard chronicles.Options.Dashboard
 ---@field project_list { show_help_hint: boolean }

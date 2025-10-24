@@ -4,7 +4,7 @@ local M = {}
 ---@param data chronicles.ChroniclesData
 ---@param session_active chronicles.SessionActive
 ---@param session_base chronicles.SessionBase
----@param track_days boolean
+---@param track_days chronicles.Options.TrackDays
 ---@return chronicles.ChroniclesData
 function M.update_chronicles_data_with_curr_session(data, session_active, session_base, track_days)
   local session_time = session_active.session_time_seconds
@@ -50,7 +50,7 @@ function M.update_chronicles_data_with_curr_session(data, session_active, sessio
   current_project.last_worked_canonical = canonical_ts
   current_project.first_worked = math.min(current_project.first_worked, canonical_ts)
 
-  if track_days then
+  if track_days.enable then
     current_project.by_day[today_key] = (current_project.by_day[today_key] or 0) + session_time
   end
 
@@ -58,7 +58,7 @@ function M.update_chronicles_data_with_curr_session(data, session_active, sessio
 end
 
 ---@param data_file string
----@param track_days boolean
+---@param track_days chronicles.Options.TrackDays
 ---@param min_session_time integer
 ---@param extend_today_to_4am boolean
 function M.end_session(data_file, track_days, min_session_time, extend_today_to_4am)

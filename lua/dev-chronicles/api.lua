@@ -26,7 +26,7 @@ function M.abort_session()
   require('dev-chronicles.core.state').abort_session()
 end
 
----@param opts? { min_session_time?: number, track_days?: boolean, extend_today_to_4am?: boolean, data_file?: string }
+---@param opts? { min_session_time?: number, track_days?: chronicles.Options.TrackDays, extend_today_to_4am?: boolean, data_file?: string }
 function M.finish_session(opts)
   opts = opts or {}
   local plugin_opts = require('dev-chronicles.config').get_opts()

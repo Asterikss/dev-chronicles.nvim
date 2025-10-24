@@ -33,10 +33,8 @@ function M.dashboard(
   end
 
   if panel_subtype == PanelSubtype.Days then
-    if not opts.track_days then
-      notify.warn(
-        '`track_days` options is set to `false`. Set to `true` to be able to display days data'
-      )
+    if not opts.track_days.enable then
+      notify.warn('track_days option is disabled. Enable it to display day data.')
       return
     end
 
