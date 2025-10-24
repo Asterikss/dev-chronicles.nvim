@@ -33,6 +33,13 @@ function M.dashboard(
   end
 
   if panel_subtype == PanelSubtype.Days then
+    if not opts.track_days then
+      notify.warn(
+        '`track_days` options is set to `false`. Set to `true` to be able to display days data'
+      )
+      return
+    end
+
     if opts.dashboard.dsh_days_today_force_precise_time and start_offset == 0 then
       ---@type chronicles.Options.Dashboard.Section
       dashboard_type_options = vim.deepcopy(opts.dashboard.dashboard_days)
