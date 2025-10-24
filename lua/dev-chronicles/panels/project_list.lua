@@ -3,6 +3,7 @@ local M = {}
 local colors = require('dev-chronicles.core.colors')
 local notify = require('dev-chronicles.utils.notify')
 local render = require('dev-chronicles.core.render')
+local session_ops = require('dev-chronicles.core.session_ops')
 
 M.project_list_indent = 2
 
@@ -523,13 +524,7 @@ function M._confirm_choices(win, data)
           return
         end
 
-        for project_id, new_color_or_false in pairs(M._changes.new_colors or {}) do
-          data.projects[project_id].color = new_color_or_false or nil
-        end
-
-        for project_id, _ in pairs(M._changes.to_be_deleted or {}) do
-          data.projects[project_id] = nil
-        end
+        session_ops.apply_changes_to_chronicles_data(data, M._changes)
 
         require('dev-chronicles.core.state').set_changes(M._changes)
         M._changes = {}

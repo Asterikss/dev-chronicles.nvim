@@ -83,21 +83,27 @@ function M.end_session(data_file, track_days, min_session_time, extend_today_to_
   end
 
   if session_base.changes then
-    for project_id_to_change, new_color_or_false in pairs(session_base.changes.new_colors or {}) do
-      local project_to_change = data.projects[project_id_to_change]
-      if project_to_change then
-        project_to_change.color = new_color_or_false or nil
-      end
-    end
-
-    for project_id_to_change, _ in pairs(session_base.changes.to_be_deleted or {}) do
-      data.projects[project_id_to_change] = nil
-    end
+    M.apply_changes_to_chronicles_data(data, session_base.changes)
   end
 
   data_utils.save_data(data, data_file)
 
   state.abort_session()
+end
+
+---@param data chronicles.ChroniclesData
+---@param changes chronicles.SessionState.Changes
+function M.apply_changes_to_chronicles_data(data, changes)
+  for project_id_to_change, new_color_or_false in pairs(changes.new_colors or {}) do
+    local project_to_change = data.projects[project_id_to_change]
+    if project_to_change then
+      project_to_change.color = new_color_or_false or nil
+    end
+  end
+
+  for project_id_to_change, _ in pairs(changes.to_be_deleted or {}) do
+    data.projects[project_id_to_change] = nil
+  end
 end
 
 return M
