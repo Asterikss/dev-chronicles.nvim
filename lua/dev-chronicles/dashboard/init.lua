@@ -34,10 +34,13 @@ function M.dashboard(
 
   if panel_subtype == PanelSubtype.Days then
     if opts.dashboard.dsh_days_today_force_precise_time and start_offset == 0 then
+      ---@type chronicles.Options.Dashboard.Section
       dashboard_type_options = vim.deepcopy(opts.dashboard.dashboard_days)
       dashboard_type_options.project_total_time.as_hours_min = false
       dashboard_type_options.project_total_time.round_hours_ge_x = 10
+      dashboard_type_options.header.project_global_time.as_hours_min = false
       dashboard_type_options.header.project_global_time.round_hours_ge_x = 10
+      dashboard_type_options.header.total_time.as_hours_min = false
       dashboard_type_options.header.total_time.round_hours_ge_x = 10
     else
       dashboard_type_options = opts.dashboard.dashboard_days

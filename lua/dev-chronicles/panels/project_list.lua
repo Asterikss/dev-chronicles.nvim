@@ -134,6 +134,7 @@ function M._show_project_help()
     '',
     'Changes are permanently applied upon closing Neovim.',
     '`:DevChronicles abort` discards the changes made.',
+    'To check for any queued changes run `:DevChronicles info`.',
     'Disable project_list.show_help_hint to hide the help hint.',
   }
 

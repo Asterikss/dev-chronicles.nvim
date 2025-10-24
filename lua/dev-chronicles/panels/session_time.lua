@@ -18,12 +18,11 @@ function M.display_session_time()
       '',
     }
   else
-    lines = { '', ' Not working on a tracked project ', '' }
+    lines = { '', ' Not tracking ', '' }
     width = #lines[2]
   end
 
-  local n_lines = #lines
-  local highlights = {}
+  local n_lines, highlights = #lines, {}
   for i = 1, n_lines do
     highlights[i] = {
       line = i,

@@ -1,5 +1,8 @@
 local M = {}
 
+---Expand a path and ensure it ends with a slash
+---@param path string
+---@return string
 function M.expand(path)
   local expanded = vim.fn.expand(path)
   if expanded:sub(-1) ~= '/' then
