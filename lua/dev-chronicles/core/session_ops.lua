@@ -94,15 +94,19 @@ end
 ---@param data chronicles.ChroniclesData
 ---@param changes chronicles.SessionState.Changes
 function M.apply_changes_to_chronicles_data(data, changes)
-  for project_id_to_change, new_color_or_false in pairs(changes.new_colors or {}) do
-    local project_to_change = data.projects[project_id_to_change]
+  for project_id, new_color_or_false in pairs(changes.new_colors or {}) do
+    local project_to_change = data.projects[project_id]
     if project_to_change then
       project_to_change.color = new_color_or_false or nil
     end
   end
 
-  for project_id_to_change, _ in pairs(changes.to_be_deleted or {}) do
-    data.projects[project_id_to_change] = nil
+  for project_id, _ in pairs(changes.to_be_deleted or {}) do
+    local project = data.projects[project_id]
+    if project then
+      data.global_time = data.global_time - project.total_time
+      data.projects[project_id] = nil
+    end
   end
 end
 
