@@ -56,9 +56,9 @@
 ---@field last_worked integer
 ---@field last_worked_canonical integer
 ---@field first_worked integer
----@field tags_map table<string, any>?
 ---@field global_time integer
----@field color string?
+---@field color? string
+---@field tags_map? table<string, any>
 
 ---@alias chronicles.Dashboard.FinalProjectDataMap table<string, chronicles.Dashboard.FinalProjectData>
 
@@ -140,8 +140,8 @@
 ---@field last_worked integer
 ---@field last_worked_canonical integer
 ---@field last_cleaned? integer
----@field tags_map table<string, any>?
----@field color string?
+---@field tags_map? table<string, any>
+---@field color? string
 
 ---@class (exact) chronicles.ChroniclesData
 ---@field global_time integer

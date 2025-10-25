@@ -181,18 +181,25 @@ function M._show_project_info(data_projects, context)
     return
   end
 
-  local tags = {}
-  for tag, _ in pairs(project_data.tags_map or {}) do
-    table.insert(tags, tag)
-  end
-
   local lines = {
     'total time:   ' .. format_time(project_data.total_time),
     'first worked: ' .. get_day_str(project_data.first_worked),
-    'last_worked:  ' .. get_day_str(project_data.last_worked),
+    'last worked:  ' .. get_day_str(project_data.last_worked),
     'color:        ' .. tostring(project_data.color),
-    'tags:         ' .. table.concat(tags, ', '),
   }
+
+  if project_data.last_cleaned then
+    table.insert(lines, 'last cleaned: ' .. tostring(project_data.last_cleaned))
+  end
+
+  if project_data.tags_map then
+    local tags = {}
+    for tag, _ in pairs(project_data.tags_map) do
+      table.insert(tags, tag)
+    end
+
+    table.insert(lines, 'tags:         ' .. table.concat(tags, ', '))
+  end
 
   local highlights, n_lines, max_width = {}, #lines, 0
   for i = 1, n_lines do
