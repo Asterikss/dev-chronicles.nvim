@@ -25,7 +25,8 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
       vim.deepcopy(data),
       session_active,
       session_base,
-      opts.track_days
+      opts.track_days,
+      false
     )
   end
 

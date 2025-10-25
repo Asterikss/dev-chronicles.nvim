@@ -5,8 +5,15 @@ local M = {}
 ---@param session_active chronicles.SessionActive
 ---@param session_base chronicles.SessionBase
 ---@param track_days chronicles.Options.TrackDays
+---@param clean_days_data boolean
 ---@return chronicles.ChroniclesData
-function M.update_chronicles_data_with_curr_session(data, session_active, session_base, track_days)
+function M.update_chronicles_data_with_curr_session(
+  data,
+  session_active,
+  session_base,
+  track_days,
+  clean_days_data
+)
   local session_time = session_active.session_time_seconds
   local now_ts = session_base.now_ts
   local canonical_ts = session_base.canonical_ts
@@ -52,9 +59,43 @@ function M.update_chronicles_data_with_curr_session(data, session_active, sessio
 
   if track_days.enable then
     current_project.by_day[today_key] = (current_project.by_day[today_key] or 0) + session_time
+
+    if clean_days_data and track_days.optimize_storage_for_x_days then
+      local last_cleaned = current_project.last_cleaned or now_ts
+      local should_clean = now_ts - last_cleaned >= 2592000
+      if should_clean then
+        M._cleanup_old_days_data_of_a_project(
+          current_project,
+          track_days.optimize_storage_for_x_days,
+          now_ts
+        )
+      end
+    end
   end
 
   return data
+end
+
+---@param project_data chronicles.ChroniclesData.ProjectData
+---@param n_days_to_keep integer
+---@param now_ts integer
+function M._cleanup_old_days_data_of_a_project(project_data, n_days_to_keep, now_ts)
+  local time_days = require('dev-chronicles.core.time.days')
+  local cutoff_ts = now_ts - (n_days_to_keep * 86400)
+  local by_day_data = project_data.by_day
+
+  -- keeps one more day than n_days_to_keep if including today
+  local new_by_day = {}
+  for ts = cutoff_ts, now_ts, 86400 do
+    local key = time_days.get_day_str(ts)
+    local value = by_day_data[key]
+    if value then
+      new_by_day[key] = value
+    end
+  end
+
+  project_data.by_day = new_by_day
+  project_data.last_cleaned = now_ts
 end
 
 ---@param data_file string
@@ -79,7 +120,7 @@ function M.end_session(data_file, track_days, min_session_time, extend_today_to_
   end
 
   if session_active and session_active.session_time_seconds >= min_session_time then
-    M.update_chronicles_data_with_curr_session(data, session_active, session_base, track_days)
+    M.update_chronicles_data_with_curr_session(data, session_active, session_base, track_days, true)
   end
 
   if session_base.changes then
