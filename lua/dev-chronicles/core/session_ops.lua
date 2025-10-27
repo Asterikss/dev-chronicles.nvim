@@ -31,6 +31,7 @@ function M.update_chronicles_data_with_curr_session(
       first_worked = now_ts,
       last_worked = now_ts,
       last_worked_canonical = canonical_ts,
+      last_cleaned = now_ts,
     }
     data.projects[session_active.project_id] = current_project
   end
@@ -61,14 +62,9 @@ function M.update_chronicles_data_with_curr_session(
     current_project.by_day[today_key] = (current_project.by_day[today_key] or 0) + session_time
 
     if clean_days_data and track_days.optimize_storage_for_x_days then
-      local last_cleaned = current_project.last_cleaned or now_ts
-      local should_clean = now_ts - last_cleaned >= 2592000
+      local should_clean = now_ts - current_project.last_cleaned >= 2592000
       if should_clean then
-        M._cleanup_old_days_data_of_a_project(
-          current_project,
-          track_days.optimize_storage_for_x_days,
-          now_ts
-        )
+        M._cleanup_project_day_data(current_project, track_days.optimize_storage_for_x_days, now_ts)
       end
     end
   end
@@ -79,7 +75,7 @@ end
 ---@param project_data chronicles.ChroniclesData.ProjectData
 ---@param n_days_to_keep integer
 ---@param now_ts integer
-function M._cleanup_old_days_data_of_a_project(project_data, n_days_to_keep, now_ts)
+function M._cleanup_project_day_data(project_data, n_days_to_keep, now_ts)
   local time_days = require('dev-chronicles.core.time.days')
   local cutoff_ts = now_ts - (n_days_to_keep * 86400)
   local by_day_data = project_data.by_day

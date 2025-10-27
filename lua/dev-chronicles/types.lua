@@ -139,7 +139,7 @@
 ---@field first_worked integer
 ---@field last_worked integer
 ---@field last_worked_canonical integer
----@field last_cleaned? integer
+---@field last_cleaned integer
 ---@field tags_map? table<string, any>
 ---@field color? string
 

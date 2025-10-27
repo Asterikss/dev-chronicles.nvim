@@ -183,14 +183,11 @@ function M._show_project_info(data_projects, context)
 
   local lines = {
     'total time:   ' .. format_time(project_data.total_time),
-    'first worked: ' .. get_day_str(project_data.first_worked),
     'last worked:  ' .. get_day_str(project_data.last_worked),
+    'first worked: ' .. get_day_str(project_data.first_worked),
+    'last cleaned: ' .. get_day_str(project_data.last_cleaned),
     'color:        ' .. tostring(project_data.color),
   }
-
-  if project_data.last_cleaned then
-    table.insert(lines, 'last cleaned: ' .. tostring(project_data.last_cleaned))
-  end
 
   if project_data.tags_map then
     local tags = {}
