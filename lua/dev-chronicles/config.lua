@@ -273,14 +273,19 @@ function M.setup(opts)
     end
   end
 
-  if
-    merged.dashboard.dashboard_days.n_by_default > 60
-    or merged.dashboard.dashboard_days.n_by_default < 1
-  then
-    notify.warn(
-      'dashboard.default_n_last_days_shown cannot be grater than 60 and smaller than 1. Setting it to 30'
-    )
-    merged.dashboard.dashboard_days.n_by_default = 60
+  if merged.track_days.optimize_storage_for_x_days then
+    if merged.track_days.optimize_storage_for_x_days <= 0 then
+      notify.error('optimize_storage_for_x_days should be greater than 0')
+      return
+    end
+    if
+      merged.dashboard.dashboard_days.n_by_default > merged.track_days.optimize_storage_for_x_days
+    then
+      notify.error(
+        'dashboard.dashboard_days.n_by_default is greater than track_days.optimize_storage_for_x_days. Cannot show older days than previous optimize_storage_for_x_days days. Setting it to the limit'
+      )
+      merged.dashboard.dashboard_days.n_by_default = merged.track_days.optimize_storage_for_x_days
+    end
   end
 
   ---@type chronicles.Options
