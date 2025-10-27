@@ -42,4 +42,38 @@ function M.finish_session(opts)
   )
 end
 
+---@param optimize_storage_for_x_days? integer
+---@param data_path? string
+function M.clean_projects_day_data(optimize_storage_for_x_days, data_path)
+  local cleanup_project_day_data =
+    require('dev-chronicles.core.session_ops').cleanup_project_day_data
+  local data_utils = require('dev-chronicles.utils.data')
+  local plugin_opts = require('dev-chronicles.config').get_opts()
+  local now_ts = os.time()
+
+  if not optimize_storage_for_x_days then
+    if not plugin_opts.track_days.optimize_storage_for_x_days then
+      require('dev-chronicles.utils.notify').warn(
+        'track_days.optimize_storage_for_x_days is set to nil and it was not passed to the function'
+      )
+      return
+    end
+    ---@type integer
+    optimize_storage_for_x_days = plugin_opts.track_days.optimize_storage_for_x_days
+  end
+
+  data_path = data_path or plugin_opts.data_file
+
+  local data = data_utils.load_data(data_path)
+  if not data then
+    return
+  end
+
+  for _, project_data in pairs(data.projects) do
+    cleanup_project_day_data(project_data, optimize_storage_for_x_days, now_ts)
+  end
+
+  data_utils.save_data(data, data_path)
+end
+
 return M

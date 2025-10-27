@@ -69,10 +69,13 @@ function M._setup_the_command(opts)
       else
         notify.notify(vim.inspect(opts))
       end
+    elseif first_arg == 'clean' then
+      api.clean_projects_day_data()
+      notify.notify('Projects cleaned')
     else
       notify.notify(
         'Usage: :DevChronicles [all | days [start_offset [end_offset]] |'
-          .. 'months [start_date [end_date]] | today | week | info | abort]'
+          .. 'months [start_date [end_date]] | today | week | info | abort | clean]'
       )
     end
   end, {
@@ -81,7 +84,7 @@ function M._setup_the_command(opts)
       local split = vim.split(cmd_line, '%s+')
       local n_splits = #split
       if n_splits == 2 then
-        return { 'all', 'days', 'months', 'info', 'abort', 'time', 'config' }
+        return { 'all', 'days', 'months', 'info', 'abort', 'time', 'config', 'clean' }
       elseif n_splits == 3 then
         if split[2] == 'days' then
           return { '30' }
