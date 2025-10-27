@@ -191,6 +191,7 @@ end
 ---@param time_period_str? string
 ---@param time_period_str_singular? string
 ---@param construct_most_worked_on_project_arr boolean
+---@param optimize_storage_for_x_days? integer
 ---@return chronicles.Dashboard.Data?
 function M.get_dashboard_data_days(
   data,
@@ -202,14 +203,15 @@ function M.get_dashboard_data_days(
   show_time,
   time_period_str,
   time_period_str_singular,
-  construct_most_worked_on_project_arr
+  construct_most_worked_on_project_arr,
+  optimize_storage_for_x_days
 )
   local time_days = require('dev-chronicles.core.time.days')
 
   start_offset = start_offset or n_days_by_default - 1
   end_offset = end_offset or 0
 
-  local DAY_SEC = 86400 -- 24 * 60 * 60
+  local DAY_SEC = 86400
   local start_str = time_days.get_previous_day(canonical_today_str, start_offset)
   local end_str = time_days.get_previous_day(canonical_today_str, end_offset)
   local start_ts = time_days.convert_day_str_to_timestamp(start_str)
@@ -220,6 +222,22 @@ function M.get_dashboard_data_days(
   if start_ts > end_ts then
     notify.warn(('DevChronicles Error: start (%s) > end (%s)'):format(start_str, end_str))
     return
+  end
+
+  if optimize_storage_for_x_days then
+    local oldest_allowed_ts = time_days.convert_day_str_to_timestamp(
+      time_days.get_previous_day(canonical_today_str, optimize_storage_for_x_days - 1)
+    )
+
+    if start_ts < oldest_allowed_ts then
+      notify.warn(
+        ('start date of the requested period — %s — is older than the last %d stored days (optimize_storage_for_x_days). Since the storage optimization is done lazily, the data past this point could be incorrect. To see it, increase the optimize_storage_for_x_days option.'):format(
+          start_str,
+          optimize_storage_for_x_days
+        )
+      )
+      return
+    end
   end
 
   M._filter_projects_by_period_inplace(projects, start_ts, end_ts)

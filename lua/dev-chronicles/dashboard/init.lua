@@ -61,7 +61,8 @@ function M.dashboard(
       dashboard_type_options.header.show_time,
       dashboard_type_options.header.time_period_str,
       dashboard_type_options.header.time_period_str_singular,
-      dashboard_type_options.header.top_projects.enable
+      dashboard_type_options.header.top_projects.enable,
+      opts.track_days.optimize_storage_for_x_days
     )
   elseif panel_subtype == PanelSubtype.All then
     dashboard_type_options = opts.dashboard.dashboard_all
