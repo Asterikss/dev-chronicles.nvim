@@ -214,7 +214,8 @@ function M.get_dashboard_data_days(
   local DAY_SEC = 86400
   local start_str = time_days.get_previous_day(canonical_today_str, start_offset)
   local end_str = time_days.get_previous_day(canonical_today_str, end_offset)
-  local start_ts = time_days.convert_day_str_to_timestamp(start_str)
+  -- Adding half a day handles DST issues given any reasonable time range. Not pretty, but performant
+  local start_ts = time_days.convert_day_str_to_timestamp(start_str) + 43200
   local end_ts = time_days.convert_day_str_to_timestamp(end_str, true)
   local canonical_today_timestamp = time_days.convert_day_str_to_timestamp(canonical_today_str)
   local projects = data.projects
