@@ -20,4 +20,15 @@ M.BarLevel = {
   Footer = 'Footer',
 }
 
+M.DefaultColors = {
+  DevChroniclesAccent = 'DevChroniclesAccent',
+  DevChroniclesProjectTime = 'DevChroniclesProjectTime',
+  DevChroniclesGlobalProjectTime = 'DevChroniclesGlobalProjectTime',
+  DevChroniclesGrayedOut = 'DevChroniclesGrayedOut',
+  DevChroniclesLightGray = 'DevChroniclesLightGray',
+  DevChroniclesWindowBG = 'DevChroniclesWindowBG',
+  DevChroniclesWindowTitle = 'DevChroniclesWindowTitle',
+  DevChroniclesBackupColor = 'DevChroniclesBackupColor',
+}
+
 return M

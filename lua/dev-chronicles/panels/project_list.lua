@@ -5,6 +5,7 @@ local notify = require('dev-chronicles.utils.notify')
 local render = require('dev-chronicles.core.render')
 local session_ops = require('dev-chronicles.core.session_ops')
 local utils = require('dev-chronicles.utils')
+local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
 
 M.project_list_indent = 2
 
@@ -73,7 +74,7 @@ function M.display_project_list(opts)
     if project_color then
       hl_name = colors.get_or_create_highlight(project_color)
     else
-      hl_name = 'DevChroniclesAccent'
+      hl_name = DefaultColors.DevChroniclesAccent
     end
 
     local line = indent .. lines[i]
@@ -97,7 +98,7 @@ function M.display_project_list(opts)
       line = lines_idx,
       col = 0,
       end_col = -1,
-      hl_group = 'DevChroniclesAccent',
+      hl_group = DefaultColors.DevChroniclesAccent,
     })
   end
 
@@ -147,7 +148,7 @@ function M._show_project_help()
       line = i,
       col = 0,
       end_col = -1,
-      hl_group = 'DevChroniclesAccent',
+      hl_group = DefaultColors.DevChroniclesAccent,
     }
   end
 
@@ -200,7 +201,7 @@ function M._show_project_info(data_projects, context)
       line = i,
       col = 0,
       end_col = -1,
-      hl_group = 'DevChroniclesAccent',
+      hl_group = DefaultColors.DevChroniclesAccent,
     }
     max_width = math.max(max_width, #lines[i])
   end
@@ -252,7 +253,13 @@ function M._mark_project(data_projects, context, symbol, hl_name, toggle_selecti
   if project_color then
     colors.apply_highlight_hex(context.buf, project_color, context.line_idx - 1, 2, -1)
   else
-    colors.apply_highlight(context.buf, 'DevChroniclesAccent', context.line_idx - 1, 2, -1)
+    colors.apply_highlight(
+      context.buf,
+      DefaultColors.DevChroniclesAccent,
+      context.line_idx - 1,
+      2,
+      -1
+    )
   end
 
   colors.apply_highlight(context.buf, hl_name, context.line_idx - 1, 0, 1)
@@ -300,7 +307,7 @@ function M._change_project_color(data_projects, context)
       line = i,
       col = 0,
       end_col = -1,
-      hl_group = 'DevChroniclesAccent',
+      hl_group = DefaultColors.DevChroniclesAccent,
     }
   end
 
@@ -351,13 +358,19 @@ function M._change_project_color(data_projects, context)
 
         colors.apply_highlight(
           buf,
-          'DevChroniclesAccent',
+          DefaultColors.DevChroniclesAccent,
           new_color_line_index - 1,
           0,
           new_color_line_default_text_end
         )
       else
-        colors.apply_highlight(buf, 'DevChroniclesAccent', new_color_line_index - 1, 0, -1)
+        colors.apply_highlight(
+          buf,
+          DefaultColors.DevChroniclesAccent,
+          new_color_line_index - 1,
+          0,
+          -1
+        )
       end
     end)
   end
@@ -410,7 +423,7 @@ function M._confirm_choices(win, data)
     line = lines_idx,
     col = 0,
     end_col = -1,
-    hl_group = 'DevChroniclesAccent',
+    hl_group = DefaultColors.DevChroniclesAccent,
   }
 
   if M._changes.new_colors and next(M._changes.new_colors) ~= nil then
@@ -431,7 +444,7 @@ function M._confirm_choices(win, data)
 
       local hl_name
       if not new_color then
-        hl_name = colors.get_or_create_default_highlight('DevChroniclesAccent')
+        hl_name = DefaultColors.DevChroniclesAccent
         color_changes_line = color_changes_line .. 'None'
       else
         hl_name = colors.get_or_create_highlight(new_color)
@@ -499,7 +512,7 @@ function M._confirm_choices(win, data)
     line = lines_idx,
     col = 0,
     end_col = -1,
-    hl_group = 'DevChroniclesAccent',
+    hl_group = DefaultColors.DevChroniclesAccent,
   }
   max_width = math.max(max_width, #lines[lines_idx])
 

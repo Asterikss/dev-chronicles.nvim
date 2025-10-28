@@ -1,5 +1,7 @@
 local M = {}
 
+local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
+
 M._namespace = vim.api.nvim_create_namespace('dev-chronicles')
 
 ---@type table<string, {fg: string, bold: boolean}>
@@ -87,7 +89,7 @@ end
 function M.get_or_create_highlight(hex_color)
   local normalized = M.check_and_normalize_hex_color(hex_color)
   if not normalized then
-    return M.get_or_create_default_highlight('DevChroniclesBackupColor')
+    return DefaultColors.DevChroniclesBackupColor
   end
 
   local hl_name = 'DevChroniclesCustom' .. normalized:upper()
@@ -111,7 +113,7 @@ function M.get_or_create_default_highlight(hl_name)
 
   local color_specs = M._default_project_colors[hl_name]
   if not color_specs then
-    return M.get_or_create_default_highlight('DevChroniclesBackupColor')
+    return DefaultColors.DevChroniclesBackupColor
   end
 
   vim.api.nvim_set_hl(0, hl_name, color_specs)

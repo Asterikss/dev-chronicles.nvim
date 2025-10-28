@@ -2,6 +2,7 @@ local M = {}
 
 function M.display_session_time()
   local format_time = require('dev-chronicles.core.time').format_time
+  local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
   local _, session_active = require('dev-chronicles.api').get_session_info()
 
   local lines, width
@@ -28,7 +29,7 @@ function M.display_session_time()
       line = i,
       col = 0,
       end_col = -1,
-      hl_group = 'DevChroniclesAccent',
+      hl_group = DefaultColors.DevChroniclesAccent,
     }
   end
 

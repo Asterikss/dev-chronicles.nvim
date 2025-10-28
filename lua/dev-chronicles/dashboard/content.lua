@@ -1,6 +1,7 @@
 local M = {}
 
 local format_time = require('dev-chronicles.core.time').format_time
+local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
 
 ---Adds 4 line header. Monster function
 ---@param lines string[]
@@ -142,8 +143,9 @@ function M.set_header_lines_hl(
         -- project_id_to_color won’t contain it, and a distinct highlight is
         -- used to indicate that this time period had a most-worked-on project
         -- that isn’t currently displayed.
-        local color = project_id and (project_id_to_color[project_id] or 'DevChroniclesLightGray')
-          or 'DevChroniclesGrayedOut'
+        local color = project_id
+            and (project_id_to_color[project_id] or DefaultColors.DevChroniclesLightGray)
+          or DefaultColors.DevChroniclesGrayedOut
 
         curr_highlight_end_col_top = curr_highlight_col_top + single_top_bar_bytes
         curr_highlight_end_col_bottom = curr_highlight_col_bottom + single_top_bar_bytes
@@ -206,24 +208,26 @@ function M.set_header_lines_hl(
     line = 1,
     col = 0,
     end_col = left_header_bytes,
-    hl_group = 'DevChroniclesAccent',
+    hl_group = DefaultColors.DevChroniclesAccent,
   })
   table.insert(highlights, {
     line = 1,
     col = right_header_highlight_start_col,
     end_col = -1,
-    hl_group = 'DevChroniclesAccent',
+    hl_group = DefaultColors.DevChroniclesAccent,
   })
   if prettify then
-    table.insert(
-      highlights,
-      { line = 2, col = 0, end_col = decorator_left_bytes, hl_group = 'DevChroniclesAccent' }
-    )
+    table.insert(highlights, {
+      line = 2,
+      col = 0,
+      end_col = decorator_left_bytes,
+      hl_group = DefaultColors.DevChroniclesAccent,
+    })
     table.insert(highlights, {
       line = 2,
       col = decorator_right_highlight_start_col,
       end_col = -1,
-      hl_group = 'DevChroniclesAccent',
+      hl_group = DefaultColors.DevChroniclesAccent,
     })
   end
 
@@ -231,7 +235,7 @@ function M.set_header_lines_hl(
   lines[2] = header_line2
   lines[3] = ''
 
-  M.set_hline_lines_hl(lines, highlights, win_width, '─', 'DevChroniclesAccent')
+  M.set_hline_lines_hl(lines, highlights, win_width, '─', DefaultColors.DevChroniclesAccent)
 end
 
 --- If global_time_line is set, then it overrides 3rd lines line
@@ -339,7 +343,7 @@ function M.set_time_labels_above_bars_lines_hl(
       line = global_time_line_number,
       col = 0,
       end_col = -1,
-      hl_group = 'DevChroniclesGlobalProjectTime',
+      hl_group = DefaultColors.DevChroniclesGlobalProjectTime,
     })
   end
 
@@ -349,7 +353,7 @@ function M.set_time_labels_above_bars_lines_hl(
       line = highlights_insert_positon,
       col = 0,
       end_col = -1,
-      hl_group = 'DevChroniclesProjectTime',
+      hl_group = DefaultColors.DevChroniclesProjectTime,
     })
   end
 
@@ -485,7 +489,7 @@ function M.set_hline_lines_hl(lines, highlights, win_width, char, hl_group)
     line = #lines,
     col = 0,
     end_col = -1,
-    hl_group = hl_group or 'DevChroniclesGlobalProjectTime',
+    hl_group = hl_group or DefaultColors.DevChroniclesGlobalProjectTime,
   })
 end
 

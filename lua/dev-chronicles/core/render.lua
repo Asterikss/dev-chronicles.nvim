@@ -3,6 +3,8 @@ local M = {}
 ---@param panel_data chronicles.Panel.Data
 ---@return integer: buffer
 function M.render(panel_data)
+  local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
+
   local buf = vim.api.nvim_create_buf(false, true)
 
   local win = vim.api.nvim_open_win(buf, true, {
@@ -20,7 +22,11 @@ function M.render(panel_data)
 
   vim.api.nvim_set_option_value(
     'winhighlight',
-    'NormalFloat:DevChroniclesWindowBG,FloatBorder:DevChroniclesLightGray,FloatTitle:DevChroniclesLightGray',
+    table.concat({
+      'NormalFloat:' .. DefaultColors.DevChroniclesWindowBG,
+      'FloatBorder:' .. DefaultColors.DevChroniclesLightGray,
+      'FloatTitle:' .. DefaultColors.DevChroniclesWindowTitle,
+    }, ','),
     { win = win }
   )
 
