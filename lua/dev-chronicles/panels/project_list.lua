@@ -4,6 +4,7 @@ local colors = require('dev-chronicles.core.colors')
 local notify = require('dev-chronicles.utils.notify')
 local render = require('dev-chronicles.core.render')
 local session_ops = require('dev-chronicles.core.session_ops')
+local utils = require('dev-chronicles.utils')
 
 M.project_list_indent = 2
 
@@ -161,12 +162,7 @@ function M._show_project_help()
     lines = lines,
     highlights = highlights,
     buf_name = 'Dev Chronicles Project List - Help',
-    window_dimensions = {
-      col = math.floor((vim.o.columns - max_width) / 2),
-      row = math.floor((vim.o.lines - n_lines) / 2),
-      width = max_width,
-      height = n_lines,
-    },
+    window_dimensions = utils.get_window_dimensions_fixed(max_width, n_lines),
   })
 end
 
@@ -213,12 +209,7 @@ function M._show_project_info(data_projects, context)
     lines = lines,
     highlights = highlights,
     buf_name = 'Dev Chronicles Project List - Project Info',
-    window_dimensions = {
-      col = math.floor((vim.o.columns - max_width) / 2),
-      row = math.floor((vim.o.lines - n_lines) / 2),
-      width = max_width,
-      height = n_lines,
-    },
+    window_dimensions = utils.get_window_dimensions_fixed(max_width, n_lines),
   })
 end
 
@@ -398,12 +389,7 @@ function M._change_project_color(data_projects, context)
         confirm_new_color(window_context.win)
       end,
     },
-    window_dimensions = {
-      col = math.floor((vim.o.columns - max_width) / 2),
-      row = math.floor((vim.o.lines - n_lines) / 2),
-      width = max_width,
-      height = n_lines,
-    },
+    window_dimensions = utils.get_window_dimensions_fixed(max_width, n_lines),
   })
 
   prompt(buf)
@@ -536,12 +522,7 @@ function M._confirm_choices(win, data)
         vim.api.nvim_win_close(win, true)
       end,
     },
-    window_dimensions = {
-      col = math.floor((vim.o.columns - max_width) / 2),
-      row = math.floor((vim.o.lines - lines_idx) / 2),
-      width = max_width,
-      height = lines_idx,
-    },
+    window_dimensions = utils.get_window_dimensions_fixed(max_width, lines_idx),
   })
 end
 

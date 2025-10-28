@@ -58,6 +58,19 @@ function M.get_window_dimensions(screen_width_percent, screen_height_percent)
   }
 end
 
+---@param width number
+---@param height number
+---@return chronicles.WindowDimensions
+function M.get_window_dimensions_fixed(width, height)
+  ---@type chronicles.WindowDimensions
+  return {
+    col = math.floor((vim.o.columns - width) / 2),
+    row = math.floor((vim.o.lines - height) / 2),
+    width = width,
+    height = height,
+  }
+end
+
 ---@param lines string[]
 ---@param highlights chronicles.Highlight[]
 ---@param win_width integer
