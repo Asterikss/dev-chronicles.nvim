@@ -114,7 +114,7 @@
 
 ---@class chronicles.Panel.Data
 ---@field lines string[]
----@field highlights chronicles.Highlight[]
+---@field highlights? chronicles.Highlight[]
 ---@field window_dimensions chronicles.WindowDimensions
 ---@field buf_name string
 ---@field window_title? string

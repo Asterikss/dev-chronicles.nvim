@@ -72,6 +72,8 @@ function M._setup_the_command(opts)
     elseif first_arg == 'clean' then
       api.clean_projects_day_data()
       notify.notify('Projects cleaned')
+    elseif first_arg == 'logs' then
+      require('dev-chronicles.panels.logs').display_logs(opts.log_file)
     else
       notify.notify(
         'Usage: :DevChronicles [all | days [start_offset [end_offset]] |'
@@ -87,7 +89,7 @@ function M._setup_the_command(opts)
         return { 'all', 'days', 'months', 'info', 'abort', 'time', 'config', 'clean' }
       elseif n_splits == 3 then
         if split[2] == 'days' then
-          return { '30' }
+          return { '29' }
         elseif split[2] == 'months' then
           return { 'MM.YYYY' }
         elseif split[2] == 'years' then

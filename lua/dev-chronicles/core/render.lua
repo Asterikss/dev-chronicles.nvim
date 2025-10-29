@@ -32,7 +32,9 @@ function M.render(panel_data)
 
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, panel_data.lines)
 
-  require('dev-chronicles.core.colors').apply_highlights(buf, panel_data.highlights)
+  if panel_data.highlights then
+    require('dev-chronicles.core.colors').apply_highlights(buf, panel_data.highlights)
+  end
 
   ---@return chronicles.Panel.Context
   local function get_current_context()

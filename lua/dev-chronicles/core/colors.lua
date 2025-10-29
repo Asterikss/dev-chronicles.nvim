@@ -142,7 +142,7 @@ function M.apply_highlight_hex(buf, hex, line_idx, col, end_col)
 end
 
 ---@param buf integer
----@param highlights chronicles.Highlight
+---@param highlights chronicles.Highlight[]
 function M.apply_highlights(buf, highlights)
   local ns = M._namespace
   for _, hl in ipairs(highlights) do
