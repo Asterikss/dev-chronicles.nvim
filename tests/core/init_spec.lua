@@ -4,17 +4,17 @@ describe('core.is_project', function()
   local real_os_homedir
 
   before_each(function()
-    real_os_homedir = vim.loop.os_homedir
-    vim.loop.os_homedir = function()
+    real_os_homedir = vim.uv.os_homedir
+    vim.uv.os_homedir = function()
       return '/home/user'
     end
   end)
 
   after_each(function()
-    vim.loop.os_homedir = real_os_homedir
+    vim.uv.os_homedir = real_os_homedir
   end)
 
-  local function new_fixture()
+  local function new_test_fixture()
     return {
       cwd = '/home/user/projects/foo/',
       tracked_parent_dirs = {},
@@ -26,7 +26,7 @@ describe('core.is_project', function()
   end
 
   it('returns nil when cwd is inside an excluded absolute dir', function()
-    local f = new_fixture()
+    local f = new_test_fixture()
     f.tracked_parent_dirs = { '/home/user/projects/' }
     f.exclude_dirs_absolute = { '/home/user/projects/foo/' }
 
@@ -44,7 +44,7 @@ describe('core.is_project', function()
   end)
 
   it('returns correct id and project name for a directly tracked directory', function()
-    local f = new_fixture()
+    local f = new_test_fixture()
     f.tracked_dirs = { '/home/user/projects/foo/' }
 
     local project_id, project_name = core.is_project(
@@ -63,7 +63,7 @@ describe('core.is_project', function()
   it(
     'returns expanded project id when differentiate_projects_by_folder_not_path = false for tracked_dirs',
     function()
-      local f = new_fixture()
+      local f = new_test_fixture()
       f.tracked_dirs = { '/home/user/projects/foo/' }
       f.differentiate_projects_by_folder_not_path = false
 
@@ -84,7 +84,7 @@ describe('core.is_project', function()
   it(
     'returns expanded project id when differentiate_projects_by_folder_not_path = false for tracked_parent_dirs',
     function()
-      local f = new_fixture()
+      local f = new_test_fixture()
       f.tracked_parent_dirs = { '/home/user/projects/' }
       f.differentiate_projects_by_folder_not_path = false
 
@@ -103,7 +103,7 @@ describe('core.is_project', function()
   )
 
   it('returns nil for a tracked parent directory itself', function()
-    local f = new_fixture()
+    local f = new_test_fixture()
     f.cwd = '/home/user/projects/'
     f.tracked_parent_dirs = { '/home/user/projects/' }
 
@@ -121,7 +121,7 @@ describe('core.is_project', function()
   end)
 
   it('detects a subproject within a tracked parent directory', function()
-    local f = new_fixture()
+    local f = new_test_fixture()
     f.tracked_parent_dirs = { '/home/user/projects/' }
 
     local project_id, project_name = core.is_project(
@@ -138,7 +138,7 @@ describe('core.is_project', function()
   end)
 
   it('skips excluded subprojects listed in the relative exclude map', function()
-    local f = new_fixture()
+    local f = new_test_fixture()
     f.tracked_parent_dirs = { '/home/user/projects/' }
     f.parsed_exclude_subdirs_relative_map = { ['foo/'] = true }
 
@@ -156,7 +156,7 @@ describe('core.is_project', function()
   end)
 
   it('appends missing trailing slash to cwd before evaluating', function()
-    local f = new_fixture()
+    local f = new_test_fixture()
     f.tracked_dirs = { '/home/user/projects/foo/' }
 
     local project_id, project_name = core.is_project(

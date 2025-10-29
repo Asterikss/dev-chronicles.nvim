@@ -15,7 +15,7 @@ end
 ---@param path string
 ---@return string
 function M.unexpand(path)
-  local home = vim.loop.os_homedir()
+  local home = vim.uv.os_homedir()
   if path:sub(1, #home) == home then
     return '~' .. path:sub(#home + 1)
   else
@@ -76,6 +76,7 @@ end
 ---@param win_width integer
 ---@param win_height integer
 function M.set_no_data_mess_lines_hl(lines, highlights, win_width, win_height)
+  local colors = require('dev-chronicles.core.colors')
   local message = {
     '▀███▀▀▀███                             ██                                      ▄█▀▀▀█▄ ',
     '  ██    ▀█                             ██                                      ██▀  ▀█▄',
@@ -110,7 +111,7 @@ function M.set_no_data_mess_lines_hl(lines, highlights, win_width, win_height)
       line = index,
       col = 0,
       end_col = -1,
-      hl_group = 'DevChroniclesRed',
+      hl_group = colors.get_or_create_standin_highlight('DevChroniclesRed'),
     })
   end
 end

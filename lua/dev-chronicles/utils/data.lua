@@ -12,7 +12,7 @@ local chronicles_data_cache = {
 ---@param file_path string
 ---@return chronicles.ChroniclesData?
 function M.load_data(file_path)
-  local file_stat = vim.loop.fs_stat(file_path)
+  local file_stat = vim.uv.fs_stat(file_path)
   local current_mtime = file_stat and file_stat.mtime.sec or 0
 
   if
