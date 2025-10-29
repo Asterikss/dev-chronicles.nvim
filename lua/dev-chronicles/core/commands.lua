@@ -73,7 +73,11 @@ function M._setup_the_command(opts)
       api.clean_projects_day_data()
       notify.notify('Projects cleaned')
     elseif first_arg == 'logs' then
-      require('dev-chronicles.panels.logs').display_logs(opts.log_file)
+      if args[2] == 'clear' then
+        require('dev-chronicles.panels.logs').clear_logs(opts.log_file)
+      else
+        require('dev-chronicles.panels.logs').display_logs(opts.log_file)
+      end
     else
       notify.notify(
         'Usage: :DevChronicles [all | days [start_offset [end_offset]] |'

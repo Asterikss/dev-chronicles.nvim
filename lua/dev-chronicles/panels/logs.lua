@@ -11,6 +11,12 @@ function M.display_logs(logs_path)
     return
   end
 
+  local window_title = 'DevChronicles logs'
+  if n_lines == 1 then
+    lines = { 'Logs empty' }
+    max_width = math.max(#lines[1], #window_title + 2)
+  end
+
   require('dev-chronicles.core.render').render({
     buf_name = 'DevChronicles logs',
     lines = lines,
@@ -18,8 +24,19 @@ function M.display_logs(logs_path)
       max_width,
       n_lines
     ),
-    window_title = 'DevChronicles logs',
+    window_title = window_title,
   })
+end
+
+---@param logs_path string
+function M.clear_logs(logs_path)
+  local notify = require('dev-chronicles.utils.notify')
+  local ok, err = require('dev-chronicles.utils.data').clear_file(logs_path)
+  if ok then
+    notify.notify('Logs cleared')
+  else
+    notify.error('Failed to clear logs: ' .. err)
+  end
 end
 
 return M

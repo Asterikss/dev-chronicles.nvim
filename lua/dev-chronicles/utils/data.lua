@@ -15,13 +15,20 @@ local chronicles_data_cache = {
 function M._read_file(path)
   local fd, err = uv.fs_open(path, 'r', 438)
   if not fd then
-    return nil, err
+    return nil, err or 'open failed'
   end
+
   local stat = uv.fs_fstat(fd)
-  if not stat or stat.size == 0 or not (stat.type == 'file' or stat.type == 'link') then
+  if not stat or not (stat.type == 'file' or stat.type == 'link') then
     uv.fs_close(fd)
-    return
+    return nil, 'not a regular file'
   end
+
+  if stat.size == 0 then
+    uv.fs_close(fd)
+    return ''
+  end
+
   local data, read_err = uv.fs_read(fd, stat.size, 0)
   uv.fs_close(fd)
   return data, read_err
@@ -103,12 +110,13 @@ function M.save_data(data, file_path)
   end
 end
 
----@param path string, string?
+---@param path string
+---@param prefix_line string?
 ---@return string[]?, integer?, integer?
 function M.read_file_lines(path, prefix_line)
   local text, err = M._read_file(path)
   if not text then
-    notify.warn('Failed to read ' .. path .. ': ' .. err)
+    notify.warn('Failed to read ' .. path .. ': ' .. (err or 'no error supplied'))
     return
   end
 
@@ -125,6 +133,22 @@ function M.read_file_lines(path, prefix_line)
     max_width = math.max(max_width, #line)
   end
   return lines, n_lines, max_width
+end
+
+---@param path string
+---@return boolean ok
+---@return string? err
+function M.clear_file(path)
+  local fd, open_err = uv.fs_open(path, 'w', 438)
+  if not fd then
+    return false, open_err or 'could not open file for writing'
+  end
+
+  local _, close_err = uv.fs_close(fd)
+  if close_err then
+    return false, close_err
+  end
+  return true
 end
 
 return M
