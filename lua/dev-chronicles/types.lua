@@ -42,7 +42,7 @@
 ---@field project_id string
 ---@field project_name string
 ---@field start_time integer
----@field session_time_seconds integer
+---@field session_time integer
 
 ---@class (exact) chronicles.Panel.Subtype.Args
 ---@field start_offset? integer

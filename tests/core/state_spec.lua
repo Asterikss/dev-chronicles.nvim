@@ -91,7 +91,7 @@ describe('core.state integration', function()
       project_id = 'dev-chronicles.nvim',
       project_name = 'dev-chronicles.nvim',
       start_time = NOW_TS,
-      session_time_seconds = NOW_TS - NOW_TS,
+      session_time = NOW_TS - NOW_TS,
     }, active)
 
     -- 4. Set changes and verify if reflected
@@ -136,7 +136,7 @@ describe('core.state integration', function()
       project_id = 'dev-chronicles.nvim',
       project_name = 'dev-chronicles.nvim',
       start_time = START_TS,
-      session_time_seconds = NOW_TS - START_TS,
+      session_time = NOW_TS - START_TS,
     }, active)
   end)
 end)

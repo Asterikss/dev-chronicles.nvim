@@ -68,14 +68,14 @@ function M.get_session_info(extend_today_to_4am)
     error()
   end
 
-  local session_time_seconds = now_ts - start_time
+  local session_time = now_ts - start_time
 
   ---@type chronicles.SessionActive
   local session_active = {
     project_id = project_id,
     project_name = project_name,
     start_time = start_time,
-    session_time_seconds = session_time_seconds,
+    session_time = session_time,
   }
 
   return session_base, session_active

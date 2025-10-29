@@ -14,7 +14,7 @@ function M.update_chronicles_data_with_curr_session(
   track_days,
   clean_days_data
 )
-  local session_time = session_active.session_time_seconds
+  local session_time = session_active.session_time
   local now_ts = session_base.now_ts
   local canonical_ts = session_base.canonical_ts
   local today_key = session_base.canonical_today_str
@@ -80,7 +80,7 @@ function M.cleanup_project_day_data(project_data, n_days_to_keep, now_ts)
   local cutoff_ts = now_ts - (n_days_to_keep * 86400)
   local by_day_data = project_data.by_day
 
-  -- keeps one more day than n_days_to_keep if including today
+  -- keeps one more day than n_days_to_keep if including today (in case of DTS)
   local new_by_day = {}
   for ts = cutoff_ts, now_ts, 86400 do
     local key = time_days.get_day_str(ts)
@@ -115,7 +115,7 @@ function M.end_session(data_file, track_days, min_session_time, extend_today_to_
     return
   end
 
-  if session_active and session_active.session_time_seconds >= min_session_time then
+  if session_active and session_active.session_time >= min_session_time then
     M.update_chronicles_data_with_curr_session(data, session_active, session_base, track_days, true)
   end
 

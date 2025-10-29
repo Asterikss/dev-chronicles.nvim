@@ -7,7 +7,7 @@ function M.display_session_time()
 
   local lines, width
   if session_active then
-    local session_time_str = ' ' .. format_time(session_active.session_time_seconds) .. ' '
+    local session_time_str = ' ' .. format_time(session_active.session_time) .. ' '
     local project_name = ' ' .. session_active.project_name .. ' '
     width = math.max(#session_time_str, #project_name)
 

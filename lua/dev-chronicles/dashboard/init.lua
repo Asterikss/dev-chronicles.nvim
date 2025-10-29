@@ -5,16 +5,9 @@ local M = {}
 ---@param opts chronicles.Options
 ---@param panel_subtype_args chronicles.Panel.Subtype.Args
 ---@param session_base chronicles.SessionBase
----@param session_time_seconds? integer
+---@param session_time? integer
 ---@return chronicles.Panel.Data?
-function M.dashboard(
-  panel_subtype,
-  data,
-  opts,
-  panel_subtype_args,
-  session_base,
-  session_time_seconds
-)
+function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base, session_time)
   local notify = require('dev-chronicles.utils.notify')
   local dashboard_data_extraction = require('dev-chronicles.dashboard.data_extraction')
   local PanelSubtype = require('dev-chronicles.core.enums').PanelSubtype
@@ -113,7 +106,7 @@ function M.dashboard(
     window_dimensions.width,
     window_dimensions.height,
     opts,
-    session_time_seconds
+    session_time
   )
 
   ---@type chronicles.Panel.Data
@@ -155,8 +148,7 @@ function M.create_dashboard_content(
 
   if not data then
     table[1] = ''
-    table[2] = 'Something went wrong. Check logs if needed'
-    -- TODO: display logs
+    table[2] = 'Something went wrong. Check logs if needed — `:DevChronicles logs`'
     return lines, highlights
   end
 

@@ -11,7 +11,7 @@ local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
 ---@param global_time_filtered integer
 ---@param does_include_curr_date boolean
 ---@param header_dashboard_type_opts chronicles.Options.Dashboard.Header
----@param curr_session_time_seconds? integer
+---@param curr_session_time? integer
 ---@param top_projects? chronicles.Dashboard.TopProjectsArray
 ---@param project_id_to_color table<string, string>
 function M.set_header_lines_hl(
@@ -22,7 +22,7 @@ function M.set_header_lines_hl(
   global_time_filtered,
   does_include_curr_date,
   header_dashboard_type_opts,
-  curr_session_time_seconds,
+  curr_session_time,
   top_projects,
   project_id_to_color
 )
@@ -38,10 +38,10 @@ function M.set_header_lines_hl(
   )
   if
     header_dashboard_type_opts.show_current_session_time
-    and curr_session_time_seconds
+    and curr_session_time
     and does_include_curr_date
   then
-    left_header = left_header .. ' (' .. format_time(curr_session_time_seconds, true, false) .. ')'
+    left_header = left_header .. ' (' .. format_time(curr_session_time, true, false) .. ')'
   end
 
   local right_header = time_period_str

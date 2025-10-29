@@ -40,7 +40,7 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
       opts,
       panel_subtype_args,
       session_base,
-      session_active and session_active.session_time_seconds
+      session_active and session_active.session_time
     )
   end
 
