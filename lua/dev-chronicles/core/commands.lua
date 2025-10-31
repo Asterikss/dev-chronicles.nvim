@@ -78,10 +78,12 @@ function M._setup_the_command(opts)
       else
         require('dev-chronicles.panels.logs').display_logs(opts.log_file)
       end
+    elseif first_arg == 'validate' then
+      require('dev-chronicles.utils').validate_data(opts.data_file)
     else
       notify.notify(
         'Usage: :DevChronicles [all | days [start_offset [end_offset]] |'
-          .. 'months [start_date [end_date]] | today | week | info | abort | clean]'
+          .. 'months [start_date [end_date]] | today | week | info | abort | clean | logs | validate ]'
       )
     end
   end, {
@@ -90,7 +92,18 @@ function M._setup_the_command(opts)
       local split = vim.split(cmd_line, '%s+')
       local n_splits = #split
       if n_splits == 2 then
-        return { 'all', 'days', 'months', 'info', 'abort', 'time', 'config', 'clean' }
+        return {
+          'all',
+          'days',
+          'months',
+          'info',
+          'abort',
+          'time',
+          'config',
+          'clean',
+          'logs',
+          'validate',
+        }
       elseif n_splits == 3 then
         if split[2] == 'days' then
           return { '29' }
@@ -100,6 +113,8 @@ function M._setup_the_command(opts)
           return { 'YYYY' }
         elseif split[2] == 'config' then
           return { 'default' }
+        elseif split[2] == 'logs' then
+          return { 'clear' }
         end
       end
     end,

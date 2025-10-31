@@ -116,4 +116,62 @@ function M.set_no_data_mess_lines_hl(lines, highlights, win_width, win_height)
   end
 end
 
+---Sanity check for project times. All months’ times sum to their year’s
+---total_time. All years’ times sum to their project’s total_time. All
+---projects’ total_time values sum to global_time.
+---@param data_path? string
+function M.validate_data(data_path)
+  local notify = require('dev-chronicles.utils.notify')
+  data_path = data_path or require('dev-chronicles.config').get_opts().data_file
+
+  local data = require('dev-chronicles.utils.data').load_data(data_path)
+  if not data then
+    return
+  end
+
+  local global_sum = 0
+
+  for project_id, project_data in pairs(data.projects) do
+    local years_sum = 0
+
+    for year, year_data in pairs(project_data.by_year) do
+      local month_sum = 0
+      for _, seconds in pairs(year_data.by_month) do
+        month_sum = month_sum + seconds
+      end
+
+      if month_sum ~= year_data.total_time then
+        notify.warn(
+          ('project %s year %s: monthly sum %d != yearly total %d'):format(
+            project_id,
+            year,
+            month_sum,
+            year_data.total_time
+          )
+        )
+        return
+      end
+      years_sum = years_sum + year_data.total_time
+    end
+
+    if years_sum ~= project_data.total_time then
+      notify.warn(
+        ('project %s: yearly sum %d != project total %d'):format(
+          project_id,
+          years_sum,
+          project_data.total_time
+        )
+      )
+      return
+    end
+    global_sum = global_sum + project_data.total_time
+  end
+
+  if global_sum ~= data.global_time then
+    notify.warn(('global sum %d != global_time %d'):format(global_sum, data.global_time))
+    return
+  end
+  notify.notify('Data has been validated. Data times are consistent.')
+end
+
 return M
