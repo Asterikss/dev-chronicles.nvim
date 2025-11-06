@@ -5,6 +5,7 @@ local session = {
   project_id = nil,
   start_time = nil,
   project_name = nil,
+  elapsed_so_far = nil,
   changes = nil,
   is_tracking = false,
 }
@@ -59,23 +60,26 @@ function M.get_session_info(extend_today_to_4am)
     return session_base, nil
   end
 
-  local start_time, project_id, project_name =
-    session.start_time, session.project_id, session.project_name
-  if not (start_time and project_id and project_name) then
+  local project_id, project_name = session.project_id, session.project_name
+  if not (project_id and project_name) then
     require('dev-chronicles.utils.notify').fatal(
-      "Session's is_tracking is set to true, but its start_time or project_id is missing"
+      "Session is_tracking is set to true, but it's missing project_id or project_name"
     )
     error()
   end
 
-  local session_time = now_ts - start_time
+  local session_time = session.elapsed_so_far or 0
+  if session.start_time then -- start_time can be nil if the session was paused and not unpaused afterwards
+    session_time = session_time + (now_ts - session.start_time)
+  end
 
   ---@type chronicles.SessionActive
   local session_active = {
     project_id = project_id,
     project_name = project_name,
-    start_time = start_time,
     session_time = session_time,
+    start_time = session.start_time,
+    paused = session.start_time == nil,
   }
 
   return session_base, session_active
@@ -87,11 +91,31 @@ function M.abort_session()
   session.project_id = nil
   session.project_name = nil
   session.changes = nil
+  session.elapsed_so_far = nil
 end
 
 ---@param changes chronicles.SessionState.Changes
 function M.set_changes(changes)
   session.changes = vim.deepcopy(changes)
+end
+
+---@return boolean
+function M.pause_session()
+  if not session.is_tracking or not session.start_time then
+    return false
+  end
+  session.elapsed_so_far = (session.elapsed_so_far or 0) + (os.time() - session.start_time)
+  session.start_time = nil
+  return true
+end
+
+---@return boolean
+function M.unpause_session()
+  if not session.is_tracking or session.start_time then
+    return false
+  end
+  session.start_time = os.time()
+  return true
 end
 
 return M

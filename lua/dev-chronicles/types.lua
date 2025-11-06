@@ -41,8 +41,9 @@
 ---@class chronicles.SessionActive
 ---@field project_id string
 ---@field project_name string
----@field start_time integer
 ---@field session_time integer
+---@field start_time? integer
+---@field paused boolean
 
 ---@class (exact) chronicles.Panel.Subtype.Args
 ---@field start_offset? integer
