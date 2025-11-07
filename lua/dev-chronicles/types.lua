@@ -27,6 +27,7 @@
 ---@field project_id? string
 ---@field project_name? string
 ---@field start_time? integer
+---@field elapsed_so_far? integer
 ---@field changes? chronicles.SessionState.Changes
 ---@field is_tracking boolean
 

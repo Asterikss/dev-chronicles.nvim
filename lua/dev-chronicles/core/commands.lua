@@ -80,10 +80,12 @@ function M._setup_the_command(opts)
       end
     elseif first_arg == 'validate' then
       require('dev-chronicles.utils').validate_data(opts.data_file)
+    elseif first_arg == 'pause' then
+      require('dev-chronicles.panels.paused').pause(opts.extend_today_to_4am)
     else
       notify.notify(
         'Usage: :DevChronicles [all | days [start_offset [end_offset]] |'
-          .. 'months [start_date [end_date]] | today | week | info | abort | clean | logs | validate ]'
+          .. 'months [start_date [end_date]] | today | week | info | abort | clean | logs | validate | pause]'
       )
     end
   end, {
@@ -103,6 +105,7 @@ function M._setup_the_command(opts)
           'clean',
           'logs',
           'validate',
+          'pause',
         }
       elseif n_splits == 3 then
         if split[2] == 'days' then
