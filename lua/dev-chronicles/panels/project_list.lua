@@ -390,7 +390,7 @@ function M._change_project_color(data_projects, context)
     M._mark_project(data_projects, context, 'C', 'DevChroniclesBlue', false)
   end
 
-  local buf = render.render({
+  local buf, _ = render.render({
     lines = lines,
     highlights = highlights,
     buf_name = 'Dev Chronicles Project List - Change Project Color',

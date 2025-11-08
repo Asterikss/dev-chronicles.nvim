@@ -1,7 +1,7 @@
 local M = {}
 
 ---@param panel_data chronicles.Panel.Data
----@return integer: buffer
+---@return integer buffer, integer window
 function M.render(panel_data)
   local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
 
@@ -85,7 +85,7 @@ function M.render(panel_data)
   end
 
   vim.cmd.redraw()
-  return buf
+  return buf, win
 end
 
 function M.set_lines(lines, buf, start_idx, end_idx)
