@@ -119,12 +119,15 @@ end
 ---Sanity check for project times. All months’ times sum to their year’s
 ---total_time. All years’ times sum to their project’s total_time. All
 ---projects’ total_time values sum to global_time.
----@param data_path? string
-function M.validate_data(data_path)
+---@param opts? { data_path?: string, data?: chronicles.ChroniclesData }
+function M.validate_data(opts)
   local notify = require('dev-chronicles.utils.notify')
-  data_path = data_path or require('dev-chronicles.config').get_opts().data_file
+  opts = opts or {}
 
-  local data = require('dev-chronicles.utils.data').load_data(data_path)
+  local data = opts.data
+    or require('dev-chronicles.utils.data').load_data(
+      opts.data_path or require('dev-chronicles.config').get_opts().data_file
+    )
   if not data then
     return
   end

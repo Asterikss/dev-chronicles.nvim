@@ -79,7 +79,7 @@ function M._setup_the_command(opts)
         require('dev-chronicles.panels.logs').display_logs(opts.log_file)
       end
     elseif first_arg == 'validate' then
-      require('dev-chronicles.utils').validate_data(opts.data_file)
+      require('dev-chronicles.utils').validate_data({ data_path = opts.data_file })
     elseif first_arg == 'pause' then
       require('dev-chronicles.panels.paused').pause(opts.extend_today_to_4am)
     else
