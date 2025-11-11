@@ -121,15 +121,15 @@ function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base
 end
 
 ---Creates lines and highlights tables for the dashboard panel
----@param data chronicles.Dashboard.Data?
+---@param dashboard_data chronicles.Dashboard.Data
 ---@param dashboard_type_opts chronicles.Options.Dashboard.Section
 ---@param win_width integer
 ---@param win_height integer
 ---@param plugin_opts chronicles.Options
 ---@param curr_session_time? integer
 ---@return string[], chronicles.Highlight[]
-function M.create_dashboard_content(
-  data,
+function M._create_dashboard_content(
+  dashboard_data,
   dashboard_type_opts,
   win_width,
   win_height,
@@ -146,18 +146,12 @@ function M.create_dashboard_content(
   local lines = {}
   local highlights = {}
 
-  if not data then
-    table[1] = ''
-    table[2] = 'Something went wrong. Check logs if needed — `:DevChronicles logs`'
-    return lines, highlights
-  end
-
-  local arr_projects = data.final_project_data_arr
+  local arr_projects = dashboard_data.final_project_data_arr
   if arr_projects == nil then
     return dashboard_content.handle_no_projects_lines_hl(
       lines,
       highlights,
-      data,
+      dashboard_data,
       win_width,
       win_height,
       dashboard_type_opts.header
@@ -197,7 +191,7 @@ function M.create_dashboard_content(
     return dashboard_content.handle_no_projects_lines_hl(
       lines,
       highlights,
-      data,
+      dashboard_data,
       win_width,
       win_height,
       dashboard_type_opts.header
@@ -208,13 +202,11 @@ function M.create_dashboard_content(
     max_bar_height = dashboard_logic.calc_max_bar_height(
       vertical_space_for_bars,
       dashboard_type_opts.dynamic_bar_height_thresholds,
-      data.max_project_time
+      dashboard_data.max_project_time
     )
   end
 
-  local bar_repr = get_random_from_tbl(
-    dashboard_type_opts.bar_chars and dashboard_type_opts.bar_chars or dashboard_opts.bar_chars
-  )
+  local bar_repr = get_random_from_tbl(dashboard_type_opts.bar_chars or dashboard_opts.bar_chars)
 
   local bar_representation = dashboard_logic.construct_bar_representation(
     bar_repr,
@@ -226,7 +218,7 @@ function M.create_dashboard_content(
   ---@type chronicles.Dashboard.BarData[], integer, table<string, string>
   local bars_data, max_lines_proj_names, project_id_to_color = dashboard_logic.create_bars_data(
     arr_projects,
-    data.max_project_time,
+    dashboard_data.max_project_time,
     max_bar_height,
     chart_start_col,
     dashboard_opts.bar_width,
@@ -243,13 +235,13 @@ function M.create_dashboard_content(
   dashboard_content.set_header_lines_hl(
     lines,
     highlights,
-    data.time_period_str,
+    dashboard_data.time_period_str,
     win_width,
-    data.global_time_filtered,
-    data.does_include_curr_date,
+    dashboard_data.global_time_filtered,
+    dashboard_data.does_include_curr_date,
     dashboard_type_opts.header,
     curr_session_time,
-    data.top_projects,
+    dashboard_data.top_projects,
     project_id_to_color
   )
 
