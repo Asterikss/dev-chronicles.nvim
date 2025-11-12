@@ -31,6 +31,14 @@ function M.pause(extend_today_to_4am)
 
   local lines, n_lines = { '', ' Paused ', ' ' }, 3
   local max_width = #lines[2]
+  local highlights = {
+    {
+      line = 2,
+      col = 0,
+      end_col = -1,
+      hl_group = require('dev-chronicles.core.enums').DefaultColors.DevChroniclesAccent,
+    },
+  }
 
   local actions = {
     ['q'] = function(_)
@@ -45,6 +53,7 @@ function M.pause(extend_today_to_4am)
     buf_name = 'DevChronicles paused',
     lines = lines,
     actions = actions,
+    highlights = highlights,
     window_dimensions = require('dev-chronicles.utils').get_window_dimensions_fixed(
       max_width,
       n_lines
