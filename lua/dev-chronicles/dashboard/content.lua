@@ -64,10 +64,10 @@ function M.set_header_lines_hl(
   end
   local decorator_left_bytes = #decorator_left
 
-  local header_line1 = nil
-  local header_line2 = nil
-  local right_header_highlight_start_col = nil
-  local decorator_right_highlight_start_col = nil
+  local header_line1
+  local header_line2
+  local right_header_highlight_start_col
+  local decorator_right_highlight_start_col
 
   ---@type integer? -- I know... I don't want to calculate #top_projects twice
   local len_top_projects = top_projects and #top_projects

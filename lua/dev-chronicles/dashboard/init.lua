@@ -14,7 +14,7 @@ function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base
   local get_window_dimensions = require('dev-chronicles.utils').get_window_dimensions
 
   ---@type chronicles.Dashboard.Data?
-  local dashboard_stats
+  local dashboard_data
   ---@type chronicles.Options.Dashboard.Section?
   local dashboard_type_options
 
@@ -44,7 +44,7 @@ function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base
       dashboard_type_options = opts.dashboard.dashboard_days
     end
 
-    dashboard_stats = dashboard_data_extraction.get_dashboard_data_days(
+    dashboard_data = dashboard_data_extraction.get_dashboard_data_days(
       data,
       session_base.canonical_today_str,
       start_offset,
@@ -59,10 +59,10 @@ function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base
     )
   elseif panel_subtype == PanelSubtype.All then
     dashboard_type_options = opts.dashboard.dashboard_all
-    dashboard_stats = dashboard_data_extraction.get_dashboard_data_all(data)
+    dashboard_data = dashboard_data_extraction.get_dashboard_data_all(data)
   elseif panel_subtype == PanelSubtype.Months then
     dashboard_type_options = opts.dashboard.dashboard_months
-    dashboard_stats = dashboard_data_extraction.get_dashboard_data_months(
+    dashboard_data = dashboard_data_extraction.get_dashboard_data_months(
       data,
       session_base,
       panel_subtype_args.start_date,
@@ -76,7 +76,7 @@ function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base
     )
   elseif panel_subtype == PanelSubtype.Years then
     dashboard_type_options = opts.dashboard.dashboard_years
-    dashboard_stats = dashboard_data_extraction.get_dashboard_data_years(
+    dashboard_data = dashboard_data_extraction.get_dashboard_data_years(
       data,
       session_base,
       panel_subtype_args.start_date,
@@ -93,15 +93,15 @@ function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base
     return
   end
 
-  if not dashboard_stats then
+  if not dashboard_data then
     return
   end
 
   local window_dimensions =
     get_window_dimensions(dashboard_type_options.window_width, dashboard_type_options.window_height)
 
-  local lines, highlights = M.create_dashboard_content(
-    dashboard_stats,
+  local lines, highlights = M._create_dashboard_content(
+    dashboard_data,
     dashboard_type_options,
     window_dimensions.width,
     window_dimensions.height,
