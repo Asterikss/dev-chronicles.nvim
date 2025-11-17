@@ -165,7 +165,7 @@ local defaults = {
     DevChroniclesBackupColor = { fg = '#fff588', bold = true },
   },
   runtime_opts = {
-    for_dev_start_time = nil,
+    for_dev_state_override = nil,
     parsed_exclude_subdirs_relative_map = nil,
   },
   extra_default_dashboard_bar_chars = {

@@ -12,6 +12,11 @@ local session = {
 
 ---@param opts chronicles.Options
 function M.start_session(opts)
+  if opts.runtime_opts.for_dev_state_override then
+    session = opts.runtime_opts.for_dev_state_override
+    return
+  end
+
   local project_id, project_name = require('dev-chronicles.core').is_project(
     vim.fn.getcwd(),
     opts.tracked_parent_dirs,
@@ -24,7 +29,7 @@ function M.start_session(opts)
   if project_id and project_name then
     session.project_id = project_id
     session.project_name = project_name
-    session.start_time = opts.runtime_opts.for_dev_start_time or os.time()
+    session.start_time = os.time()
     session.is_tracking = true
   end
 end
@@ -79,7 +84,8 @@ function M.get_session_info(extend_today_to_4am)
     project_name = project_name,
     session_time = session_time,
     start_time = session.start_time,
-    paused = session.start_time == nil,
+    elapsed_so_far = session.elapsed_so_far,
+    paused = session.start_time == nil or nil,
   }
 
   return session_base, session_active

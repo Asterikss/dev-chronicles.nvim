@@ -44,7 +44,8 @@
 ---@field project_name string
 ---@field session_time integer
 ---@field start_time? integer
----@field paused boolean
+---@field elapsed_so_far? integer
+---@field paused? boolean
 
 ---@class (exact) chronicles.Panel.Subtype.Args
 ---@field start_offset? integer

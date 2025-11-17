@@ -20,7 +20,7 @@ describe('core.state integration', function()
     differentiate_projects_by_folder_not_path = true,
     runtime_opts = {
       parsed_exclude_subdirs_relative_map = {},
-      for_dev_start_time = nil,
+      for_dev_state_override = nil,
     },
   }
 
@@ -123,18 +123,25 @@ describe('core.state integration', function()
     assert.is_nil(active)
   end)
 
-  it('handles for_dev_start_time correctly (non 0 session time too)', function()
+  it('handles for_dev_state_override correctly (non 0 session time too)', function()
     local START_TS = 1760783872 -- 18.10.2025 12:37:52
     local new_opts = vim.deepcopy(opts)
-    new_opts.runtime_opts.for_dev_start_time = START_TS
+    new_opts.runtime_opts.for_dev_state_override = {
+      project_id = 'test-dev-chronicles.nvim',
+      project_name = 'test-dev-chronicles.nvim',
+      start_time = START_TS,
+      elapsed_so_far = nil,
+      changes = nil,
+      is_tracking = true,
+    }
 
     state.start_session(new_opts)
 
     local _base, active = state.get_session_info(extend_today_to_4am)
 
     assert.are.same({
-      project_id = 'dev-chronicles.nvim',
-      project_name = 'dev-chronicles.nvim',
+      project_id = 'test-dev-chronicles.nvim',
+      project_name = 'test-dev-chronicles.nvim',
       start_time = START_TS,
       session_time = NOW_TS - START_TS,
     }, active)
