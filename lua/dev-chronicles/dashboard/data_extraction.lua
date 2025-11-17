@@ -242,7 +242,7 @@ function M.get_dashboard_data_days(
     end
   end
 
-  M._filter_projects_by_period_inplace(projects, start_ts, end_ts)
+  M._filter_projects_by_period_inplace(projects, unnormalized_start_ts, end_ts)
 
   ---@type chronicles.Dashboard.FinalProjectDataMap
   local projects_filtered_parsed = {}
