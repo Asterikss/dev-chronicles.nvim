@@ -15,10 +15,12 @@ local default_vars = {
 
 ---@type chronicles.Options.Dashboard.Header
 local dashboard_section_header_opts = {
-  show_date_period = true,
-  show_time = true,
-  time_period_str = nil,
-  time_period_str_singular = nil,
+  period_indicator = {
+    date_range = true,
+    days_count = true,
+    time_period_str = nil,
+    time_period_str_singular = nil,
+  },
   show_current_session_time = true,
   prettify = true,
   window_title = ' Dev Chronicles ',
@@ -115,8 +117,10 @@ local defaults = {
     dashboard_days = make_dashboard_section({
       header = {
         window_title = ' Dev Chronicles Days ',
-        time_period_str = 'last %s days',
-        time_period_str_singular = 'today',
+        period_indicator = {
+          time_period_str = 'last %s days',
+          time_period_str_singular = 'today',
+        },
       },
       n_by_default = 30,
       dynamic_bar_height_thresholds = { 2, 3.5, 5 }, -- It could be a integer[] and integer[][]

@@ -193,6 +193,20 @@
 ---@field bar_footer_extends_by integer
 ---@field bar_spacing integer
 
+-- --------------------------------------------
+-- Common Opts
+-- --------------------------------------------
+
+---@class chronicles.Options.Common.Header.PeriodIndicator
+---@field date_range boolean
+---@field days_count boolean
+---@field time_period_str? string
+---@field time_period_str_singular? string
+
+-- --------------------------------------------
+-- Dashboard Opts
+-- --------------------------------------------
+
 ---@class chronicles.Options.Dashboard.Header.TopProjects
 ---@field enable boolean
 ---@field extra_space_between_bars boolean
@@ -214,10 +228,7 @@
 ---@field color_like_bars boolean
 
 ---@class chronicles.Options.Dashboard.Header
----@field show_date_period boolean
----@field show_time boolean
----@field time_period_str string?
----@field time_period_str_singular string?
+---@field period_indicator chronicles.Options.Common.Header.PeriodIndicator
 ---@field show_current_session_time boolean
 ---@field prettify boolean
 ---@field window_title string
