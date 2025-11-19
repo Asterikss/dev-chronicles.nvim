@@ -98,6 +98,36 @@
 ---@alias chronicles.Dashboard.TopProjectsArray chronicles.StringOrFalse[]
 
 -- --------------------------------------------
+-- Timeline
+-- --------------------------------------------
+
+---@class chronicles.Timeline.Data
+---@field total_period_time integer
+---@field segments? chronicles.Timeline.SegmentData[]
+---@field max_segment_time integer
+---@field does_include_curr_date boolean
+---@field time_period_str string
+---@field project_id_to_highlight table<string, string>
+
+---@class chronicles.Timeline.SegmentData
+---@field date_key string
+---@field total_segment_time integer
+---@field project_shares chronicles.Timeline.SegmentData.ProjectShare[]
+
+---@class chronicles.Timeline.SegmentData.ProjectShare
+---@field project_id string
+---@field share number (0-1]
+
+---@class chronicles.Timeline.RowRepresentation
+---@field realized_row string
+---@field row_codepoint_count integer
+---@field row_display_width integer
+---@field row_bytes integer
+---@field row_chars string[]
+---@field row_char_display_widths integer[]
+---@field row_char_bytes integer[]
+
+-- --------------------------------------------
 -- Panel Data
 -- --------------------------------------------
 
