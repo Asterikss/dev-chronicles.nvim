@@ -75,7 +75,7 @@ function M.get_dashboard_data_months(
   local projects = data.projects
 
   if start_ts > end_ts then
-    notify.warn(('DevChronicles Error: start (%s) > end (%s)'):format(start_date, end_date))
+    notify.warn(('start (%s) > end (%s)'):format(start_date, end_date))
     return
   end
 
@@ -91,7 +91,7 @@ function M.get_dashboard_data_months(
   ---@type chronicles.Dashboard.TopProjectsArray?
   local most_worked_on_project_per_month = construct_most_worked_on_project_arr and {} or nil
 
-  if projects then
+  if next(projects) ~= nil then
     local i = 0
     while true do
       i = i + 1
@@ -222,7 +222,7 @@ function M.get_dashboard_data_days(
   local projects = data.projects
 
   if start_ts > end_ts then
-    notify.warn(('DevChronicles Error: start (%s) > end (%s)'):format(start_str, end_str))
+    notify.warn(('start (%s) > end (%s)'):format(start_str, end_str))
     return
   end
 
@@ -254,7 +254,7 @@ function M.get_dashboard_data_days(
   ---@type chronicles.Dashboard.TopProjectsArray?
   local most_worked_on_project_per_day = construct_most_worked_on_project_arr and {} or nil
 
-  if projects then
+  if next(projects) ~= nil then
     local i = 0
     for ts = start_ts, end_ts, DAY_SEC do
       i = i + 1
@@ -387,7 +387,7 @@ function M.get_dashboard_data_years(
   ---@type chronicles.Dashboard.TopProjectsArray?
   local most_worked_on_project_per_year = construct_most_worked_on_project_arr and {} or nil
 
-  if projects then
+  if next(projects) ~= nil then
     local i = 0
     while true do
       i = i + 1
