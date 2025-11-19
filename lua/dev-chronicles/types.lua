@@ -238,6 +238,23 @@
 ---@field enable boolean
 ---@field optimize_storage_for_x_days? integer
 
+-- -- --------------------------------------------
+-- -- Timeline
+-- -- --------------------------------------------
+
+---@class chronicles.Timeline.RowRepresentation
+---@field realized_row string
+---@field row_codepoint_count integer
+---@field row_display_width integer
+---@field row_bytes integer
+---@field row_chars string[]
+---@field row_char_display_widths integer[]
+---@field row_char_bytes integer[]
+
+-- -- --------------------------------------------
+-- -- End Timeline
+-- -- --------------------------------------------
+
 ---@alias chronicles.Options.HighlightDefinitions.Definition { fg?: string, bg?: string, bold?: boolean, italic?: boolean, underline?: boolean }
 
 ---@class chronicles.Options.HighlightDefinitions
