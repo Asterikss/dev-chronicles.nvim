@@ -54,7 +54,7 @@
 ---@field end_date? string
 
 ---@class (exact) chronicles.Dashboard.FinalProjectData
----@field id string
+---@field project_id string
 ---@field total_time integer
 ---@field last_worked integer
 ---@field last_worked_canonical integer

@@ -244,7 +244,7 @@ function M.create_bars_data(
     local bar_height = math.max(1, math.floor((project.total_time / max_time) * max_bar_height))
     local color = get_project_color(project.color)
 
-    local project_id = project.id
+    local project_id = project.project_id
     project_id_to_color[project_id] = color
 
     local project_name = differentiate_projects_by_folder_not_path and project_id
@@ -257,7 +257,7 @@ function M.create_bars_data(
 
     max_lines_proj_names = math.max(max_lines_proj_names, #project_name_tbl)
 
-    table.insert(bars_data, {
+    bars_data[i] = {
       project_name_tbl = project_name_tbl,
       project_time = project.total_time,
       height = bar_height,
@@ -268,7 +268,7 @@ function M.create_bars_data(
         or BarLevel.Body,
       curr_bar_representation_index = 1,
       global_project_time = project.global_time,
-    })
+    }
   end
 
   return bars_data, max_lines_proj_names, project_id_to_color

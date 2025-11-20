@@ -14,7 +14,7 @@ function M.get_dashboard_data_all(data)
   for project_id, project_data in pairs(data.projects) do
     project_arr_idx = project_arr_idx + 1
     final_project_data_arr[project_arr_idx] = {
-      id = project_id,
+      project_id = project_id,
       total_time = project_data.total_time,
       last_worked = project_data.last_worked,
       last_worked_canonical = project_data.last_worked_canonical,
@@ -110,7 +110,7 @@ function M.get_dashboard_data_months(
           local filtered_project_data = projects_filtered_parsed[project_id]
           if not filtered_project_data then
             filtered_project_data = {
-              id = project_id,
+              project_id = project_id,
               total_time = 0,
               last_worked = project_data.last_worked,
               last_worked_canonical = project_data.last_worked_canonical,
@@ -262,7 +262,7 @@ function M.get_dashboard_data_days(
           local accum_proj_data = projects_filtered_parsed[project_id]
           if not accum_proj_data then
             accum_proj_data = {
-              id = project_id,
+              project_id = project_id,
               total_time = 0,
               last_worked = project_data.last_worked,
               last_worked_canonical = project_data.last_worked_canonical,
@@ -394,7 +394,7 @@ function M.get_dashboard_data_years(
           local filtered_project_data = projects_filtered_parsed[project_id]
           if not filtered_project_data then
             filtered_project_data = {
-              id = project_id,
+              project_id = project_id,
               total_time = 0,
               last_worked = project_data.last_worked,
               last_worked_canonical = project_data.last_worked_canonical,
