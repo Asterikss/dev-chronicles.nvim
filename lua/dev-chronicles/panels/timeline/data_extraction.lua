@@ -120,7 +120,13 @@ function M.get_timeline_data_days(
     max_segment_time = max_segment_time,
     does_include_curr_date = canonical_today_timestamp >= unnormalized_start_ts
       and canonical_today_timestamp <= end_ts,
-    time_period_str = 'todo',
+    time_period_str = time_days.get_time_period_str_days(
+      start_offset - end_offset + 1,
+      start_str,
+      end_str,
+      canonical_today_str,
+      timeline_type_options_header.period_indicator
+    ),
     project_id_to_highlight = project_id_to_highlight,
   }
 end
