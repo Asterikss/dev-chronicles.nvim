@@ -84,27 +84,21 @@ end
 ---@param end_month string 'MM.YYYY'
 ---@param canonical_month_str string 'MM.YYYY'
 ---@param canonical_today_str string 'DD.MM.YYYY'
----@param show_date_period boolean
----@param show_time boolean
----@param time_period_str? string
----@param time_period_str_singular? string
+---@param period_indicator_opts chronicles.Options.Common.Header.PeriodIndicator
 ---@return string
 function M.get_time_period_str_months(
   start_month,
   end_month,
   canonical_month_str,
   canonical_today_str,
-  show_date_period,
-  show_time,
-  time_period_str,
-  time_period_str_singular
+  period_indicator_opts
 )
   -- -- caller wants a custom numeric placeholder
-  if start_month == end_month and time_period_str_singular then
-    return time_period_str_singular:format(1)
+  if start_month == end_month and period_indicator_opts.time_period_str_singular then
+    return period_indicator_opts.time_period_str_singular:format(1)
   end
 
-  if time_period_str then
+  if period_indicator_opts.time_period_str then
     local start_ts = M.convert_month_str_to_timestamp(start_month)
     local end_ts = M.convert_month_str_to_timestamp(end_month)
     local earlier_date = os.date('*t', start_ts)
@@ -113,14 +107,14 @@ function M.get_time_period_str_months(
     local year_diff = later_date.year - earlier_date.year
     local month_diff = later_date.month - earlier_date.month
 
-    return time_period_str:format(year_diff * 12 + month_diff)
+    return period_indicator_opts.time_period_str:format(year_diff * 12 + month_diff)
   end
   -- --
 
   local time_period = ''
   local is_current_month = end_month == canonical_month_str
 
-  if show_date_period then
+  if period_indicator_opts.date_range then
     local month_start, year_start = M.extract_month_year(start_month)
     local month_end, year_end = M.extract_month_year(end_month)
 
@@ -147,7 +141,7 @@ function M.get_time_period_str_months(
     end
   end
 
-  if show_time then
+  if period_indicator_opts.days_count then
     local start_ts = M.convert_month_str_to_timestamp(start_month)
 
     local end_ts = is_current_month and os.time()
@@ -155,7 +149,7 @@ function M.get_time_period_str_months(
 
     local total_time = time.format_time(end_ts - start_ts, false)
 
-    if show_date_period then
+    if period_indicator_opts.date_range then
       time_period = time_period .. ' (' .. total_time .. ')'
     else
       time_period = total_time

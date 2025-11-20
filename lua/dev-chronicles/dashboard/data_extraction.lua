@@ -42,10 +42,7 @@ end
 ---@param start_date? string
 ---@param end_date? string
 ---@param n_months_by_default integer
----@param show_date_period boolean
----@param show_time boolean
----@param time_period_str? string
----@param time_period_str_singular? string
+---@param period_indicator_opts chronicles.Options.Common.Header.PeriodIndicator
 ---@param construct_most_worked_on_project_arr boolean
 ---@return chronicles.Dashboard.Data?
 function M.get_dashboard_data_months(
@@ -54,10 +51,7 @@ function M.get_dashboard_data_months(
   start_date,
   end_date,
   n_months_by_default,
-  show_date_period,
-  show_time,
-  time_period_str,
-  time_period_str_singular,
+  period_indicator_opts,
   construct_most_worked_on_project_arr
 )
   local time_months = require('dev-chronicles.core.time.months')
@@ -172,10 +166,7 @@ function M.get_dashboard_data_months(
       end_date,
       session_base.canonical_month_str,
       session_base.canonical_today_str,
-      show_date_period,
-      show_time,
-      time_period_str,
-      time_period_str_singular
+      period_indicator_opts
     ),
     top_projects = most_worked_on_project_per_month,
   }
@@ -323,10 +314,7 @@ end
 ---@param start_date? string
 ---@param end_date? string
 ---@param n_years_by_default integer
----@param show_date_period boolean
----@param show_time boolean
----@param time_period_str? string
----@param time_period_str_singular? string
+---@param period_indicator_opts chronicles.Options.Common.Header.PeriodIndicator
 ---@param construct_most_worked_on_project_arr boolean
 ---@return chronicles.Dashboard.Data?
 function M.get_dashboard_data_years(
@@ -335,10 +323,7 @@ function M.get_dashboard_data_years(
   start_date,
   end_date,
   n_years_by_default,
-  show_date_period,
-  show_time,
-  time_period_str,
-  time_period_str_singular,
+  period_indicator_opts,
   construct_most_worked_on_project_arr
 )
   local time_years = require('dev-chronicles.core.time.years')
@@ -453,10 +438,7 @@ function M.get_dashboard_data_years(
       end_date,
       session_base.canonical_year_str,
       session_base.canonical_today_str,
-      show_date_period,
-      show_time,
-      time_period_str,
-      time_period_str_singular
+      period_indicator_opts
     ),
     top_projects = most_worked_on_project_per_year,
   }

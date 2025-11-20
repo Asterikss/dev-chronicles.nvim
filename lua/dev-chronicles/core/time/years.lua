@@ -55,37 +55,31 @@ end
 ---@param end_year string 'YYYY'
 ---@param canonical_year_str string 'YYYY'
 ---@param canonical_today_str string 'DD.MM.YYYY'
----@param show_date_period boolean
----@param show_time boolean
----@param time_period_str? string
----@param time_period_singular_str? string
+---@param period_indicator_opts chronicles.Options.Common.Header.PeriodIndicator
 ---@return string
 function M.get_time_period_str_years(
   start_year,
   end_year,
   canonical_year_str,
   canonical_today_str,
-  show_date_period,
-  show_time,
-  time_period_str,
-  time_period_singular_str
+  period_indicator_opts
 )
   -- -- caller wants a custom numeric placeholder
-  if start_year == end_year and time_period_singular_str then
-    return time_period_singular_str:format(1)
+  if start_year == end_year and period_indicator_opts.time_period_str_singular then
+    return period_indicator_opts.time_period_str_singular:format(1)
   end
 
-  if time_period_str then
+  if period_indicator_opts.time_period_str then
     local sy = assert(tonumber(start_year), 'bad start_year')
     local ey = assert(tonumber(end_year), 'bad end_year')
-    return time_period_str:format(ey - sy + 1)
+    return period_indicator_opts.time_period_str:format(ey - sy + 1)
   end
   -- --
 
   local period = ''
   local does_end_at_curr_year = end_year == canonical_year_str
 
-  if show_date_period then
+  if period_indicator_opts.date_range then
     if start_year == end_year then
       period = start_year
     else
@@ -98,7 +92,7 @@ function M.get_time_period_str_years(
     period = ('%s [%02d.%02d]'):format(period, day, month)
   end
 
-  if show_time then
+  if period_indicator_opts.days_count then
     local start_ts = M.convert_year_str_to_timestamp(start_year, false)
 
     local end_ts = does_end_at_curr_year and os.time()
@@ -106,7 +100,7 @@ function M.get_time_period_str_years(
 
     local total_time = time.format_time(end_ts - start_ts, false)
 
-    if show_date_period then
+    if period_indicator_opts.date_range then
       period = period .. ' (' .. total_time .. ')'
     else
       period = total_time
