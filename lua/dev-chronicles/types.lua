@@ -279,23 +279,6 @@
 ---@field enable boolean
 ---@field optimize_storage_for_x_days? integer
 
--- -- --------------------------------------------
--- -- Timeline
--- -- --------------------------------------------
-
----@class chronicles.Timeline.RowRepresentation
----@field realized_row string
----@field row_codepoint_count integer
----@field row_display_width integer
----@field row_bytes integer
----@field row_chars string[]
----@field row_char_display_widths integer[]
----@field row_char_bytes integer[]
-
--- -- --------------------------------------------
--- -- End Timeline
--- -- --------------------------------------------
-
 ---@alias chronicles.Options.HighlightDefinitions.Definition { fg?: string, bg?: string, bold?: boolean, italic?: boolean, underline?: boolean }
 
 ---@class chronicles.Options.HighlightDefinitions
@@ -308,6 +291,38 @@
 ---@field DevChroniclesWindowTitle chronicles.Options.HighlightDefinitions.Definition
 ---@field DevChroniclesBackupColor chronicles.Options.HighlightDefinitions.Definition
 
+--- -- --------------------------------------------
+--- -- Timeline Opts
+--- -- --------------------------------------------
+
+---@class chronicles.Options.Timeline
+---@field row_repr string[]
+---@field timeline_days chronicles.Options.Timeline.Section
+
+---@class chronicles.Options.Timeline.Section
+---@field bar_width integer
+---@field bar_spacing integer
+---@field row_repr? string[]
+---@field n_by_default integer
+---@field header chronicles.Options.Timeline.Header
+---@field segment_total_time_opts chronicles.Options.Timeline.Section.SegmentTotalTime
+---@field window_height integer
+---@field window_width integer
+
+---@class chronicles.Options.Timeline.Header
+---@field total_time chronicles.Options.Dashboard.Header.TotalTime
+---@field show_current_session_time boolean
+---@field window_title string
+---@field period_indicator chronicles.Options.Common.Header.PeriodIndicator
+
+---@class chronicles.Options.Timeline.Section.SegmentTotalTime: chronicles.Options.Dashboard.TotalTimeBase
+---@field color? string
+---@field color_like_top_segment_project boolean
+
+--- -- --------------------------------------------
+--- -- Top Level Opts
+--- -- --------------------------------------------
+
 ---@class chronicles.Options
 ---@field tracked_parent_dirs string[] List of parent dirs to track
 ---@field tracked_dirs string[] List of dir paths to track
@@ -319,9 +334,10 @@
 ---@field track_days chronicles.Options.TrackDays
 ---@field extend_today_to_4am boolean
 ---@field dashboard chronicles.Options.Dashboard
+---@field timeline chronicles.Options.Timeline
 ---@field project_list { show_help_hint: boolean }
 ---@field highlights chronicles.Options.HighlightDefinitions
 ---@field data_file string Path to the data file
 ---@field log_file string Path to the log file
----@field runtime_opts { for_dev_start_time?: integer, parsed_exclude_subdirs_relative_map?: table<string, boolean>} -- exclude_subdirs_relative as a map
+---@field runtime_opts { for_dev_state_override?: chronicles.SessionState, parsed_exclude_subdirs_relative_map?: table<string, boolean>} -- exclude_subdirs_relative as a map
 ---@field extra_default_dashboard_bar_chars string[][][]
