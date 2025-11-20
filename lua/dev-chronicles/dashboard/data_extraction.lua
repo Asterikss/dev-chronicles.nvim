@@ -186,10 +186,6 @@ end
 ---@param start_offset? integer
 ---@param end_offset? integer
 ---@param n_days_by_default integer
----@param show_date_period boolean
----@param show_time boolean
----@param time_period_str? string
----@param time_period_str_singular? string
 ---@param construct_most_worked_on_project_arr boolean
 ---@param optimize_storage_for_x_days? integer
 ---@return chronicles.Dashboard.Data?
@@ -199,10 +195,7 @@ function M.get_dashboard_data_days(
   start_offset,
   end_offset,
   n_days_by_default,
-  show_date_period,
-  show_time,
-  time_period_str,
-  time_period_str_singular,
+  period_indicator_opts,
   construct_most_worked_on_project_arr,
   optimize_storage_for_x_days
 )
@@ -319,10 +312,7 @@ function M.get_dashboard_data_days(
       start_str,
       end_str,
       canonical_today_str,
-      show_date_period,
-      show_time,
-      time_period_str,
-      time_period_str_singular
+      period_indicator_opts
     ),
     top_projects = most_worked_on_project_per_day,
   }

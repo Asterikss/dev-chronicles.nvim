@@ -113,33 +113,28 @@ end
 ---@param start_day string 'DD.MM.YYYY'
 ---@param end_day string 'DD.MM.YYYY'
 ---@param canonical_today_str string 'DD.MM.YYYY'
----@param show_date_period boolean
----@param show_time boolean
----@param time_period_str? string
----@param time_period_str_singular? string
+---@param period_indicator_opts chronicles.Options.Common.Header.PeriodIndicator
 ---@return string
 function M.get_time_period_str_days(
   n_days,
   start_day,
   end_day,
   canonical_today_str,
-  show_date_period,
-  show_time,
-  time_period_str,
-  time_period_str_singular
+  period_indicator_opts
 )
   local is_singular = n_days == 1
   local ends_today = end_day == canonical_today_str
 
   if ends_today then
-    local template = is_singular and time_period_str_singular or time_period_str
+    local template = is_singular and period_indicator_opts.time_period_str_singular
+      or period_indicator_opts.time_period_str
     if template then
       return template:format(n_days)
     end
   end
 
   local time_period = ''
-  if show_date_period then
+  if period_indicator_opts.date_range then
     if is_singular then
       time_period = start_day
     else
@@ -155,9 +150,9 @@ function M.get_time_period_str_days(
     end
   end
 
-  if show_time then
+  if period_indicator_opts.days_count then
     local ending = is_singular and ' day' or ' days'
-    if show_date_period then
+    if period_indicator_opts.date_range then
       time_period = time_period .. ' (' .. n_days .. ending .. ')'
     else
       time_period = time_period .. ending
