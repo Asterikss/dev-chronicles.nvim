@@ -3,6 +3,7 @@ local M = {}
 local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
 local format_time = require('dev-chronicles.core.time').format_time
 
+---Adds a 4 line header
 ---@param lines string[]
 ---@param highlights chronicles.Highlight[]
 ---@param timeline_data chronicles.Timeline.Data
@@ -155,81 +156,70 @@ function M.set_header_lines_hl(
     .. (' '):rep(min_project_str_pad_ammount)
     .. decorator_right
 
-  lines[len_lines + 1] = header1
-  lines[len_lines + 2] = header2
-  lines[len_lines + 3] = ''
-
-  local left_header_bytes = #left_header
-  table.insert(highlights, {
-    line = len_lines + 1,
-    col = 0,
-    end_col = left_header_bytes,
-    hl_group = DefaultColors.DevChroniclesAccent,
-  })
-
-  local header1_hl_rolling_col = left_header_bytes
-    + min_project_str_pad_ammount
-    + extra_pad_left
-    + extra_pad_left_header1
-
-  for index, entry_bytes in ipairs(header1_proj_entries_bytes) do
+  local function apply_header_highlights(
+    line_num,
+    left_header_bytes,
+    proj_entries_bytes,
+    proj_entries_highlights,
+    extra_pad_left_side,
+    extra_pad_right_side
+  )
     table.insert(highlights, {
-      line = len_lines + 1,
-      col = header1_hl_rolling_col,
-      end_col = header1_hl_rolling_col + entry_bytes,
-      hl_group = header1_proj_entries_highlights[index],
+      line = line_num,
+      col = 0,
+      end_col = left_header_bytes,
+      hl_group = DefaultColors.DevChroniclesAccent,
     })
-    header1_hl_rolling_col = header1_hl_rolling_col + entry_bytes + spacing_between_projects
+
+    local rolling_col = left_header_bytes
+      + min_project_str_pad_ammount
+      + extra_pad_left
+      + extra_pad_left_side
+
+    for index, entry_bytes in ipairs(proj_entries_bytes) do
+      table.insert(highlights, {
+        line = line_num,
+        col = rolling_col,
+        end_col = rolling_col + entry_bytes,
+        hl_group = proj_entries_highlights[index],
+      })
+      rolling_col = rolling_col + entry_bytes + spacing_between_projects
+    end
+
+    rolling_col = rolling_col + extra_pad_right_side + extra_pad_right + min_project_str_pad_ammount
+
+    table.insert(highlights, {
+      line = line_num,
+      col = rolling_col,
+      end_col = -1,
+      hl_group = DefaultColors.DevChroniclesAccent,
+    })
   end
 
-  header1_hl_rolling_col = header1_hl_rolling_col
-    + extra_pad_right_header1
-    + extra_pad_right
-    + min_project_str_pad_ammount
+  len_lines = len_lines + 1
+  lines[len_lines] = header1
+  apply_header_highlights(
+    len_lines,
+    #left_header,
+    header1_proj_entries_bytes,
+    header1_proj_entries_highlights,
+    extra_pad_left_header1,
+    extra_pad_right_header1
+  )
 
-  table.insert(highlights, {
-    line = len_lines + 1,
-    col = header1_hl_rolling_col,
-    end_col = -1,
-    hl_group = DefaultColors.DevChroniclesAccent,
-  })
+  len_lines = len_lines + 1
+  lines[len_lines] = header2
+  apply_header_highlights(
+    len_lines,
+    #decorator_left,
+    header2_proj_entries_bytes,
+    header2_proj_entries_highlights,
+    extra_pad_left_header2,
+    extra_pad_right_header2
+  )
 
-  local left_decorator_bytes = #decorator_left
-  table.insert(highlights, {
-    line = len_lines + 2,
-    col = 0,
-    end_col = left_decorator_bytes,
-    hl_group = DefaultColors.DevChroniclesAccent,
-  })
-
-  local header2_hl_rolling_col = left_decorator_bytes
-    + min_project_str_pad_ammount
-    + extra_pad_left
-    + extra_pad_left_header2
-
-  for index, entry_bytes in ipairs(header2_proj_entries_bytes) do
-    table.insert(highlights, {
-      line = len_lines + 2,
-      col = header2_hl_rolling_col,
-      end_col = header2_hl_rolling_col + entry_bytes,
-      hl_group = header2_proj_entries_highlights[index],
-    })
-    header2_hl_rolling_col = header2_hl_rolling_col + entry_bytes + spacing_between_projects
-  end
-
-  header2_hl_rolling_col = header2_hl_rolling_col
-    + extra_pad_right_header2
-    + extra_pad_right
-    + min_project_str_pad_ammount
-
-  table.insert(highlights, {
-    line = len_lines + 2,
-    col = header2_hl_rolling_col,
-    end_col = -1,
-    hl_group = DefaultColors.DevChroniclesAccent,
-  })
-
-  len_lines = len_lines + 3
+  len_lines = len_lines + 1
+  lines[len_lines] = ''
 
   len_lines = require('dev-chronicles.dashboard.content').set_hline_lines_hl(
     lines,
