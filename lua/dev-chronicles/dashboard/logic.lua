@@ -228,7 +228,7 @@ function M.create_bars_data(
 )
   local string_utils = require('dev-chronicles.utils.strings')
   local BarLevel = require('dev-chronicles.core.enums').BarLevel
-  local get_project_color = require('dev-chronicles.core.colors').closure_get_project_color(
+  local get_project_highlight = require('dev-chronicles.core.colors').closure_get_project_highlight(
     random_bars_coloring,
     projects_sorted_ascending,
     #arr_projects
@@ -242,10 +242,10 @@ function M.create_bars_data(
 
   for i, project in ipairs(arr_projects) do
     local bar_height = math.max(1, math.floor((project.total_time / max_time) * max_bar_height))
-    local color = get_project_color(project.color)
+    local highlight = get_project_highlight(project.color)
 
     local project_id = project.project_id
-    project_id_to_color[project_id] = color
+    project_id_to_color[project_id] = highlight
 
     local project_name = differentiate_projects_by_folder_not_path and project_id
       or string_utils.get_project_name(project_id)
@@ -261,7 +261,7 @@ function M.create_bars_data(
       project_name_tbl = project_name_tbl,
       project_time = project.total_time,
       height = bar_height,
-      color = color,
+      color = highlight,
       start_col = chart_start_col + (i - 1) * (bar_width + bar_spacing),
       width = bar_width,
       current_bar_level = (next(bar_header_realized_rows_tbl) ~= nil) and BarLevel.Header

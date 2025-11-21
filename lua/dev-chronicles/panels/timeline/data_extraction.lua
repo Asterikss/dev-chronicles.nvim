@@ -1,7 +1,9 @@
 local M = {}
 
 local notify = require('dev-chronicles.utils.notify')
-local closure_get_project_color = require('dev-chronicles.core.colors').closure_get_project_color
+local get_project_name = require('dev-chronicles.utils.strings').get_project_name
+local closure_get_project_highlight =
+  require('dev-chronicles.core.colors').closure_get_project_highlight
 
 ---@param data chronicles.ChroniclesData
 ---@param canonical_today_str string
@@ -107,7 +109,7 @@ function M.get_timeline_data_days(
     end
   end
 
-  local get_project_color = closure_get_project_color(true, false, -1)
+  local get_project_color = closure_get_project_highlight(true, false, -1)
 
   for project_id, project_data in pairs(projects) do
     project_id_to_highlight[project_id] = get_project_color(project_data.color)

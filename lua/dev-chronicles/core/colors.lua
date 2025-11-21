@@ -43,8 +43,12 @@ end
 ---@param random_bars_coloring boolean
 ---@param projects_sorted_ascending boolean
 ---@param n_projects integer
----@return fun(project_color?: string): string
-function M.closure_get_project_color(random_bars_coloring, projects_sorted_ascending, n_projects)
+---@return fun(project_hex_color?: string): string
+function M.closure_get_project_highlight(
+  random_bars_coloring,
+  projects_sorted_ascending,
+  n_projects
+)
   local shuffle = require('dev-chronicles.utils').shuffle
 
   local color_keys = M._lazy_standin_colors_keys
@@ -55,11 +59,11 @@ function M.closure_get_project_color(random_bars_coloring, projects_sorted_ascen
     shuffle(color_keys)
   end
 
-  ---@param project_color string?
+  ---@param project_hex_color? string
   ---@return string
-  return function(project_color)
-    if project_color then
-      return M.get_or_create_hex_highlight(project_color)
+  return function(project_hex_color)
+    if project_hex_color then
+      return M.get_or_create_hex_highlight(project_hex_color)
     end
 
     local hl_name
