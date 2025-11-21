@@ -10,6 +10,7 @@ local closure_get_project_highlight =
 ---@param n_days_by_default integer
 ---@param timeline_type_options_header chronicles.Options.Timeline.Header
 ---@param optimize_storage_for_x_days integer
+---@param differentiate_projects_by_folder_not_path boolean
 ---@param start_offset? integer
 ---@param end_offset? integer
 ---@return chronicles.Timeline.Data?
@@ -19,6 +20,7 @@ function M.get_timeline_data_days(
   n_days_by_default,
   timeline_type_options_header,
   optimize_storage_for_x_days,
+  differentiate_projects_by_folder_not_path,
   start_offset,
   end_offset
 )
@@ -112,7 +114,9 @@ function M.get_timeline_data_days(
   local get_project_color = closure_get_project_highlight(true, false, -1)
 
   for project_id, project_data in pairs(projects) do
-    project_id_to_highlight[project_id] = get_project_color(project_data.color)
+    local project_name = differentiate_projects_by_folder_not_path and project_id
+      or get_project_name(project_id)
+    project_id_to_highlight[project_name] = get_project_color(project_data.color)
   end
 
   ---@type chronicles.Timeline.Data
