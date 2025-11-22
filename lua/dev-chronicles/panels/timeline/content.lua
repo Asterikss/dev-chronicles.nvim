@@ -242,6 +242,7 @@ end
 ---@param win_width integer
 ---@param chart_start_col integer
 ---@param segment_total_time_opts chronicles.Options.Timeline.Section.SegmentTotalTime
+---@param len_lines? integer
 function M.set_time_labels_above_bars_lines_hl(
   lines,
   highlights,
@@ -250,7 +251,8 @@ function M.set_time_labels_above_bars_lines_hl(
   bar_spacing,
   win_width,
   chart_start_col,
-  segment_total_time_opts
+  segment_total_time_opts,
+  len_lines
 )
   -- Helper function to place a formatted time string onto a character array.
   ---@param target_line string[]
@@ -293,16 +295,16 @@ function M.set_time_labels_above_bars_lines_hl(
     end
   end
 
-  local highlights_insert_positon = #lines + 1
-  local time_line = vim.split(string.rep(' ', win_width), '')
+  len_lines = (len_lines or #lines) + 1
+  local time_labels_row = vim.split(string.rep(' ', win_width), '')
 
   for index, segment_data in ipairs(timeline_data.segments) do
     place_label(
-      time_line,
+      time_labels_row,
       segment_data.total_segment_time,
       chart_start_col + (index - 1) * (bar_width + bar_spacing),
       bar_width,
-      highlights_insert_positon,
+      len_lines,
       DefaultColors.DevChroniclesAccent,
       segment_total_time_opts.as_hours_max,
       segment_total_time_opts.as_hours_min,
@@ -310,8 +312,13 @@ function M.set_time_labels_above_bars_lines_hl(
     )
   end
 
-  table.insert(lines, table.concat(time_line))
-  table.insert(lines, '')
+  lines[len_lines] = table.concat(time_labels_row)
+  len_lines = len_lines + 1
+  lines[len_lines] = ''
+
+  return len_lines
+end
+
 end
 
 return M
