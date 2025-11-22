@@ -318,6 +318,7 @@
 ---@class chronicles.Options.Timeline.Section.SegmentTotalTime: chronicles.Options.Dashboard.TotalTimeBase
 ---@field color? string
 ---@field color_like_top_segment_project boolean
+---@field hide_when_zero boolean
 
 --- -- --------------------------------------------
 --- -- Top Level Opts

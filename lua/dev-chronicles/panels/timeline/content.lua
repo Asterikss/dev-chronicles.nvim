@@ -296,20 +296,27 @@ function M.set_time_labels_above_bars_lines_hl(
   end
 
   len_lines = (len_lines or #lines) + 1
+  local hide_when_zero = segment_total_time_opts.hide_when_zero
+  local as_hours_max = segment_total_time_opts.as_hours_max
+  local as_hours_min = segment_total_time_opts.as_hours_min
+  local round_hours_ge_x = segment_total_time_opts.round_hours_ge_x
   local time_labels_row = vim.split(string.rep(' ', win_width), '')
 
   for index, segment_data in ipairs(timeline_data.segments) do
-    place_label(
-      time_labels_row,
-      segment_data.total_segment_time,
-      chart_start_col + (index - 1) * (bar_width + bar_spacing),
-      bar_width,
-      len_lines,
-      DefaultColors.DevChroniclesAccent,
-      segment_total_time_opts.as_hours_max,
-      segment_total_time_opts.as_hours_min,
-      segment_total_time_opts.round_hours_ge_x
-    )
+    local total_segment_time = segment_data.total_segment_time
+    if not hide_when_zero or total_segment_time > 0 then
+      place_label(
+        time_labels_row,
+        total_segment_time,
+        chart_start_col + (index - 1) * (bar_width + bar_spacing),
+        bar_width,
+        len_lines,
+        DefaultColors.DevChroniclesAccent,
+        as_hours_max,
+        as_hours_min,
+        round_hours_ge_x
+      )
+    end
   end
 
   lines[len_lines] = table.concat(time_labels_row)
