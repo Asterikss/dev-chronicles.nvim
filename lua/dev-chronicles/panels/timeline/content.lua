@@ -255,14 +255,24 @@ function M.set_time_labels_above_bars_lines_hl(
   len_lines
 )
   len_lines = (len_lines or #lines) + 1
+  local time_labels_row = vim.split(string.rep(' ', win_width), '')
+  local project_id_to_highlight = timeline_data.project_id_to_highlight
   local hide_when_zero = segment_total_time_opts.hide_when_zero
   local as_hours_max = segment_total_time_opts.as_hours_max
   local as_hours_min = segment_total_time_opts.as_hours_min
   local round_hours_ge_x = segment_total_time_opts.round_hours_ge_x
-  local time_labels_row = vim.split(string.rep(' ', win_width), '')
+  local color_like_top_segment_project = segment_total_time_opts.color_like_top_segment_project
+  local highlight = segment_total_time_opts.color
+      and get_or_create_hex_highlight(segment_total_time_opts.color)
+    or DefaultColors.DevChroniclesAccent
 
   for index, segment_data in ipairs(timeline_data.segments) do
     local total_segment_time = segment_data.total_segment_time
+    if color_like_top_segment_project then
+      local project_shares = segment_data.project_shares
+      highlight = project_id_to_highlight[project_shares[#project_shares].project_id]
+    end
+
     if not hide_when_zero or total_segment_time > 0 then
       place_duration_label(
         time_labels_row,
@@ -271,7 +281,7 @@ function M.set_time_labels_above_bars_lines_hl(
         bar_width,
         highlights,
         len_lines,
-        DefaultColors.DevChroniclesAccent,
+        highlight,
         as_hours_max,
         as_hours_min,
         round_hours_ge_x
