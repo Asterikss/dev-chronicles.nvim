@@ -233,4 +233,85 @@ function M.set_header_lines_hl(
   return len_lines
 end
 
+---Adds 2 lines.
+---@param lines string[]
+---@param highlights chronicles.Highlight[]
+---@param timeline_data chronicles.Timeline.Data
+---@param bar_width integer
+---@param bar_spacing integer
+---@param win_width integer
+---@param chart_start_col integer
+---@param segment_total_time_opts chronicles.Options.Timeline.Section.SegmentTotalTime
+function M.set_time_labels_above_bars_lines_hl(
+  lines,
+  highlights,
+  timeline_data,
+  bar_width,
+  bar_spacing,
+  win_width,
+  chart_start_col,
+  segment_total_time_opts
+)
+  -- Helper function to place a formatted time string onto a character array.
+  ---@param target_line string[]
+  ---@param time_to_format integer
+  ---@param bar_start_col integer
+  ---@param bar_widthh integer
+  ---@param highlights_insert_positon integer
+  ---@param color? string
+  ---@param as_hours_max boolean
+  ---@param as_hours_min boolean
+  ---@param round_hours_ge_x? integer
+  local function place_label(
+    target_line,
+    time_to_format,
+    bar_start_col,
+    bar_widthh,
+    highlights_insert_positon,
+    color,
+    as_hours_max,
+    as_hours_min,
+    round_hours_ge_x
+  )
+    local time_str = format_time(time_to_format, as_hours_max, as_hours_min, round_hours_ge_x)
+    local len_time_str = #time_str -- bytes are fine here
+    local label_start = bar_start_col + math.floor((bar_widthh - len_time_str) / 2)
+
+    if label_start >= 0 and label_start + len_time_str <= win_width then
+      for i = 1, len_time_str do
+        target_line[label_start + i] = time_str:sub(i, i)
+      end
+
+      if color then
+        table.insert(highlights, {
+          line = highlights_insert_positon,
+          col = label_start,
+          end_col = label_start + len_time_str,
+          hl_group = color,
+        })
+      end
+    end
+  end
+
+  local highlights_insert_positon = #lines + 1
+  local time_line = vim.split(string.rep(' ', win_width), '')
+
+  for index, segment_data in ipairs(timeline_data.segments) do
+    place_label(
+      time_line,
+      segment_data.total_segment_time,
+      chart_start_col + (index - 1) * (bar_width + bar_spacing),
+      bar_width,
+      highlights_insert_positon,
+      DefaultColors.DevChroniclesAccent,
+      segment_total_time_opts.as_hours_max,
+      segment_total_time_opts.as_hours_min,
+      segment_total_time_opts.round_hours_ge_x
+    )
+  end
+
+  table.insert(lines, table.concat(time_line))
+  table.insert(lines, '')
+end
+
 return M
