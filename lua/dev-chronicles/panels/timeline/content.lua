@@ -254,47 +254,6 @@ function M.set_time_labels_above_bars_lines_hl(
   segment_total_time_opts,
   len_lines
 )
-  -- Helper function to place a formatted time string onto a character array.
-  ---@param target_line string[]
-  ---@param time_to_format integer
-  ---@param bar_start_col integer
-  ---@param bar_widthh integer
-  ---@param highlights_insert_positon integer
-  ---@param color? string
-  ---@param as_hours_max boolean
-  ---@param as_hours_min boolean
-  ---@param round_hours_ge_x? integer
-  local function place_label(
-    target_line,
-    time_to_format,
-    bar_start_col,
-    bar_widthh,
-    highlights_insert_positon,
-    color,
-    as_hours_max,
-    as_hours_min,
-    round_hours_ge_x
-  )
-    local time_str = format_time(time_to_format, as_hours_max, as_hours_min, round_hours_ge_x)
-    local len_time_str = #time_str -- bytes are fine here
-    local label_start = bar_start_col + math.floor((bar_widthh - len_time_str) / 2)
-
-    if label_start >= 0 and label_start + len_time_str <= win_width then
-      for i = 1, len_time_str do
-        target_line[label_start + i] = time_str:sub(i, i)
-      end
-
-      if color then
-        table.insert(highlights, {
-          line = highlights_insert_positon,
-          col = label_start,
-          end_col = label_start + len_time_str,
-          hl_group = color,
-        })
-      end
-    end
-  end
-
   len_lines = (len_lines or #lines) + 1
   local hide_when_zero = segment_total_time_opts.hide_when_zero
   local as_hours_max = segment_total_time_opts.as_hours_max
@@ -305,11 +264,12 @@ function M.set_time_labels_above_bars_lines_hl(
   for index, segment_data in ipairs(timeline_data.segments) do
     local total_segment_time = segment_data.total_segment_time
     if not hide_when_zero or total_segment_time > 0 then
-      place_label(
+      place_duration_label(
         time_labels_row,
         total_segment_time,
         chart_start_col + (index - 1) * (bar_width + bar_spacing),
         bar_width,
+        highlights,
         len_lines,
         DefaultColors.DevChroniclesAccent,
         as_hours_max,
