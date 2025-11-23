@@ -184,18 +184,18 @@
 ---@field projects table<string, chronicles.ChroniclesData.ProjectData>
 
 -- --------------------------------------------
--- Plugin Configuration Types
+-- Plugin Configuration Opts Types
 -- --------------------------------------------
 
----@class chronicles.Options.DefaultVars
+---@class chronicles.Options.Dashboard.DefaultVars
 ---@field bar_width integer
+---@field bar_spacing integer
 ---@field bar_header_extends_by integer
 ---@field bar_footer_extends_by integer
----@field bar_spacing integer
 
--- --------------------------------------------
--- Common Opts
--- --------------------------------------------
+-- -- --------------------------------------------
+-- -- Common Opts
+-- -- --------------------------------------------
 
 ---@class chronicles.Options.Common.Header.PeriodIndicator
 ---@field date_range boolean
@@ -203,9 +203,14 @@
 ---@field time_period_str? string
 ---@field time_period_str_singular? string
 
--- --------------------------------------------
--- Dashboard Opts
--- --------------------------------------------
+---@class chronicles.Options.Common.TotalTimeBase
+---@field as_hours_max boolean
+---@field as_hours_min boolean
+---@field round_hours_ge_x? integer
+
+-- -- --------------------------------------------
+-- -- Dashboard Opts
+-- -- --------------------------------------------
 
 ---@class chronicles.Options.Dashboard.Header.TopProjects
 ---@field enable boolean
@@ -214,15 +219,10 @@
 ---@field super_extra_duper_wide_bars boolean
 ---@field min_top_projects_len_to_show integer
 
----@class chronicles.Options.Dashboard.TotalTimeBase
----@field as_hours_max boolean
----@field as_hours_min boolean
----@field round_hours_ge_x? integer
-
----@class chronicles.Options.Dashboard.Header.TotalTime: chronicles.Options.Dashboard.TotalTimeBase
+---@class chronicles.Options.Dashboard.Header.TotalTime: chronicles.Options.Common.TotalTimeBase
 ---@field format_str string
 
----@class chronicles.Options.Dashboard.Header.ProjectGlobalTime: chronicles.Options.Dashboard.TotalTimeBase
+---@class chronicles.Options.Dashboard.Header.ProjectGlobalTime: chronicles.Options.Common.TotalTimeBase
 ---@field enable boolean
 ---@field show_only_if_differs boolean
 ---@field color_like_bars boolean
@@ -241,7 +241,7 @@
 ---@field sort_by_last_worked_not_total_time boolean
 ---@field ascending boolean
 
----@class chronicles.Options.Dashboard.Section.ProjectTotalTime: chronicles.Options.Dashboard.TotalTimeBase
+---@class chronicles.Options.Dashboard.Section.ProjectTotalTime: chronicles.Options.Common.TotalTimeBase
 ---@field color_like_bars boolean
 
 ---@class chronicles.Options.Dashboard.Section
@@ -316,7 +316,7 @@
 ---@field period_indicator chronicles.Options.Common.Header.PeriodIndicator
 ---@field project_prefix string
 
----@class chronicles.Options.Timeline.Section.SegmentTimeLabels: chronicles.Options.Dashboard.TotalTimeBase
+---@class chronicles.Options.Timeline.Section.SegmentTimeLabels: chronicles.Options.Common.TotalTimeBase
 ---@field color? string
 ---@field color_like_top_segment_project boolean
 ---@field hide_when_zero boolean
