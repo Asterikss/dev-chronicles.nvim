@@ -241,7 +241,7 @@ end
 ---@param bar_spacing integer
 ---@param win_width integer
 ---@param chart_start_col integer
----@param segment_total_time_opts chronicles.Options.Timeline.Section.SegmentTotalTime
+---@param segment_time_labels_opts chronicles.Options.Timeline.Section.SegmentTimeLabels
 ---@param len_lines? integer
 function M.set_time_labels_above_bars_lines_hl(
   lines,
@@ -251,31 +251,32 @@ function M.set_time_labels_above_bars_lines_hl(
   bar_spacing,
   win_width,
   chart_start_col,
-  segment_total_time_opts,
+  segment_time_labels_opts,
   len_lines
 )
   len_lines = (len_lines or #lines) + 1
-  local time_labels_row = vim.split(string.rep(' ', win_width), '')
+  local time_labels_row_arr = vim.split(string.rep(' ', win_width), '')
   local project_id_to_highlight = timeline_data.project_id_to_highlight
-  local hide_when_zero = segment_total_time_opts.hide_when_zero
-  local as_hours_max = segment_total_time_opts.as_hours_max
-  local as_hours_min = segment_total_time_opts.as_hours_min
-  local round_hours_ge_x = segment_total_time_opts.round_hours_ge_x
-  local color_like_top_segment_project = segment_total_time_opts.color_like_top_segment_project
-  local highlight = segment_total_time_opts.color
-      and get_or_create_hex_highlight(segment_total_time_opts.color)
+  local hide_when_zero = segment_time_labels_opts.hide_when_zero
+  local as_hours_max = segment_time_labels_opts.as_hours_max
+  local as_hours_min = segment_time_labels_opts.as_hours_min
+  local round_hours_ge_x = segment_time_labels_opts.round_hours_ge_x
+  local color_like_top_segment_project = segment_time_labels_opts.color_like_top_segment_project
+  local highlight = segment_time_labels_opts.color
+      and get_or_create_hex_highlight(segment_time_labels_opts.color)
     or DefaultColors.DevChroniclesAccent
 
   for index, segment_data in ipairs(timeline_data.segments) do
     local total_segment_time = segment_data.total_segment_time
-    if color_like_top_segment_project then
-      local project_shares = segment_data.project_shares
-      highlight = project_id_to_highlight[project_shares[#project_shares].project_id]
-    end
 
     if not hide_when_zero or total_segment_time > 0 then
+      if color_like_top_segment_project then
+        local project_shares = segment_data.project_shares
+        highlight = project_id_to_highlight[project_shares[#project_shares].project_id]
+      end
+
       place_duration_label(
-        time_labels_row,
+        time_labels_row_arr,
         total_segment_time,
         chart_start_col + (index - 1) * (bar_width + bar_spacing),
         bar_width,
@@ -289,7 +290,7 @@ function M.set_time_labels_above_bars_lines_hl(
     end
   end
 
-  lines[len_lines] = table.concat(time_labels_row)
+  lines[len_lines] = table.concat(time_labels_row_arr)
   len_lines = len_lines + 1
   lines[len_lines] = ''
 
