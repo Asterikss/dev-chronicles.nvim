@@ -176,6 +176,7 @@ function M.set_header_lines_hl(
       + extra_pad_left
       + extra_pad_left_side
 
+    local len_proj_entries_bytes = #proj_entries_bytes
     for index, entry_bytes in ipairs(proj_entries_bytes) do
       table.insert(highlights, {
         line = line_num,
@@ -183,7 +184,11 @@ function M.set_header_lines_hl(
         end_col = rolling_col + entry_bytes,
         hl_group = proj_entries_highlights[index],
       })
-      rolling_col = rolling_col + entry_bytes + spacing_between_projects
+
+      rolling_col = rolling_col + entry_bytes
+      if index < len_proj_entries_bytes then
+        rolling_col = rolling_col + spacing_between_projects
+      end
     end
 
     rolling_col = rolling_col + extra_pad_right_side + extra_pad_right + min_project_str_pad_ammount
