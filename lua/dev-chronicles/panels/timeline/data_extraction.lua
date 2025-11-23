@@ -78,7 +78,8 @@ function M.get_timeline_data_days(
       ---@type chronicles.Timeline.SegmentData.ProjectShare[]
       local project_shares, len_project_shares = {}, 0
       local total_segment_time = 0
-      local key = time_days.get_day_str(ts)
+      local key = time_days.get_day_str(ts) -- DD.MM.YYYY
+      local day, month, year = key:sub(1, 2), key:sub(4, 5), key:sub(7, 10)
 
       for project_id, project_data in pairs(projects) do
         local day_time = project_data.by_day[key]
@@ -105,6 +106,9 @@ function M.get_timeline_data_days(
       len_segments = len_segments + 1
       segments[len_segments] = {
         date_key = key,
+        day = day,
+        month = month,
+        year = year,
         total_segment_time = total_segment_time,
         project_shares = project_shares,
       }
