@@ -311,6 +311,7 @@
 ---@field window_width integer
 ---@field header chronicles.Options.Timeline.Header
 ---@field segment_time_labels chronicles.Options.Timeline.Section.SegmentTimeLabels
+---@field segment_labels chronicles.Options.Timeline.Section.SegmentLabels
 
 ---@class chronicles.Options.Timeline.Header
 ---@field total_time chronicles.Options.Dashboard.Header.TotalTime
@@ -320,6 +321,11 @@
 ---@field project_prefix string
 
 ---@class chronicles.Options.Timeline.Section.SegmentTimeLabels: chronicles.Options.Common.TotalTimeBase
+---@field color? string
+---@field color_like_top_segment_project boolean
+---@field hide_when_zero boolean
+
+---@class chronicles.Options.Timeline.Section.SegmentLabels
 ---@field color? string
 ---@field color_like_top_segment_project boolean
 ---@field hide_when_zero boolean

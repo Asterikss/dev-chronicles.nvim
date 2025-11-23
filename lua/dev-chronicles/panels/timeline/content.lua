@@ -302,6 +302,60 @@ function M.set_time_labels_above_bars_lines_hl(
   return len_lines
 end
 
+
+---Adds 1 line
+---@param lines string[]
+---@param highlights chronicles.Highlight[]
+---@param timeline_data chronicles.Timeline.Data
+---@param bar_width integer
+---@param bar_spacing integer
+---@param win_width integer
+---@param chart_start_col integer
+---@param segment_labels_opts chronicles.Options.Timeline.Section.SegmentLabels
+---@param len_lines? integer
+function M.set_bar_labels_lines_hl(
+  lines,
+  highlights,
+  timeline_data,
+  bar_width,
+  bar_spacing,
+  win_width,
+  chart_start_col,
+  segment_labels_opts,
+  len_lines
+)
+  len_lines = (len_lines or #lines) + 1
+  local labels_row_arr = vim.split(string.rep(' ', win_width), '')
+  local project_id_to_highlight = timeline_data.project_id_to_highlight
+  local hide_when_zero = segment_labels_opts.hide_when_zero
+  local color_like_top_segment_project = segment_labels_opts.color_like_top_segment_project
+  local highlight = segment_labels_opts.color
+      and get_or_create_hex_highlight(segment_labels_opts.color)
+    or DefaultColors.DevChroniclesAccent
+
+  for index, segment_data in ipairs(timeline_data.segments) do
+    if not hide_when_zero or segment_data.total_segment_time > 0 then
+      if color_like_top_segment_project then
+        local project_shares = segment_data.project_shares
+        highlight = project_id_to_highlight[project_shares[#project_shares].project_id]
+      end
+
+      local date_label = segment_data.day or segment_data.month or segment_data.year
+      place_label(
+        labels_row_arr,
+        date_label,
+        chart_start_col + (index - 1) * (bar_width + bar_spacing),
+        bar_width,
+        highlights,
+        len_lines,
+        highlight
+      )
+    end
+  end
+
+  lines[len_lines] = table.concat(labels_row_arr)
+
+  return len_lines
 end
 
 return M
