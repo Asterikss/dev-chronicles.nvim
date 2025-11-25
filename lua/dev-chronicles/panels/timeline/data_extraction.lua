@@ -73,6 +73,12 @@ function M.get_timeline_data_days(
   local max_segment_time = 0
   local total_period_time = 0
 
+  local orig_locale
+  if segment_labels_opts.locale then
+    orig_locale = os.setlocale(nil, 'time')
+    os.setlocale(segment_labels_opts.locale, 'time')
+  end
+
   if next(projects) ~= nil then
     for ts = start_ts, end_ts, DAY_SEC do
       ---@type chronicles.Timeline.SegmentData.ProjectShare[]
@@ -115,6 +121,10 @@ function M.get_timeline_data_days(
         project_shares = project_shares,
       }
     end
+  end
+
+  if segment_labels_opts.locale then
+    os.setlocale(orig_locale, 'time')
   end
 
   local get_project_color = closure_get_project_highlight(true, false, -1)
