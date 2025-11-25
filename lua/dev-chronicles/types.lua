@@ -111,9 +111,10 @@
 
 ---@class chronicles.Timeline.SegmentData
 ---@field date_key string
----@field day string
----@field month string
+---@field day? string
+---@field month? string
 ---@field year string
+---@field date_abbr string
 ---@field total_segment_time integer
 ---@field project_shares chronicles.Timeline.SegmentData.ProjectShare[]
 

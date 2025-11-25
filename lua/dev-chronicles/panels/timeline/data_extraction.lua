@@ -80,6 +80,7 @@ function M.get_timeline_data_days(
       local total_segment_time = 0
       local key = time_days.get_day_str(ts) -- DD.MM.YYYY
       local day, month, year = key:sub(1, 2), key:sub(4, 5), key:sub(7, 10)
+      local dow_abbr = os.date('%a', ts) --[[@as string]]
 
       for project_id, project_data in pairs(projects) do
         local day_time = project_data.by_day[key]
@@ -109,6 +110,7 @@ function M.get_timeline_data_days(
         day = day,
         month = month,
         year = year,
+        date_abbr = dow_abbr,
         total_segment_time = total_segment_time,
         project_shares = project_shares,
       }
