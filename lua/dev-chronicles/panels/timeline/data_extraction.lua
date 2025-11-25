@@ -9,6 +9,7 @@ local closure_get_project_highlight =
 ---@param canonical_today_str string
 ---@param n_days_by_default integer
 ---@param timeline_type_options_header chronicles.Options.Timeline.Header
+---@param abbr_labels_opts chronicles.Options.Timeline.Section.SegmentAbbrLabels
 ---@param optimize_storage_for_x_days integer
 ---@param differentiate_projects_by_folder_not_path boolean
 ---@param start_offset? integer
@@ -19,6 +20,7 @@ function M.get_timeline_data_days(
   canonical_today_str,
   n_days_by_default,
   timeline_type_options_header,
+  abbr_labels_opts,
   optimize_storage_for_x_days,
   differentiate_projects_by_folder_not_path,
   start_offset,
@@ -74,9 +76,9 @@ function M.get_timeline_data_days(
   local total_period_time = 0
 
   local orig_locale
-  if segment_labels_opts.locale then
+  if abbr_labels_opts.locale then
     orig_locale = os.setlocale(nil, 'time')
-    os.setlocale(segment_labels_opts.locale, 'time')
+    os.setlocale(abbr_labels_opts.locale, 'time')
   end
 
   if next(projects) ~= nil then
@@ -123,7 +125,7 @@ function M.get_timeline_data_days(
     end
   end
 
-  if segment_labels_opts.locale then
+  if abbr_labels_opts.locale then
     os.setlocale(orig_locale, 'time')
   end
 

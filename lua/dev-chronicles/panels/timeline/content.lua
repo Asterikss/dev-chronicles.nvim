@@ -311,7 +311,7 @@ end
 ---@param bar_spacing integer
 ---@param win_width integer
 ---@param chart_start_col integer
----@param segment_labels_opts chronicles.Options.Timeline.Section.SegmentLabels
+---@param numeric_label_opts chronicles.Options.Timeline.Section.SegmentNumericLabels
 ---@param len_lines? integer
 function M.set_bar_labels_lines_hl(
   lines,
@@ -321,16 +321,16 @@ function M.set_bar_labels_lines_hl(
   bar_spacing,
   win_width,
   chart_start_col,
-  segment_labels_opts,
+  numeric_label_opts,
   len_lines
 )
   len_lines = (len_lines or #lines) + 1
   local labels_row_arr = vim.split(string.rep(' ', win_width), '')
   local project_id_to_highlight = timeline_data.project_id_to_highlight
-  local hide_when_zero = segment_labels_opts.hide_when_zero
-  local color_like_top_segment_project = segment_labels_opts.color_like_top_segment_project
-  local highlight = segment_labels_opts.color
-      and get_or_create_hex_highlight(segment_labels_opts.color)
+  local hide_when_zero = numeric_label_opts.hide_when_zero
+  local color_like_top_segment_project = numeric_label_opts.color_like_top_segment_project
+  local initial_highlight = numeric_label_opts.color
+      and get_or_create_hex_highlight(numeric_label_opts.color)
     or DefaultColors.DevChroniclesAccent
 
   for index, segment_data in ipairs(timeline_data.segments) do
