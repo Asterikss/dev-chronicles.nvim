@@ -277,7 +277,10 @@ function M.set_time_labels_above_bars_lines_hl(
     if not hide_when_zero or total_segment_time > 0 then
       if color_like_top_segment_project then
         local project_shares = segment_data.project_shares
-        highlight = project_id_to_highlight[project_shares[#project_shares].project_id]
+        local len_project_shares = #project_shares
+        if len_project_shares > 0 then
+          highlight = project_id_to_highlight[project_shares[len_project_shares].project_id]
+        end
       end
 
       place_duration_label(
@@ -332,12 +335,18 @@ function M.set_bar_labels_lines_hl(
   local initial_highlight = numeric_label_opts.color
       and get_or_create_hex_highlight(numeric_label_opts.color)
     or DefaultColors.DevChroniclesAccent
+  local highlight = initial_highlight
 
   for index, segment_data in ipairs(timeline_data.segments) do
     if not hide_when_zero or segment_data.total_segment_time > 0 then
       if color_like_top_segment_project then
         local project_shares = segment_data.project_shares
-        highlight = project_id_to_highlight[project_shares[#project_shares].project_id]
+        local len_project_shares = #project_shares
+        if len_project_shares > 0 then
+          highlight = project_id_to_highlight[project_shares[len_project_shares].project_id]
+        else
+          highlight = initial_highlight
+        end
       end
 
       local date_label = segment_data.day or segment_data.month or segment_data.year
