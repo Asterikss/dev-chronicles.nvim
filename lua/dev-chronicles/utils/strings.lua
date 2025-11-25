@@ -151,4 +151,42 @@ function M.place_duration_label(
   end
 end
 
+---Helper function that formats a duration in seconds and places it into a
+---character array. Meant to be used for placing labels above bars.
+---@param target_line_arr string[]
+---@param label string
+---@param bar_start_col integer
+---@param bar_width integer
+---@param highlights chronicles.Highlight[]
+---@param highlights_line integer
+---@param highlight? string
+function M.place_label(
+  target_line_arr,
+  label,
+  bar_start_col,
+  bar_width,
+  highlights,
+  highlights_line,
+  highlight
+)
+  local len_label = #label
+  if len_label > bar_width then
+    return
+  end
+  local label_start = bar_start_col + math.floor((bar_width - len_label) / 2)
+
+  for i = 1, len_label do
+    target_line_arr[label_start + i] = label:sub(i, i)
+  end
+
+  if highlight then
+    table.insert(highlights, {
+      line = highlights_line,
+      col = label_start,
+      end_col = label_start + len_label,
+      hl_group = highlight,
+    })
+  end
+end
+
 return M
