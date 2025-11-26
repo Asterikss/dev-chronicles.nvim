@@ -150,14 +150,7 @@ end
 function M.apply_highlights(buf, highlights)
   local ns = M._namespace
   for _, hl in ipairs(highlights) do
-    vim.api.nvim_buf_add_highlight(
-      buf,
-      ns,
-      hl.hl_group,
-      hl.line - 1,
-      hl.col,
-      hl.end_col == -1 and -1 or hl.end_col
-    )
+    vim.api.nvim_buf_add_highlight(buf, ns, hl.hl_group, hl.line - 1, hl.col, hl.end_col)
   end
 end
 
