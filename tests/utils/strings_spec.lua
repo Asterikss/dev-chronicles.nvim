@@ -103,6 +103,28 @@ describe('utils.strings', function()
         )
       )
     end)
+
+    it('handles max_width=1 well', function()
+      assert.are.same(
+        { 'ą', 'ą', '…' },
+        strings.format_project_name('ąą-ćććć', 1, max_entries)
+      )
+    end)
+
+    it('handles max_width=0 well', function()
+      assert.are.same({}, strings.format_project_name('ąą-ćććć', 0, max_entries))
+    end)
+
+    it('handles max_entries=1 well', function()
+      assert.are.same(
+        { 'ąą ćććć źź…' },
+        strings.format_project_name('ąą-ćććć-źźźźźźźźźźź', max_width, 1)
+      )
+    end)
+
+    it('handles max_entries=0 well', function()
+      assert.are.same({}, strings.format_project_name('ąą-ćććć', max_width, 0))
+    end)
   end)
 
   describe('_separate_project_name', function()

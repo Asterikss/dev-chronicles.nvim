@@ -8,6 +8,9 @@ local M = {}
 function M.format_project_name(project_name, max_width, max_entries)
   local parts = M._separate_project_name(project_name)
   local ret = {}
+  if max_entries < 1 then
+    return ret
+  end
 
   if vim.fn.strdisplaywidth(project_name) <= max_width then
     return { table.concat(parts, ' ') }
@@ -37,6 +40,9 @@ end
 ---@return table<string>
 function M._split_string_given_max_width(str, max_width, n_splits)
   local ret = {}
+  if max_width < 1 or n_splits < 1 then
+    return ret
+  end
 
   for i = 1, n_splits do
     if vim.fn.strdisplaywidth(str) > max_width then
