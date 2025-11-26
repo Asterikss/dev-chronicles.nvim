@@ -332,7 +332,8 @@
 ---@class chronicles.Options.Timeline.Section.SegmentNumericLabels: chronicles.Options.Timeline.Section.SegmentLabelBase
 
 ---@class chronicles.Options.Timeline.Section.SegmentAbbrLabels: chronicles.Options.Timeline.Section.SegmentLabelBase
----@field locale? string
+---@field locale? string: 'C' for English
+---@field days_abbrs? string[]: 7 entries, Sunday first
 
 --- -- --------------------------------------------
 --- -- Top Level Opts

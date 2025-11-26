@@ -39,6 +39,7 @@ function M.get_timeline_data_days(
   local start_ts = unnormalized_start_ts + 43200
   local end_ts = time_days.convert_day_str_to_timestamp(end_str, true)
   local canonical_today_timestamp = time_days.convert_day_str_to_timestamp(canonical_today_str)
+  local days_abbrs = abbr_labels_opts.days_abbrs
   local projects = data.projects
 
   if start_ts > end_ts then
@@ -88,7 +89,7 @@ function M.get_timeline_data_days(
       local total_segment_time = 0
       local key = time_days.get_day_str(ts) -- DD.MM.YYYY
       local day, month, year = key:sub(1, 2), key:sub(4, 5), key:sub(7, 10)
-      local dow_abbr = os.date('%a', ts) --[[@as string]]
+      local dow_abbr = days_abbrs and days_abbrs[os.date('*t', ts).wday] or os.date('%a', ts) --[[@as string]]
 
       for project_id, project_data in pairs(projects) do
         local day_time = project_data.by_day[key]
