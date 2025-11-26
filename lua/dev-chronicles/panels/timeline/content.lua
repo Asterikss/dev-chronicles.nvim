@@ -2,6 +2,9 @@ local M = {}
 
 local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
 local format_time = require('dev-chronicles.core.time').format_time
+local place_label = require('dev-chronicles.utils.strings').place_label
+local get_or_create_hex_highlight =
+  require('dev-chronicles.core.colors').get_or_create_hex_highlight
 
 ---Adds a 4 line header
 ---@param lines string[]
@@ -267,9 +270,10 @@ function M.set_time_labels_above_bars_lines_hl(
   local as_hours_min = segment_time_labels_opts.as_hours_min
   local round_hours_ge_x = segment_time_labels_opts.round_hours_ge_x
   local color_like_top_segment_project = segment_time_labels_opts.color_like_top_segment_project
-  local highlight = segment_time_labels_opts.color
+  local orig_highlight = segment_time_labels_opts.color
       and get_or_create_hex_highlight(segment_time_labels_opts.color)
     or DefaultColors.DevChroniclesAccent
+  local highlight
 
   for index, segment_data in ipairs(timeline_data.segments) do
     local total_segment_time = segment_data.total_segment_time
@@ -280,20 +284,19 @@ function M.set_time_labels_above_bars_lines_hl(
         local len_project_shares = #project_shares
         if len_project_shares > 0 then
           highlight = project_id_to_highlight[project_shares[len_project_shares].project_id]
+        else
+          highlight = orig_highlight
         end
       end
 
-      place_duration_label(
+      place_label(
         time_labels_row_arr,
-        total_segment_time,
+        format_time(total_segment_time, as_hours_max, as_hours_min, round_hours_ge_x),
         chart_start_col + (index - 1) * (bar_width + bar_spacing),
         bar_width,
         highlights,
         len_lines,
-        highlight,
-        as_hours_max,
-        as_hours_min,
-        round_hours_ge_x
+        highlight
       )
     end
   end
