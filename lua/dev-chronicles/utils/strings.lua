@@ -99,49 +99,110 @@ function M.str_sub(str, i, j)
   return str:sub(s + 1, e)
 end
 
----Extract project name from its id
+---Extracts project name from its id.
 ---@param project_id string
 ---@return string
 function M.get_project_name(project_id)
   return project_id:match('([^/]+)/*$') or project_id
 end
 
----Helper function that formats a duration in seconds and places it into a
----character array. Meant to be used for placing labels above bars.
+---Places a label into a character array. This "simple" variant assumes all
+---characters in `label` are single-byte and occupy one cell. Designed as a
+---helper for positioning textual labels relative to rendered bars.
 ---@param target_line_arr string[]
 ---@param label string
----@param bar_start_col integer
----@param bar_width integer
+---@param left_margin_col integer
+---@param available_width integer
 ---@param highlights chronicles.Highlight[]
 ---@param highlights_line integer
 ---@param highlight? string
-function M.place_label(
+function M.place_label_simple(
   target_line_arr,
   label,
-  bar_start_col,
-  bar_width,
+  left_margin_col,
+  available_width,
   highlights,
   highlights_line,
   highlight
 )
   local len_label = #label
-  if len_label > bar_width then
+  if len_label > available_width then
     return
   end
-  local label_start = bar_start_col + math.floor((bar_width - len_label) / 2)
+  local label_left_margin_col = left_margin_col + math.floor((available_width - len_label) / 2)
 
   for i = 1, len_label do
-    target_line_arr[label_start + i] = label:sub(i, i)
+    target_line_arr[label_left_margin_col + i] = label:sub(i, i)
   end
 
   if highlight then
     table.insert(highlights, {
       line = highlights_line,
-      col = label_start,
-      end_col = label_start + len_label,
+      col = label_left_margin_col,
+      end_col = label_left_margin_col + len_label,
       hl_group = highlight,
     })
   end
+end
+
+---Places a label into a character array. Designed as a helper for positioning
+---textual labels relative to rendered bars. Returns `hl_bytes_shift`, if any.
+---@param target_line_arr string[]
+---@param label string
+---@param left_margin_col integer
+---@param available_width integer
+---@param highlights chronicles.Highlight[]
+---@param highlights_line integer
+---@param highlight? string
+---@param hl_bytes_shift? integer
+---@return integer: hl_bytes_shift
+function M.place_label(
+  target_line_arr,
+  label,
+  left_margin_col,
+  available_width,
+  highlights,
+  highlights_line,
+  highlight,
+  hl_bytes_shift
+)
+  local label_display_width = vim.fn.strdisplaywidth(label)
+  if label_display_width > available_width then
+    return 0
+  end
+
+  local label_left_margin_col = left_margin_col
+    + math.floor((available_width - label_display_width) / 2)
+  local label_curr_col = label_left_margin_col
+
+  for i = 1, vim.str_utfindex(label) do
+    local char = M.str_sub(label, i, i)
+    local char_disp_width = vim.fn.strdisplaywidth(char)
+
+    label_curr_col = label_curr_col + 1
+    target_line_arr[label_curr_col] = char
+
+    for j = 1, char_disp_width - 1 do
+      target_line_arr[label_curr_col + j] = ''
+    end
+    label_curr_col = label_curr_col + char_disp_width - 1
+  end
+
+  if highlight then
+    hl_bytes_shift = hl_bytes_shift or 0
+    local label_bytes = #label
+
+    table.insert(highlights, {
+      line = highlights_line,
+      col = label_left_margin_col + hl_bytes_shift,
+      end_col = label_left_margin_col + label_bytes + hl_bytes_shift,
+      hl_group = highlight,
+    })
+
+    return label_bytes - label_display_width
+  end
+
+  return 0
 end
 
 return M
