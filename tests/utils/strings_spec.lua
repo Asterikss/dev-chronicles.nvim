@@ -53,7 +53,7 @@ describe('utils.strings', function()
     it('handles parts longer than max_width in the middle of the split', function()
       assert.are.same(
         { 'aaaa', '12character', 's BB' },
-        strings.format_project_name('aaaa-12characters-BB', max_width)
+        strings.format_project_name('aaaa-12characters-BB', max_width, max_entries)
       )
     end)
 

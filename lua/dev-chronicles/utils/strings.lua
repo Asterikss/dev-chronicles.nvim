@@ -9,12 +9,12 @@ function M.format_project_name(project_name, max_width, max_entries)
   local parts = M._separate_project_name(project_name)
   local ret = {}
 
-  if #project_name <= max_width then
+  if vim.fn.strdisplaywidth(project_name) <= max_width then
     return { table.concat(parts, ' ') }
   end
 
   for i, part in ipairs(parts) do
-    if i ~= max_entries and #part <= max_width then
+    if i ~= max_entries and vim.fn.strdisplaywidth(part) <= max_width then
       table.insert(ret, part)
     else
       local leftover_string = table.concat(parts, ' ', i)
@@ -30,7 +30,7 @@ function M.format_project_name(project_name, max_width, max_entries)
   return ret
 end
 
----Splits a string into `n_splits` parts, with each part being at most `max_width` chars long.
+---Splits a string into `n_splits` parts, with each part being at most `max_width` wide.
 ---@param str string
 ---@param max_width integer
 ---@param n_splits integer
@@ -39,13 +39,15 @@ function M._split_string_given_max_width(str, max_width, n_splits)
   local ret = {}
 
   for i = 1, n_splits do
-    if #str > max_width then
-      if i == n_splits then
-        table.insert(ret, str:sub(1, max_width - 1) .. '…')
-      else
-        table.insert(ret, str:sub(1, max_width))
+    if vim.fn.strdisplaywidth(str) > max_width then
+      local last_split = (i == n_splits)
+      local take = last_split and (max_width - 1) or max_width
+      local piece = M.str_sub(str, 1, take)
+      if last_split then
+        piece = piece .. '…'
       end
-      str = str:sub(max_width + 1)
+      table.insert(ret, piece)
+      str = M.str_sub(str, take + 1, -1)
     else
       table.insert(ret, str)
       break
