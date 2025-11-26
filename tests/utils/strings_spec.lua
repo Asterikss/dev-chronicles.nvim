@@ -3,19 +3,26 @@ local strings = require('dev-chronicles.utils.strings')
 describe('utils.strings', function()
   describe('format_project_name', function()
     local max_width = 11
+    local max_entries = 3
 
     it('returns single cleaned part if whole name fits', function()
-      assert.are.same({ 'abc abcabc' }, strings.format_project_name('abc-abcabc', max_width))
+      assert.are.same(
+        { 'abc abcabc' },
+        strings.format_project_name('abc-abcabc', max_width, max_entries)
+      )
     end)
 
     it('splits two-part name that are longer than max_width', function()
-      assert.are.same({ 'name', 'project' }, strings.format_project_name('name-project', max_width))
+      assert.are.same(
+        { 'name', 'project' },
+        strings.format_project_name('name-project', max_width, max_entries)
+      )
     end)
 
     it('splits too-long single part into multiple', function()
       assert.are.same(
         { 'abcheyyyloo', 'ong' },
-        strings.format_project_name('abcheyyylooong', max_width)
+        strings.format_project_name('abcheyyylooong', max_width, max_entries)
       )
     end)
 
@@ -24,7 +31,7 @@ describe('utils.strings', function()
       function()
         assert.are.same(
           { 'abc', 'there', 'is' },
-          strings.format_project_name('abc-there-is', max_width)
+          strings.format_project_name('abc-there-is', max_width, max_entries)
         )
       end
     )
@@ -32,21 +39,21 @@ describe('utils.strings', function()
     it('merges leftover parts when there would be four', function()
       assert.are.same(
         { 'abc', 'where', 'is it' },
-        strings.format_project_name('abc-where-is-it', max_width)
+        strings.format_project_name('abc-where-is-it', max_width, max_entries)
       )
     end)
 
     it('merges leftover parts when there would be four and trucates if needed', function()
       assert.are.same(
         { 'abc', 'where', 'is it trun…' },
-        strings.format_project_name('abc-where-is-it-truncates', max_width)
+        strings.format_project_name('abc-where-is-it-truncates', max_width, max_entries)
       )
     end)
 
     it('keeps long first part and splits remaining correctly', function()
       assert.are.same(
         { '12character', 's aaaa bb' },
-        strings.format_project_name('12characters-aaaa-bb', max_width)
+        strings.format_project_name('12characters-aaaa-bb', max_width, max_entries)
       )
     end)
 
@@ -60,7 +67,40 @@ describe('utils.strings', function()
     it('handles long names where multiple max-length violation are present', function()
       assert.are.same(
         { '~/projects/', 'project nam', 'efoo bar/' },
-        strings.format_project_name('~/projects/project-namefoo.bar/', max_width)
+        strings.format_project_name('~/projects/project-namefoo.bar/', max_width, max_entries)
+      )
+    end)
+
+    it('handles multibyte characters', function()
+      assert.are.same(
+        { 'ąąąąąąąąąąą', 'ććććć', 'źź' },
+        strings.format_project_name(
+          'ąąąąąąąąąąą-ććććć-źź',
+          max_width,
+          max_entries
+        )
+      )
+    end)
+
+    it('handles multibyte characters where parts need to be concatenated', function()
+      assert.are.same(
+        { 'ąąąąąąąąąąą', 'ą ććććććććć', 'ćććć' },
+        strings.format_project_name(
+          'ąąąąąąąąąąąą-ććććććććććććć',
+          max_width,
+          max_entries
+        )
+      )
+    end)
+
+    it('handles multibyte characters where parts need to be concatenated and cutoff', function()
+      assert.are.same(
+        { 'ąąąąąąąąąąą', 'ą ććććććććć', 'ćććć źźźźź…' },
+        strings.format_project_name(
+          'ąąąąąąąąąąąą-ććććććććććććć-źźźźźźźźźźźźźźźź',
+          max_width,
+          max_entries
+        )
       )
     end)
   end)
