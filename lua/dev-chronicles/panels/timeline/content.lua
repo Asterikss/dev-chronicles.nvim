@@ -1,8 +1,8 @@
 local M = {}
 
 local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
+local strings = require('dev-chronicles.utils.strings')
 local format_time = require('dev-chronicles.core.time').format_time
-local place_label = require('dev-chronicles.utils.strings').place_label
 local get_or_create_hex_highlight =
   require('dev-chronicles.core.colors').get_or_create_hex_highlight
 
@@ -289,7 +289,7 @@ function M.set_time_labels_above_bars_lines_hl(
         end
       end
 
-      place_label(
+      strings.place_label_simple(
         time_labels_row_arr,
         format_time(total_segment_time, as_hours_max, as_hours_min, round_hours_ge_x),
         chart_start_col + (index - 1) * (bar_width + bar_spacing),
@@ -319,7 +319,8 @@ end
 ---@param chart_start_col integer
 ---@param numeric_label_opts chronicles.Options.Timeline.Section.SegmentNumericLabels
 ---@param len_lines? integer
-function M.set_bar_labels_lines_hl(
+---@return integer: len_lines
+function M.set_numeric_labels_lines_hl(
   lines,
   highlights,
   timeline_data,
@@ -353,7 +354,7 @@ function M.set_bar_labels_lines_hl(
       end
 
       local date_label = segment_data.day or segment_data.month or segment_data.year
-      place_label(
+      strings.place_label_simple(
         labels_row_arr,
         date_label,
         chart_start_col + (index - 1) * (bar_width + bar_spacing),
@@ -366,6 +367,70 @@ function M.set_bar_labels_lines_hl(
   end
 
   lines[len_lines] = table.concat(labels_row_arr)
+
+  return len_lines
+end
+
+---Adds 1 entry to the lines table.
+---@param lines string[]
+---@param highlights chronicles.Highlight[]
+---@param timeline_data chronicles.Timeline.Data
+---@param bar_width integer
+---@param bar_spacing integer
+---@param win_width integer
+---@param chart_start_col integer
+---@param abbr_label_opts chronicles.Options.Timeline.Section.SegmentAbbrLabels
+---@param len_lines? integer
+---@return integer: len_lines
+function M.set_abbr_labels_lines_hl(
+  lines,
+  highlights,
+  timeline_data,
+  bar_width,
+  bar_spacing,
+  win_width,
+  chart_start_col,
+  abbr_label_opts,
+  len_lines
+)
+  len_lines = (len_lines or #lines) + 1
+  local abbr_row_arr = vim.split(string.rep(' ', win_width), '')
+  local project_id_to_highlight = timeline_data.project_id_to_highlight
+  local hide_when_zero = abbr_label_opts.hide_when_zero
+  local color_like_top_segment_project = abbr_label_opts.color_like_top_segment_project
+  local initial_highlight = abbr_label_opts.color
+      and get_or_create_hex_highlight(abbr_label_opts.color)
+    or DefaultColors.DevChroniclesAccent
+  local highlight = initial_highlight
+  local hl_bytes_shift = 0
+
+  for index, segment_data in ipairs(timeline_data.segments) do
+    if not hide_when_zero or segment_data.total_segment_time > 0 then
+      if color_like_top_segment_project then
+        local project_shares = segment_data.project_shares
+        local len_project_shares = #project_shares
+        if len_project_shares > 0 then
+          highlight = project_id_to_highlight[project_shares[len_project_shares].project_id]
+        else
+          highlight = initial_highlight
+        end
+      end
+
+      local additional_hl_bytes_shift = strings.place_label(
+        abbr_row_arr,
+        segment_data.date_abbr,
+        chart_start_col + (index - 1) * (bar_width + bar_spacing),
+        bar_width,
+        highlights,
+        len_lines,
+        highlight,
+        hl_bytes_shift
+      )
+      hl_bytes_shift = hl_bytes_shift + additional_hl_bytes_shift
+    end
+  end
+
+  lines[len_lines] = table.concat(abbr_row_arr)
 
   return len_lines
 end
