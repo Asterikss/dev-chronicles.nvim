@@ -62,13 +62,14 @@ function M._split_string_given_max_width(project_name, max_width, n_splits)
   return ret
 end
 
----Split the project name by `_`, `-`, and `.`
+---Splits `project_name` by `_`, `-`, and `.`
 ---@param project_name string
----@return table<string>
+---@return string[]
 function M._separate_project_name(project_name)
-  local result = {}
-  for part in string.gmatch(project_name, '([^' .. '-_.' .. ']+)') do
-    table.insert(result, part)
+  local result, len_result = {}, 0
+  for part in project_name:gmatch('[^%._-]+') do
+    len_result = len_result + 1
+    result[len_result] = part
   end
   return result
 end
