@@ -322,20 +322,16 @@
 ---@field period_indicator chronicles.Options.Common.Header.PeriodIndicator
 ---@field project_prefix string
 
----@class chronicles.Options.Timeline.Section.SegmentTimeLabels: chronicles.Options.Common.TotalTimeBase
+---@class chronicles.Options.Timeline.Section.SegmentLabelBase
 ---@field color? string
 ---@field color_like_top_segment_project boolean
 ---@field hide_when_zero boolean
 
----@class chronicles.Options.Timeline.Section.SegmentNumericLabels
----@field color? string
----@field color_like_top_segment_project boolean
----@field hide_when_zero boolean
+---@class chronicles.Options.Timeline.Section.SegmentTimeLabels: chronicles.Options.Timeline.Section.SegmentLabelBase, chronicles.Options.Common.TotalTimeBase
 
----@class chronicles.Options.Timeline.Section.SegmentAbbrLabels
----@field color? string
----@field color_like_top_segment_project boolean
----@field hide_when_zero boolean
+---@class chronicles.Options.Timeline.Section.SegmentNumericLabels: chronicles.Options.Timeline.Section.SegmentLabelBase
+
+---@class chronicles.Options.Timeline.Section.SegmentAbbrLabels: chronicles.Options.Timeline.Section.SegmentLabelBase
 ---@field locale? string
 
 --- -- --------------------------------------------
