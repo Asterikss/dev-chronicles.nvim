@@ -1,32 +1,25 @@
 local M = {}
 
----Formats project name as a table of strings. The table has at most 3 parts.
----Each part’s length is at most max_width (characters, not bytes).
+---Formats project name as a table of strings. The table has at most
+---`max_entries` parts. Each part’s length is at most `max_width` wide.
 ---@param project_name string
 ---@param max_width integer
 ---@return table<string>
-function M.format_project_name(project_name, max_width)
-  if #project_name <= max_width then
-    local project_name_parsed, _ = string.gsub(project_name, '[%-_.]', ' ')
-    return { project_name_parsed }
-  end
-
+function M.format_project_name(project_name, max_width, max_entries)
   local parts = M._separate_project_name(project_name)
   local ret = {}
-  local last_entry = false
 
-  for i = 1, #parts do
-    if i == 3 then
-      last_entry = true
-    end
+  if #project_name <= max_width then
+    return { table.concat(parts, ' ') }
+  end
 
-    local part = parts[i]
-    if not last_entry and #part <= max_width then
+  for i, part in ipairs(parts) do
+    if i ~= max_entries and #part <= max_width then
       table.insert(ret, part)
     else
-      local concat_leftout_portion = table.concat(parts, ' ', i)
+      local leftover_string = table.concat(parts, ' ', i)
       for _, str in
-        ipairs(M._split_string_given_max_width(concat_leftout_portion, max_width, 4 - i))
+        ipairs(M._split_string_given_max_width(leftover_string, max_width, max_entries + 1 - i))
       do
         table.insert(ret, str)
       end
@@ -37,24 +30,24 @@ function M.format_project_name(project_name, max_width)
   return ret
 end
 
----Split a string into `n_splits` parts, with each part being at most `max_width` chars long
----@param project_name string
+---Splits a string into `n_splits` parts, with each part being at most `max_width` chars long.
+---@param str string
 ---@param max_width integer
 ---@param n_splits integer
 ---@return table<string>
-function M._split_string_given_max_width(project_name, max_width, n_splits)
+function M._split_string_given_max_width(str, max_width, n_splits)
   local ret = {}
 
   for i = 1, n_splits do
-    if #project_name > max_width then
+    if #str > max_width then
       if i == n_splits then
-        table.insert(ret, project_name:sub(1, max_width - 1) .. '…')
+        table.insert(ret, str:sub(1, max_width - 1) .. '…')
       else
-        table.insert(ret, project_name:sub(1, max_width))
+        table.insert(ret, str:sub(1, max_width))
       end
-      project_name = project_name:sub(max_width + 1)
+      str = str:sub(max_width + 1)
     else
-      table.insert(ret, project_name)
+      table.insert(ret, str)
       break
     end
   end

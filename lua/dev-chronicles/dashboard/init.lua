@@ -158,7 +158,9 @@ function M._create_dashboard_content(
     )
   end
 
-  local chart_height = win_height - 7 -- header_height + footer_height
+  local header_height = 4
+  local footer_height = 3
+  local chart_height = win_height - header_height - footer_height
   local max_chart_width = win_width - 4 -- margins
   local vertical_space_for_bars = chart_height - 3 -- projects_time + gap 1 + chart floor
   local max_bar_height = vertical_space_for_bars
@@ -229,7 +231,8 @@ function M._create_dashboard_content(
         and dashboard_type_opts.sorting.ascending
       or not dashboard_type_opts.sorting.ascending,
     bar_representation.header.realized_rows,
-    differentiate_projects_by_folder_not_path
+    differentiate_projects_by_folder_not_path,
+    footer_height
   )
 
   dashboard_content.set_header_lines_hl(

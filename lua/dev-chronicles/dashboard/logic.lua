@@ -212,6 +212,7 @@ end
 ---@param projects_sorted_ascending boolean
 ---@param bar_header_realized_rows_tbl string[]
 ---@param differentiate_projects_by_folder_not_path boolean
+---@param footer_height integer
 ---@return chronicles.Dashboard.BarData[], integer, table<string, string>
 function M.create_bars_data(
   arr_projects,
@@ -224,7 +225,8 @@ function M.create_bars_data(
   random_bars_coloring,
   projects_sorted_ascending,
   bar_header_realized_rows_tbl,
-  differentiate_projects_by_folder_not_path
+  differentiate_projects_by_folder_not_path,
+  footer_height
 )
   local string_utils = require('dev-chronicles.utils.strings')
   local BarLevel = require('dev-chronicles.core.enums').BarLevel
@@ -252,7 +254,8 @@ function M.create_bars_data(
 
     local project_name_tbl = string_utils.format_project_name(
       project_name,
-      bar_width + (let_proj_names_extend_bars_by_one and 2 or 0)
+      bar_width + (let_proj_names_extend_bars_by_one and 2 or 0),
+      footer_height
     )
 
     max_lines_proj_names = math.max(max_lines_proj_names, #project_name_tbl)
