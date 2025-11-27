@@ -105,7 +105,7 @@ function M.get_time_period_str_months(
     local later_date = os.date('*t', end_ts)
 
     local year_diff = later_date.year - earlier_date.year
-    local month_diff = later_date.month - earlier_date.month
+    local month_diff = later_date.month - earlier_date.month + 1
 
     return period_indicator_opts.time_period_str:format(year_diff * 12 + month_diff)
   end
