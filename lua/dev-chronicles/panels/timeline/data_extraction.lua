@@ -39,7 +39,7 @@ function M.get_timeline_data_days(
   local start_ts = unnormalized_start_ts + 43200
   local end_ts = time_days.convert_day_str_to_timestamp(end_str, true)
   local canonical_today_timestamp = time_days.convert_day_str_to_timestamp(canonical_today_str)
-  local days_abbrs = abbr_labels_opts.days_abbrs
+  local days_abbrs = abbr_labels_opts.date_abbrs
   local projects = data.projects
 
   if start_ts > end_ts then
@@ -151,6 +151,148 @@ function M.get_timeline_data_days(
       end_str,
       canonical_today_str,
       timeline_type_options_header.period_indicator
+    ),
+    project_id_to_highlight = project_id_to_highlight,
+  }
+end
+
+---@param data chronicles.ChroniclesData
+---@param session_base chronicles.SessionBase
+---@param n_months_by_default integer
+---@param period_indicator_opts chronicles.Options.Common.Header.PeriodIndicator
+---@param abbr_labels_opts chronicles.Options.Timeline.Section.SegmentAbbrLabels
+---@param differentiate_projects_by_folder_not_path boolean
+---@param start_month? string: MM.YYYY
+---@param end_month? string: MM.YYYY
+---@return chronicles.Timeline.Data?
+function M.get_timeline_data_months(
+  data,
+  session_base,
+  n_months_by_default,
+  period_indicator_opts,
+  abbr_labels_opts,
+  differentiate_projects_by_folder_not_path,
+  start_month,
+  end_month
+)
+  local time_months = require('dev-chronicles.core.time.months')
+
+  start_month = start_month
+    or time_months.get_previous_month(session_base.canonical_month_str, n_months_by_default - 1)
+  end_month = end_month or session_base.canonical_month_str
+
+  local l_pointer_month, l_pointer_year = time_months.extract_month_year(start_month)
+  local r_pointer_month, r_pointer_year = time_months.extract_month_year(end_month)
+
+  local start_ts = time_months.convert_month_str_to_timestamp(start_month)
+  local end_ts = time_months.convert_month_str_to_timestamp(end_month, true)
+  local months_abbrs = abbr_labels_opts.date_abbrs
+  local projects = data.projects
+
+  if start_ts > end_ts then
+    notify.warn(('start (%s) > end (%s)'):format(start_month, end_month))
+    return
+  end
+
+  require('dev-chronicles.dashboard.data_extraction')._filter_projects_by_period_inplace(
+    projects,
+    start_ts,
+    end_ts
+  )
+
+  ---@type chronicles.Timeline.SegmentData[]
+  local segments, len_segments = {}, 0
+  ---@type table<string, string>
+  local project_id_to_highlight = {}
+  local max_segment_time = 0
+  local total_period_time = 0
+
+  if next(projects) ~= nil then
+    local i = 0
+    while true do
+      i = i + 1
+      local year_str = string.format('%d', l_pointer_year)
+      local month_str = string.format('%02d.%d', l_pointer_month, l_pointer_year)
+
+      ---@type chronicles.Timeline.SegmentData.ProjectShare[]
+      local project_shares, len_project_shares = {}, 0
+      local total_segment_time = 0
+
+      for project_id, project_data in pairs(projects) do
+        local month_time = project_data.by_year[year_str]
+          and project_data.by_year[year_str].by_month[month_str]
+
+        if month_time then
+          total_segment_time = total_segment_time + month_time
+          len_project_shares = len_project_shares + 1
+          project_shares[len_project_shares] = { project_id = project_id, share = month_time }
+        end
+      end
+
+      if total_segment_time > 0 then
+        total_period_time = total_period_time + total_segment_time
+        max_segment_time = math.max(max_segment_time, total_segment_time)
+
+        table.sort(project_shares, function(a, b)
+          return a.share < b.share
+        end)
+
+        for j = 1, len_project_shares do
+          project_shares[j].share = project_shares[j].share / total_segment_time
+        end
+      end
+
+      local month_ts = time_months.convert_month_str_to_timestamp(month_str)
+      local month_abbr = months_abbrs and months_abbrs[os.date('*t', month_ts).month]
+        or os.date('%b', month_ts) --[[@as string]]
+
+      len_segments = len_segments + 1
+      segments[len_segments] = {
+        date_key = month_str,
+        day = nil,
+        month = month_str:sub(1, 2),
+        year = year_str,
+        date_abbr = month_abbr,
+        total_segment_time = total_segment_time,
+        project_shares = project_shares,
+      }
+
+      if l_pointer_month == r_pointer_month and l_pointer_year == r_pointer_year then
+        break
+      end
+
+      l_pointer_month = l_pointer_month + 1
+      if l_pointer_month == 13 then
+        l_pointer_month = 1
+        l_pointer_year = l_pointer_year + 1
+      end
+    end
+  end
+
+  local get_project_color = closure_get_project_highlight(true, false, -1)
+
+  for project_id, project_data in pairs(projects) do
+    local project_name = differentiate_projects_by_folder_not_path and project_id
+      or get_project_name(project_id)
+    project_id_to_highlight[project_name] = get_project_color(project_data.color)
+  end
+
+  ---@type chronicles.Timeline.Data
+  return {
+    total_period_time = total_period_time,
+    segments = next(segments) ~= nil and segments or nil,
+    max_segment_time = max_segment_time,
+    does_include_curr_date = time_months.is_month_in_range(
+      session_base.canonical_month_str,
+      start_month,
+      end_month
+    ),
+    time_period_str = time_months.get_time_period_str_months(
+      start_month,
+      end_month,
+      session_base.canonical_month_str,
+      session_base.canonical_today_str,
+      period_indicator_opts
     ),
     project_id_to_highlight = project_id_to_highlight,
   }
