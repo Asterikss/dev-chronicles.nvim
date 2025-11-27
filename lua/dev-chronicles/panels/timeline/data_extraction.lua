@@ -8,7 +8,7 @@ local closure_get_project_highlight =
 ---@param data chronicles.ChroniclesData
 ---@param canonical_today_str string
 ---@param n_days_by_default integer
----@param timeline_type_options_header chronicles.Options.Timeline.Header
+---@param period_indicator_opts chronicles.Options.Common.Header.PeriodIndicator
 ---@param abbr_labels_opts chronicles.Options.Timeline.Section.SegmentAbbrLabels
 ---@param optimize_storage_for_x_days integer
 ---@param differentiate_projects_by_folder_not_path boolean
@@ -19,7 +19,7 @@ function M.get_timeline_data_days(
   data,
   canonical_today_str,
   n_days_by_default,
-  timeline_type_options_header,
+  period_indicator_opts,
   abbr_labels_opts,
   optimize_storage_for_x_days,
   differentiate_projects_by_folder_not_path,
@@ -150,7 +150,7 @@ function M.get_timeline_data_days(
       start_str,
       end_str,
       canonical_today_str,
-      timeline_type_options_header.period_indicator
+      period_indicator_opts
     ),
     project_id_to_highlight = project_id_to_highlight,
   }
