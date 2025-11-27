@@ -325,7 +325,7 @@
 ---@class chronicles.Options.Timeline.Section.SegmentLabelBase
 ---@field color? string
 ---@field color_like_top_segment_project boolean
----@field hide_when_zero boolean
+---@field hide_when_empty boolean
 
 ---@class chronicles.Options.Timeline.Section.SegmentTimeLabels: chronicles.Options.Timeline.Section.SegmentLabelBase, chronicles.Options.Common.TotalTimeBase
 

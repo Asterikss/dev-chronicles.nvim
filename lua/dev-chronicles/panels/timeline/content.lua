@@ -265,7 +265,7 @@ function M.set_time_labels_above_bars_lines_hl(
   len_lines = (len_lines or #lines) + 1
   local time_labels_row_arr = vim.split(string.rep(' ', win_width), '')
   local project_id_to_highlight = timeline_data.project_id_to_highlight
-  local hide_when_zero = segment_time_labels_opts.hide_when_zero
+  local hide_when_empty = segment_time_labels_opts.hide_when_empty
   local as_hours_max = segment_time_labels_opts.as_hours_max
   local as_hours_min = segment_time_labels_opts.as_hours_min
   local round_hours_ge_x = segment_time_labels_opts.round_hours_ge_x
@@ -278,7 +278,7 @@ function M.set_time_labels_above_bars_lines_hl(
   for index, segment_data in ipairs(timeline_data.segments) do
     local total_segment_time = segment_data.total_segment_time
 
-    if not hide_when_zero or total_segment_time > 0 then
+    if not hide_when_empty or total_segment_time > 0 then
       if color_like_top_segment_project then
         local project_shares = segment_data.project_shares
         local len_project_shares = #project_shares
@@ -334,7 +334,7 @@ function M.set_numeric_labels_lines_hl(
   len_lines = (len_lines or #lines) + 1
   local labels_row_arr = vim.split(string.rep(' ', win_width), '')
   local project_id_to_highlight = timeline_data.project_id_to_highlight
-  local hide_when_zero = numeric_label_opts.hide_when_zero
+  local hide_when_empty = numeric_label_opts.hide_when_empty
   local color_like_top_segment_project = numeric_label_opts.color_like_top_segment_project
   local initial_highlight = numeric_label_opts.color
       and get_or_create_hex_highlight(numeric_label_opts.color)
@@ -342,7 +342,7 @@ function M.set_numeric_labels_lines_hl(
   local highlight = initial_highlight
 
   for index, segment_data in ipairs(timeline_data.segments) do
-    if not hide_when_zero or segment_data.total_segment_time > 0 then
+    if not hide_when_empty or segment_data.total_segment_time > 0 then
       if color_like_top_segment_project then
         local project_shares = segment_data.project_shares
         local len_project_shares = #project_shares
@@ -396,7 +396,7 @@ function M.set_abbr_labels_lines_hl(
   len_lines = (len_lines or #lines) + 1
   local abbr_row_arr = vim.split(string.rep(' ', win_width), '')
   local project_id_to_highlight = timeline_data.project_id_to_highlight
-  local hide_when_zero = abbr_label_opts.hide_when_zero
+  local hide_when_empty = abbr_label_opts.hide_when_empty
   local color_like_top_segment_project = abbr_label_opts.color_like_top_segment_project
   local initial_highlight = abbr_label_opts.color
       and get_or_create_hex_highlight(abbr_label_opts.color)
@@ -405,7 +405,7 @@ function M.set_abbr_labels_lines_hl(
   local hl_bytes_shift = 0
 
   for index, segment_data in ipairs(timeline_data.segments) do
-    if not hide_when_zero or segment_data.total_segment_time > 0 then
+    if not hide_when_empty or segment_data.total_segment_time > 0 then
       if color_like_top_segment_project then
         local project_shares = segment_data.project_shares
         local len_project_shares = #project_shares
