@@ -302,6 +302,7 @@
 ---@class chronicles.Options.Timeline
 ---@field row_repr string[]
 ---@field timeline_days chronicles.Options.Timeline.Section
+---@field timeline_months chronicles.Options.Timeline.Section
 
 ---@class chronicles.Options.Timeline.Section
 ---@field bar_width integer
@@ -333,7 +334,7 @@
 
 ---@class chronicles.Options.Timeline.Section.SegmentAbbrLabels: chronicles.Options.Timeline.Section.SegmentLabelBase
 ---@field locale? string: 'C' for English
----@field days_abbrs? string[]: 7 entries, Sunday first
+---@field date_abbrs? string[]: days: 7 entries, Sunday first; months: 12 entries, January first
 
 --- -- --------------------------------------------
 --- -- Top Level Opts
