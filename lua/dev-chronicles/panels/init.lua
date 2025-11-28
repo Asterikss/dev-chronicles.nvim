@@ -35,10 +35,10 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
 
   if panel_type == PanelType.Dashboard then
     panel_data = require('dev-chronicles.dashboard').dashboard(
-      panel_subtype,
       data,
-      opts,
+      panel_subtype,
       panel_subtype_args,
+      opts,
       session_base,
       session_active and session_active.session_time
     )
@@ -47,8 +47,8 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
       data,
       panel_subtype,
       panel_subtype_args,
-      session_base,
       opts,
+      session_base,
       session_active and session_active.session_time
     )
   end

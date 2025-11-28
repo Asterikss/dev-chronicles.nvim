@@ -1,13 +1,13 @@
 local M = {}
 
----@param panel_subtype chronicles.Panel.Subtype
 ---@param data chronicles.ChroniclesData
----@param opts chronicles.Options
+---@param panel_subtype chronicles.Panel.Subtype
 ---@param panel_subtype_args chronicles.Panel.Subtype.Args
+---@param opts chronicles.Options
 ---@param session_base chronicles.SessionBase
 ---@param session_time? integer
 ---@return chronicles.Panel.Data?
-function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base, session_time)
+function M.dashboard(data, panel_subtype, panel_subtype_args, opts, session_base, session_time)
   local notify = require('dev-chronicles.utils.notify')
   local dashboard_data_extraction = require('dev-chronicles.dashboard.data_extraction')
   local PanelSubtype = require('dev-chronicles.core.enums').PanelSubtype
@@ -53,10 +53,7 @@ function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base
       start_offset,
       end_offset,
       dashboard_type_options.n_by_default,
-      dashboard_type_options.header.show_date_period,
-      dashboard_type_options.header.show_time,
-      dashboard_type_options.header.time_period_str,
-      dashboard_type_options.header.time_period_str_singular,
+      dashboard_type_options.header.period_indicator,
       dashboard_type_options.header.top_projects.enable,
       opts.track_days.optimize_storage_for_x_days
     )
@@ -71,10 +68,7 @@ function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base
       panel_subtype_args.start_date,
       panel_subtype_args.end_date,
       dashboard_type_options.n_by_default,
-      dashboard_type_options.header.show_date_period,
-      dashboard_type_options.header.show_time,
-      dashboard_type_options.header.time_period_str,
-      dashboard_type_options.header.time_period_str_singular,
+      dashboard_type_options.header.period_indicator,
       dashboard_type_options.header.top_projects.enable
     )
   elseif panel_subtype == PanelSubtype.Years then
@@ -85,10 +79,7 @@ function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base
       panel_subtype_args.start_date,
       panel_subtype_args.end_date,
       dashboard_type_options.n_by_default,
-      dashboard_type_options.header.show_date_period,
-      dashboard_type_options.header.show_time,
-      dashboard_type_options.header.time_period_str,
-      dashboard_type_options.header.time_period_str_singular,
+      dashboard_type_options.header.period_indicator,
       dashboard_type_options.header.top_projects.enable
     )
   else
