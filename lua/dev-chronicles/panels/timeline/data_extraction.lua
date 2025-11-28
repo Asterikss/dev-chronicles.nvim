@@ -186,6 +186,12 @@ function M.get_timeline_data_months(
     end_ts
   )
 
+  local orig_locale
+  if abbr_labels_opts.locale then
+    orig_locale = os.setlocale(nil, 'time')
+    os.setlocale(abbr_labels_opts.locale, 'time')
+  end
+
   ---@type chronicles.Timeline.SegmentData[]
   local segments, len_segments = {}, 0
   local max_segment_time = 0
@@ -251,6 +257,10 @@ function M.get_timeline_data_months(
         l_pointer_year = l_pointer_year + 1
       end
     end
+  end
+
+  if abbr_labels_opts.locale then
+    os.setlocale(orig_locale, 'time')
   end
 
   ---@type chronicles.Timeline.Data
