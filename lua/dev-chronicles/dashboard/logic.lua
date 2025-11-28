@@ -211,7 +211,6 @@ end
 ---@param random_bars_coloring boolean
 ---@param projects_sorted_ascending boolean
 ---@param bar_header_realized_rows_tbl string[]
----@param differentiate_projects_by_folder_not_path boolean
 ---@param footer_height integer
 ---@return chronicles.Dashboard.BarData[], integer, table<string, string>
 function M.create_bars_data(
@@ -225,7 +224,6 @@ function M.create_bars_data(
   random_bars_coloring,
   projects_sorted_ascending,
   bar_header_realized_rows_tbl,
-  differentiate_projects_by_folder_not_path,
   footer_height
 )
   local string_utils = require('dev-chronicles.utils.strings')
@@ -249,11 +247,8 @@ function M.create_bars_data(
     local project_id = project.project_id
     project_id_to_color[project_id] = highlight
 
-    local project_name = differentiate_projects_by_folder_not_path and project_id
-      or string_utils.get_project_name(project_id)
-
     local project_name_tbl = string_utils.format_project_name(
-      project_name,
+      string_utils.get_project_name(project_id),
       bar_width + (let_proj_names_extend_bars_by_one and 2 or 0),
       footer_height
     )

@@ -105,7 +105,7 @@ function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base
     dashboard_type_options,
     window_dimensions.width,
     window_dimensions.height,
-    opts,
+    opts.dashboard,
     session_time
   )
 
@@ -125,7 +125,7 @@ end
 ---@param dashboard_type_opts chronicles.Options.Dashboard.Section
 ---@param win_width integer
 ---@param win_height integer
----@param plugin_opts chronicles.Options
+---@param dashboard_opts chronicles.Options.Dashboard
 ---@param curr_session_time? integer
 ---@return string[], chronicles.Highlight[]
 function M._create_dashboard_content(
@@ -133,15 +133,12 @@ function M._create_dashboard_content(
   dashboard_type_opts,
   win_width,
   win_height,
-  plugin_opts,
+  dashboard_opts,
   curr_session_time
 )
   local dashboard_content = require('dev-chronicles.dashboard.content')
   local dashboard_logic = require('dev-chronicles.dashboard.logic')
   local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
-  local dashboard_opts = plugin_opts.dashboard
-  local differentiate_projects_by_folder_not_path =
-    plugin_opts.differentiate_projects_by_folder_not_path
 
   local lines = {}
   local highlights = {}
@@ -231,7 +228,6 @@ function M._create_dashboard_content(
         and dashboard_type_opts.sorting.ascending
       or not dashboard_type_opts.sorting.ascending,
     bar_representation.header.realized_rows,
-    differentiate_projects_by_folder_not_path,
     footer_height
   )
 

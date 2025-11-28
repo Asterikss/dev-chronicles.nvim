@@ -11,7 +11,6 @@ local closure_get_project_highlight =
 ---@param period_indicator_opts chronicles.Options.Common.Header.PeriodIndicator
 ---@param abbr_labels_opts chronicles.Options.Timeline.Section.SegmentAbbrLabels
 ---@param optimize_storage_for_x_days integer
----@param differentiate_projects_by_folder_not_path boolean
 ---@param start_offset? integer
 ---@param end_offset? integer
 ---@return chronicles.Timeline.Data?
@@ -22,7 +21,6 @@ function M.get_timeline_data_days(
   period_indicator_opts,
   abbr_labels_opts,
   optimize_storage_for_x_days,
-  differentiate_projects_by_folder_not_path,
   start_offset,
   end_offset
 )
@@ -133,9 +131,7 @@ function M.get_timeline_data_days(
   local get_project_color = closure_get_project_highlight(true, false, -1)
 
   for project_id, project_data in pairs(projects) do
-    local project_name = differentiate_projects_by_folder_not_path and project_id
-      or get_project_name(project_id)
-    project_id_to_highlight[project_name] = get_project_color(project_data.color)
+    project_id_to_highlight[get_project_name(project_id)] = get_project_color(project_data.color)
   end
 
   ---@type chronicles.Timeline.Data
@@ -161,7 +157,6 @@ end
 ---@param n_months_by_default integer
 ---@param period_indicator_opts chronicles.Options.Common.Header.PeriodIndicator
 ---@param abbr_labels_opts chronicles.Options.Timeline.Section.SegmentAbbrLabels
----@param differentiate_projects_by_folder_not_path boolean
 ---@param start_month? string: MM.YYYY
 ---@param end_month? string: MM.YYYY
 ---@return chronicles.Timeline.Data?
@@ -171,7 +166,6 @@ function M.get_timeline_data_months(
   n_months_by_default,
   period_indicator_opts,
   abbr_labels_opts,
-  differentiate_projects_by_folder_not_path,
   start_month,
   end_month
 )
@@ -272,9 +266,7 @@ function M.get_timeline_data_months(
   local get_project_color = closure_get_project_highlight(true, false, -1)
 
   for project_id, project_data in pairs(projects) do
-    local project_name = differentiate_projects_by_folder_not_path and project_id
-      or get_project_name(project_id)
-    project_id_to_highlight[project_name] = get_project_color(project_data.color)
+    project_id_to_highlight[get_project_name(project_id)] = get_project_color(project_data.color)
   end
 
   ---@type chronicles.Timeline.Data
