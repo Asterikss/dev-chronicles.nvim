@@ -1,9 +1,9 @@
 local M = {}
 
 local notify = require('dev-chronicles.utils.notify')
+local get_project_color =
+  require('dev-chronicles.core.colors').closure_get_project_highlight(true, false, -1)
 local get_project_name = require('dev-chronicles.utils.strings').get_project_name
-local closure_get_project_highlight =
-  require('dev-chronicles.core.colors').closure_get_project_highlight
 
 ---@param data chronicles.ChroniclesData
 ---@param canonical_today_str string
@@ -33,7 +33,7 @@ function M.get_timeline_data_days(
   local start_str = time_days.get_previous_day(canonical_today_str, start_offset)
   local end_str = time_days.get_previous_day(canonical_today_str, end_offset)
   local unnormalized_start_ts = time_days.convert_day_str_to_timestamp(start_str)
-  -- Adding half a day handles DST issues given any reasonable time range. Not pretty, but performant
+  -- Adding half a day should handle DST issues given any reasonable time range. Not pretty, but no overhead.
   local start_ts = unnormalized_start_ts + 43200
   local end_ts = time_days.convert_day_str_to_timestamp(end_str, true)
   local canonical_today_timestamp = time_days.convert_day_str_to_timestamp(canonical_today_str)
@@ -69,8 +69,6 @@ function M.get_timeline_data_days(
 
   ---@type chronicles.Timeline.SegmentData[]
   local segments, len_segments = {}, 0
-  ---@type table<string, string>
-  local project_id_to_highlight = {}
   local max_segment_time = 0
   local total_period_time = 0
 
@@ -128,12 +126,6 @@ function M.get_timeline_data_days(
     os.setlocale(orig_locale, 'time')
   end
 
-  local get_project_color = closure_get_project_highlight(true, false, -1)
-
-  for project_id, project_data in pairs(projects) do
-    project_id_to_highlight[get_project_name(project_id)] = get_project_color(project_data.color)
-  end
-
   ---@type chronicles.Timeline.Data
   return {
     total_period_time = total_period_time,
@@ -148,7 +140,7 @@ function M.get_timeline_data_days(
       canonical_today_str,
       period_indicator_opts
     ),
-    project_id_to_highlight = project_id_to_highlight,
+    project_id_to_highlight = M._construct_project_id_to_highlight(projects),
   }
 end
 
@@ -196,8 +188,6 @@ function M.get_timeline_data_months(
 
   ---@type chronicles.Timeline.SegmentData[]
   local segments, len_segments = {}, 0
-  ---@type table<string, string>
-  local project_id_to_highlight = {}
   local max_segment_time = 0
   local total_period_time = 0
 
@@ -263,12 +253,6 @@ function M.get_timeline_data_months(
     end
   end
 
-  local get_project_color = closure_get_project_highlight(true, false, -1)
-
-  for project_id, project_data in pairs(projects) do
-    project_id_to_highlight[get_project_name(project_id)] = get_project_color(project_data.color)
-  end
-
   ---@type chronicles.Timeline.Data
   return {
     total_period_time = total_period_time,
@@ -286,7 +270,7 @@ function M.get_timeline_data_months(
       session_base.canonical_today_str,
       period_indicator_opts
     ),
-    project_id_to_highlight = project_id_to_highlight,
+    project_id_to_highlight = M._construct_project_id_to_highlight(projects),
   }
 end
 
@@ -328,8 +312,6 @@ function M.get_timeline_data_years(
 
   ---@type chronicles.Timeline.SegmentData[]
   local segments, len_segments = {}, 0
-  ---@type table<string, string>
-  local project_id_to_highlight = {}
   local max_segment_time = 0
   local total_period_time = 0
 
@@ -389,12 +371,6 @@ function M.get_timeline_data_years(
     end
   end
 
-  local get_project_color = closure_get_project_highlight(true, false, -1)
-
-  for project_id, project_data in pairs(projects) do
-    project_id_to_highlight[get_project_name(project_id)] = get_project_color(project_data.color)
-  end
-
   ---@type chronicles.Timeline.Data
   return {
     total_period_time = total_period_time,
@@ -412,8 +388,18 @@ function M.get_timeline_data_years(
       session_base.canonical_today_str,
       period_indicator_opts
     ),
-    project_id_to_highlight = project_id_to_highlight,
+    project_id_to_highlight = M._construct_project_id_to_highlight(projects),
   }
+end
+
+---@param projects chronicles.ChroniclesData.ProjectData
+---@return table<string, string>
+function M._construct_project_id_to_highlight(projects)
+  local project_id_to_highlight = {}
+  for project_id, project_data in pairs(projects) do
+    project_id_to_highlight[get_project_name(project_id)] = get_project_color(project_data.color)
+  end
+  return project_id_to_highlight
 end
 
 return M
