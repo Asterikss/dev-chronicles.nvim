@@ -42,6 +42,15 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
       session_base,
       session_active and session_active.session_time
     )
+  elseif panel_type == PanelType.Timeline then
+    panel_data = require('dev-chronicles.panels.timeline').timeline(
+      data,
+      panel_subtype,
+      panel_subtype_args,
+      session_base,
+      opts,
+      session_active and session_active.session_time
+    )
   end
 
   if panel_data then
