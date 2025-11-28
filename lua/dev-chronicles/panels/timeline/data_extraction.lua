@@ -298,4 +298,130 @@ function M.get_timeline_data_months(
   }
 end
 
+---@param data chronicles.ChroniclesData
+---@param session_base chronicles.SessionBase
+---@param n_years_by_default integer
+---@param period_indicator_opts chronicles.Options.Common.Header.PeriodIndicator
+---@param start_year? string: YYYY
+---@param end_year? string: YYYY
+---@return chronicles.Timeline.Data?
+function M.get_timeline_data_years(
+  data,
+  session_base,
+  n_years_by_default,
+  period_indicator_opts,
+  start_year,
+  end_year
+)
+  local time_years = require('dev-chronicles.core.time.years')
+
+  start_year = start_year
+    or time_years.get_previous_year(session_base.canonical_year_str, n_years_by_default - 1)
+  end_year = end_year or session_base.canonical_year_str
+
+  local start_ts = time_years.convert_year_str_to_timestamp(start_year)
+  local end_ts = time_years.convert_year_str_to_timestamp(end_year, true)
+  local projects = data.projects
+
+  if start_ts > end_ts then
+    notify.warn(('start year: (%s) > end year: (%s)'):format(start_year, end_year))
+    return
+  end
+
+  require('dev-chronicles.dashboard.data_extraction')._filter_projects_by_period_inplace(
+    projects,
+    start_ts,
+    end_ts
+  )
+
+  ---@type chronicles.Timeline.SegmentData[]
+  local segments, len_segments = {}, 0
+  ---@type table<string, string>
+  local project_id_to_highlight = {}
+  local max_segment_time = 0
+  local total_period_time = 0
+
+  local l_pointer_year, r_pointer_year =
+    time_years.str_to_year(start_year), time_years.str_to_year(end_year)
+
+  if next(projects) ~= nil then
+    local i = 0
+    while true do
+      i = i + 1
+      local year_str = tostring(l_pointer_year)
+
+      ---@type chronicles.Timeline.SegmentData.ProjectShare[]
+      local project_shares, len_project_shares = {}, 0
+      local total_segment_time = 0
+
+      for project_id, project_data in pairs(projects) do
+        local year_time = project_data.by_year[year_str]
+          and project_data.by_year[year_str].total_time
+
+        if year_time then
+          total_segment_time = total_segment_time + year_time
+          len_project_shares = len_project_shares + 1
+          project_shares[len_project_shares] = { project_id = project_id, share = year_time }
+        end
+      end
+
+      if total_segment_time > 0 then
+        total_period_time = total_period_time + total_segment_time
+        max_segment_time = math.max(max_segment_time, total_segment_time)
+
+        table.sort(project_shares, function(a, b)
+          return a.share < b.share
+        end)
+
+        for j = 1, len_project_shares do
+          project_shares[j].share = project_shares[j].share / total_segment_time
+        end
+      end
+
+      len_segments = len_segments + 1
+      segments[len_segments] = {
+        date_key = year_str,
+        day = nil,
+        month = nil,
+        year = year_str,
+        date_abbr = year_str,
+        total_segment_time = total_segment_time,
+        project_shares = project_shares,
+      }
+
+      if l_pointer_year == r_pointer_year then
+        break
+      end
+
+      l_pointer_year = l_pointer_year + 1
+    end
+  end
+
+  local get_project_color = closure_get_project_highlight(true, false, -1)
+
+  for project_id, project_data in pairs(projects) do
+    project_id_to_highlight[get_project_name(project_id)] = get_project_color(project_data.color)
+  end
+
+  ---@type chronicles.Timeline.Data
+  return {
+    total_period_time = total_period_time,
+    segments = next(segments) ~= nil and segments or nil,
+    max_segment_time = max_segment_time,
+    does_include_curr_date = time_years.is_year_in_range(
+      session_base.canonical_year_str,
+      start_year,
+      end_year
+    ),
+    time_period_str = time_years.get_time_period_str_years(
+      start_year,
+      end_year,
+      session_base.canonical_year_str,
+      session_base.canonical_today_str,
+      period_indicator_opts
+    ),
+    project_id_to_highlight = project_id_to_highlight,
+  }
+end
+
 return M
