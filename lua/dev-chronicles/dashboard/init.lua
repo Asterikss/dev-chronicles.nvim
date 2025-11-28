@@ -20,8 +20,11 @@ function M.dashboard(panel_subtype, data, opts, panel_subtype_args, session_base
 
   local start_offset = panel_subtype_args.start_offset
   local end_offset = panel_subtype_args.end_offset
-  if (start_offset and start_offset < 0) or (end_offset and end_offset < 0) then
-    notify.warn('Both start_offset and end_offset cannot be smaller than 0')
+  if
+    (start_offset and (start_offset < 0 or start_offset % 1 ~= 0))
+    or (end_offset and (end_offset < 0 or end_offset % 1 ~= 0))
+  then
+    notify.warn('Both start_offset and end_offset must be non-negative integers.')
     return
   end
 
