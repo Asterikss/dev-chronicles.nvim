@@ -67,7 +67,7 @@
 
 ---@class (exact) chronicles.Dashboard.Data
 ---@field global_time integer
----@field global_time_filtered integer
+---@field total_period_time integer
 ---@field final_project_data_arr? chronicles.Dashboard.FinalProjectData[]
 ---@field max_project_time integer
 ---@field does_include_curr_date boolean

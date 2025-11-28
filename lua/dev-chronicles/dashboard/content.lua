@@ -8,7 +8,7 @@ local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
 ---@param highlights chronicles.Highlight[]
 ---@param time_period_str string
 ---@param win_width integer
----@param global_time_filtered integer
+---@param total_period_time integer
 ---@param does_include_curr_date boolean
 ---@param header_dashboard_type_opts chronicles.Options.Dashboard.Header
 ---@param curr_session_time? integer
@@ -19,7 +19,7 @@ function M.set_header_lines_hl(
   highlights,
   time_period_str,
   win_width,
-  global_time_filtered,
+  total_period_time,
   does_include_curr_date,
   header_dashboard_type_opts,
   curr_session_time,
@@ -30,7 +30,7 @@ function M.set_header_lines_hl(
   local left_header = string.format(
     total_time_opts.format_str,
     format_time(
-      global_time_filtered,
+      total_period_time,
       total_time_opts.as_hours_max,
       total_time_opts.as_hours_min,
       total_time_opts.round_hours_ge_x
@@ -581,7 +581,7 @@ function M.handle_no_projects_lines_hl(
     highlights,
     data.time_period_str,
     win_width,
-    data.global_time_filtered,
+    data.total_period_time,
     data.does_include_curr_date,
     header_dashboard_type_opts,
     nil,

@@ -29,7 +29,7 @@ function M.get_dashboard_data_all(data)
   ---@type chronicles.Dashboard.Data
   return {
     global_time = data.global_time,
-    global_time_filtered = data.global_time,
+    total_period_time = data.global_time,
     final_project_data_arr = next(final_project_data_arr) ~= nil and final_project_data_arr or nil,
     max_project_time = max_project_time,
     does_include_curr_date = true,
@@ -81,7 +81,7 @@ function M.get_dashboard_data_months(
   local arr_projects = {}
   local len_arr_projects = 0
   local max_project_time = 0
-  local global_time_filtered = 0
+  local total_period_time = 0
   ---@type chronicles.Dashboard.TopProjectsArray?
   local most_worked_on_project_per_month = construct_most_worked_on_project_arr and {} or nil
 
@@ -118,7 +118,7 @@ function M.get_dashboard_data_months(
             arr_projects[len_arr_projects] = filtered_project_data
           end
           filtered_project_data.total_time = filtered_project_data.total_time + month_time
-          global_time_filtered = global_time_filtered + month_time
+          total_period_time = total_period_time + month_time
           max_project_time = math.max(max_project_time, filtered_project_data.total_time)
 
           if construct_most_worked_on_project_arr and month_time > month_max_time then
@@ -153,7 +153,7 @@ function M.get_dashboard_data_months(
   ---@type chronicles.Dashboard.Data
   return {
     global_time = data.global_time,
-    global_time_filtered = global_time_filtered,
+    total_period_time = total_period_time,
     final_project_data_arr = next(arr_projects) ~= nil and arr_projects or nil,
     max_project_time = max_project_time,
     does_include_curr_date = time_months.is_month_in_range(
@@ -234,7 +234,7 @@ function M.get_dashboard_data_days(
   local arr_projects = {}
   local len_arr_projects = 0
   local max_project_time = 0
-  local global_time_filtered = 0
+  local total_period_time = 0
   ---@type chronicles.Dashboard.TopProjectsArray?
   local most_worked_on_project_per_day = construct_most_worked_on_project_arr and {} or nil
 
@@ -267,7 +267,7 @@ function M.get_dashboard_data_days(
             arr_projects[len_arr_projects] = accum_proj_data
           end
           accum_proj_data.total_time = accum_proj_data.total_time + day_time
-          global_time_filtered = global_time_filtered + day_time
+          total_period_time = total_period_time + day_time
           max_project_time = math.max(max_project_time, accum_proj_data.total_time)
 
           if construct_most_worked_on_project_arr and day_time > day_max_time then
@@ -293,7 +293,7 @@ function M.get_dashboard_data_days(
   ---@type chronicles.Dashboard.Data
   return {
     global_time = data.global_time,
-    global_time_filtered = global_time_filtered,
+    total_period_time = total_period_time,
     final_project_data_arr = next(arr_projects) ~= nil and arr_projects or nil,
     max_project_time = max_project_time,
     does_include_curr_date = canonical_today_timestamp >= unnormalized_start_ts
@@ -358,7 +358,7 @@ function M.get_dashboard_data_years(
   local arr_projects = {}
   local len_arr_projects = 0
   local max_project_time = 0
-  local global_time_filtered = 0
+  local total_period_time = 0
   ---@type chronicles.Dashboard.TopProjectsArray?
   local most_worked_on_project_per_year = construct_most_worked_on_project_arr and {} or nil
 
@@ -394,7 +394,7 @@ function M.get_dashboard_data_years(
           end
 
           filtered_project_data.total_time = filtered_project_data.total_time + year_time
-          global_time_filtered = global_time_filtered + year_time
+          total_period_time = total_period_time + year_time
           max_project_time = math.max(max_project_time, filtered_project_data.total_time)
 
           if construct_most_worked_on_project_arr and year_time > year_max_time then
@@ -425,7 +425,7 @@ function M.get_dashboard_data_years(
   ---@type chronicles.Dashboard.Data
   return {
     global_time = data.global_time,
-    global_time_filtered = global_time_filtered,
+    total_period_time = total_period_time,
     final_project_data_arr = next(arr_projects) ~= nil and arr_projects or nil,
     max_project_time = max_project_time,
     does_include_curr_date = time_years.is_year_in_range(

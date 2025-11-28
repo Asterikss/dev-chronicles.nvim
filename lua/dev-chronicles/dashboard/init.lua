@@ -230,7 +230,7 @@ function M._create_dashboard_content(
     highlights,
     dashboard_data.time_period_str,
     win_width,
-    dashboard_data.global_time_filtered,
+    dashboard_data.total_period_time,
     dashboard_data.does_include_curr_date,
     dashboard_type_opts.header,
     curr_session_time,
