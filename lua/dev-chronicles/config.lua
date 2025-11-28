@@ -5,8 +5,8 @@ local notify = require('dev-chronicles.utils.notify')
 ---@type chronicles.Options
 local options
 
----@type chronicles.Options.DefaultVars
-local default_vars = {
+---@type chronicles.Options.Dashboard.DefaultVars
+local default_dashboard_vars = {
   bar_width = 9,
   bar_header_extends_by = 1,
   bar_footer_extends_by = 1,
@@ -102,10 +102,10 @@ local defaults = {
   data_file = 'dev-chronicles.json',
   log_file = 'log.dev-chronicles.log',
   dashboard = {
-    bar_width = default_vars.bar_width,
-    bar_header_extends_by = default_vars.bar_header_extends_by,
-    bar_footer_extends_by = default_vars.bar_footer_extends_by,
-    bar_spacing = default_vars.bar_spacing,
+    bar_width = default_dashboard_vars.bar_width,
+    bar_header_extends_by = default_dashboard_vars.bar_header_extends_by,
+    bar_footer_extends_by = default_dashboard_vars.bar_footer_extends_by,
+    bar_spacing = default_dashboard_vars.bar_spacing,
     bar_chars = {
       { {}, { '▉' }, {} },
     },
@@ -267,10 +267,10 @@ function M.setup(opts)
 
   if
     merged.dashboard.use_extra_default_dashboard_bar_chars
-    and merged.dashboard.bar_width == default_vars.bar_width
-    and merged.dashboard.bar_header_extends_by == default_vars.bar_header_extends_by
-    and merged.dashboard.bar_footer_extends_by == default_vars.bar_footer_extends_by
-    and merged.dashboard.bar_spacing == default_vars.bar_spacing
+    and merged.dashboard.bar_width == default_dashboard_vars.bar_width
+    and merged.dashboard.bar_header_extends_by == default_dashboard_vars.bar_header_extends_by
+    and merged.dashboard.bar_footer_extends_by == default_dashboard_vars.bar_footer_extends_by
+    and merged.dashboard.bar_spacing == default_dashboard_vars.bar_spacing
   then
     for _, extra_bar_chars in ipairs(merged.extra_default_dashboard_bar_chars) do
       table.insert(merged.dashboard.bar_chars, extra_bar_chars)
