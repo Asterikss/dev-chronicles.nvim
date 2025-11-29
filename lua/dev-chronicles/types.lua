@@ -331,10 +331,12 @@
 ---@class chronicles.Options.Timeline.Section.SegmentTimeLabels: chronicles.Options.Timeline.Section.SegmentLabelBase, chronicles.Options.Common.TotalTimeBase
 
 ---@class chronicles.Options.Timeline.Section.SegmentNumericLabels: chronicles.Options.Timeline.Section.SegmentLabelBase
+---@field enable boolean
 
 ---@class chronicles.Options.Timeline.Section.SegmentAbbrLabels: chronicles.Options.Timeline.Section.SegmentLabelBase
+---@field enable boolean
 ---@field locale? string: 'C' for English
----@field date_abbrs? string[]: days: 7 entries, Sunday first; months: 12 entries, January first
+---@field date_abbrs? string[]: timeline_days: 7 entries, Sunday first; timeline_months: 12 entries, January first
 
 --- -- --------------------------------------------
 --- -- Top Level Opts
