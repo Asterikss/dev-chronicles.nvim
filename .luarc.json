@@ -1,6 +1,6 @@
 {
   "runtime": {
-    "version": "LuaJIT"
+    "version": "Lua 5.1"
   },
   "diagnostics": {
     "globals": ["vim"],
