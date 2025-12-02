@@ -13,7 +13,7 @@ local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
 ---@param header_dashboard_type_opts chronicles.Options.Dashboard.Header
 ---@param curr_session_time? integer
 ---@param top_projects? chronicles.Dashboard.TopProjectsArray
----@param project_id_to_color table<string, string>
+---@param project_id_to_highlight table<string, string>
 function M.set_header_lines_hl(
   lines,
   highlights,
@@ -24,7 +24,7 @@ function M.set_header_lines_hl(
   header_dashboard_type_opts,
   curr_session_time,
   top_projects,
-  project_id_to_color
+  project_id_to_highlight
 )
   local total_time_opts = header_dashboard_type_opts.total_time
   local left_header = string.format(
@@ -140,11 +140,11 @@ function M.set_header_lines_hl(
         --
         -- A project (project_id) listed in top_projects might not be shown on
         -- screen (for example, if it doesn’t fit on the screen). In that case,
-        -- project_id_to_color won’t contain it, and a distinct highlight is
+        -- project_id_to_highlight won’t contain it, and a distinct highlight is
         -- used to indicate that this time period had a most-worked-on project
         -- that isn’t currently displayed.
         local color = project_id
-            and (project_id_to_color[project_id] or DefaultColors.DevChroniclesLightGray)
+            and (project_id_to_highlight[project_id] or DefaultColors.DevChroniclesLightGray)
           or DefaultColors.DevChroniclesGrayedOut
 
         curr_highlight_end_col_top = curr_highlight_col_top + single_top_bar_bytes

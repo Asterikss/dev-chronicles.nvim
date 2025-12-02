@@ -218,7 +218,7 @@ function M._create_dashboard_content(
   )
 
   ---@type chronicles.Dashboard.BarData[], table<string, string>
-  local bars_data, project_id_to_color = dashboard_logic.create_bars_data(
+  local bars_data, project_id_to_highlight = dashboard_logic.create_bars_data(
     arr_projects,
     project_name_tbls_arr,
     dashboard_data.max_project_time,
@@ -243,7 +243,7 @@ function M._create_dashboard_content(
     dashboard_type_opts.header,
     curr_session_time,
     dashboard_data.top_projects,
-    project_id_to_color
+    project_id_to_highlight
   )
 
   dashboard_content.set_time_labels_above_bars_lines_hl(

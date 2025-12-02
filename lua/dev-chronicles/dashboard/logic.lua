@@ -234,14 +234,14 @@ function M.create_bars_data(
   ---@type chronicles.Dashboard.BarData[]
   local bars_data = {}
   ---@type table<string, string>
-  local project_id_to_color = {}
+  local project_id_to_highlight = {}
 
   for i, project in ipairs(arr_projects) do
     local bar_height = math.max(1, math.floor((project.total_time / max_time) * max_bar_height))
     local highlight = get_project_highlight(project.color)
 
     local project_id = project.project_id
-    project_id_to_color[project_id] = highlight
+    project_id_to_highlight[project_id] = highlight
 
     bars_data[i] = {
       project_name_tbl = project_name_tbls_arr[i],
@@ -257,7 +257,7 @@ function M.create_bars_data(
     }
   end
 
-  return bars_data, project_id_to_color
+  return bars_data, project_id_to_highlight
 end
 
 ---@param final_project_data_arr chronicles.Dashboard.FinalProjectData[]
