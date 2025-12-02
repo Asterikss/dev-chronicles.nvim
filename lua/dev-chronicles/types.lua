@@ -110,7 +110,6 @@
 ---@field project_id_to_highlight table<string, string>
 
 ---@class chronicles.Timeline.SegmentData
----@field date_key string
 ---@field day? string
 ---@field month? string
 ---@field year string

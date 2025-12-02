@@ -111,7 +111,6 @@ function M.get_timeline_data_days(
 
       len_segments = len_segments + 1
       segments[len_segments] = {
-        date_key = key,
         day = day,
         month = month,
         year = year,
@@ -238,7 +237,6 @@ function M.get_timeline_data_months(
 
       len_segments = len_segments + 1
       segments[len_segments] = {
-        date_key = month_str,
         day = nil,
         month = month_str:sub(1, 2),
         year = year_str,
@@ -364,7 +362,6 @@ function M.get_timeline_data_years(
 
       len_segments = len_segments + 1
       segments[len_segments] = {
-        date_key = year_str,
         day = nil,
         month = nil,
         year = year_str,
