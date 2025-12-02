@@ -399,6 +399,52 @@ function M.get_timeline_data_years(
   }
 end
 
+---@param data chronicles.ChroniclesData
+---@param session_base chronicles.SessionBase
+---@return chronicles.Timeline.Data?
+function M.get_timeline_data_all(data, session_base)
+  local time = require('dev-chronicles.core.time')
+  local global_time = data.global_time
+
+  ---@type chronicles.Timeline.SegmentData.ProjectShare[]
+  local project_shares, len_project_shares = {}, 0
+
+  for project_id, project_data in pairs(data.projects) do
+    len_project_shares = len_project_shares + 1
+    project_shares[len_project_shares] =
+      { project_id = project_id, share = project_data.total_time }
+  end
+
+  table.sort(project_shares, function(a, b)
+    return a.share < b.share
+  end)
+
+  for j = 1, len_project_shares do
+    project_shares[j].share = project_shares[j].share / global_time
+  end
+
+  ---@type chronicles.Timeline.SegmentData[]
+  local segments = {}
+  segments[1] = {
+    day = nil,
+    month = nil,
+    year = ' ',
+    date_abbr = ' ',
+    total_segment_time = global_time,
+    project_shares = project_shares,
+  }
+
+  ---@type chronicles.Timeline.Data
+  return {
+    total_period_time = global_time,
+    segments = segments,
+    max_segment_time = global_time,
+    does_include_curr_date = true,
+    time_period_str = time.get_time_period_str(data.tracking_start, session_base.now_ts),
+    project_id_to_highlight = M._construct_project_id_to_highlight(data.projects),
+  }
+end
+
 ---@param projects chronicles.ChroniclesData.ProjectData
 ---@return table<string, string>
 function M._construct_project_id_to_highlight(projects)
