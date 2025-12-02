@@ -69,8 +69,10 @@ local defaults = {
     dashboard_all = dashboard_cfg.make_dashboard_section({
       header = {
         window_title = ' Dev Chronicles All ',
-        total_time_format_str = 'global total time: %s',
         show_current_session_time = false,
+        total_time = {
+          format_str = 'global total time: %s',
+        },
       },
       sorting = { sort_by_last_worked_not_total_time = false },
       window_height = 0.85,
