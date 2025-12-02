@@ -186,19 +186,22 @@ function M.sort_and_cutoff_projects(arr_projects, len_arr_projects, n_projects_t
     return arr_projects, len_arr_projects
   end
 
-  local arr_projects_filtered = {}
-
+  local first, last
   if sorting.ascending then
-    for i = math.max(1, len_arr_projects - n_projects_to_keep + 1), len_arr_projects do
-      table.insert(arr_projects_filtered, arr_projects[i])
-    end
+    first = math.max(1, len_arr_projects - n_projects_to_keep + 1)
+    last = len_arr_projects
   else
-    for i = 1, math.min(n_projects_to_keep, len_arr_projects) do
-      table.insert(arr_projects_filtered, arr_projects[i])
-    end
+    first = 1
+    last = math.min(n_projects_to_keep, len_arr_projects)
   end
 
-  return arr_projects_filtered, #arr_projects_filtered
+  local arr_projects_filtered, len_arr_projects_filtered = {}, 0
+  for i = first, last do
+    len_arr_projects_filtered = len_arr_projects_filtered + 1
+    arr_projects_filtered[len_arr_projects_filtered] = arr_projects[i]
+  end
+
+  return arr_projects_filtered, len_arr_projects_filtered
 end
 
 ---@param arr_projects chronicles.Dashboard.FinalProjectData[]
