@@ -202,31 +202,28 @@ function M.sort_and_cutoff_projects(arr_projects, len_arr_projects, n_projects_t
 end
 
 ---@param arr_projects chronicles.Dashboard.FinalProjectData[]
+---@param project_name_tbls_arr string[][]
 ---@param max_time integer
 ---@param max_bar_height integer
 ---@param chart_start_col integer
 ---@param bar_width integer
 ---@param bar_spacing integer
----@param let_proj_names_extend_bars_by_one boolean
 ---@param random_bars_coloring boolean
 ---@param projects_sorted_ascending boolean
 ---@param bar_header_realized_rows_tbl string[]
----@param footer_height integer
----@return chronicles.Dashboard.BarData[], integer, table<string, string>
+---@return chronicles.Dashboard.BarData[], table<string, string>
 function M.create_bars_data(
   arr_projects,
+  project_name_tbls_arr,
   max_time,
   max_bar_height,
   chart_start_col,
   bar_width,
   bar_spacing,
-  let_proj_names_extend_bars_by_one,
   random_bars_coloring,
   projects_sorted_ascending,
-  bar_header_realized_rows_tbl,
-  footer_height
+  bar_header_realized_rows_tbl
 )
-  local string_utils = require('dev-chronicles.utils.strings')
   local BarLevel = require('dev-chronicles.core.enums').BarLevel
   local get_project_highlight = require('dev-chronicles.core.colors').closure_get_project_highlight(
     random_bars_coloring,
@@ -238,7 +235,6 @@ function M.create_bars_data(
   local bars_data = {}
   ---@type table<string, string>
   local project_id_to_color = {}
-  local max_lines_proj_names = 0
 
   for i, project in ipairs(arr_projects) do
     local bar_height = math.max(1, math.floor((project.total_time / max_time) * max_bar_height))
@@ -247,16 +243,8 @@ function M.create_bars_data(
     local project_id = project.project_id
     project_id_to_color[project_id] = highlight
 
-    local project_name_tbl = string_utils.format_project_name(
-      string_utils.get_project_name(project_id),
-      bar_width + (let_proj_names_extend_bars_by_one and 2 or 0),
-      footer_height
-    )
-
-    max_lines_proj_names = math.max(max_lines_proj_names, #project_name_tbl)
-
     bars_data[i] = {
-      project_name_tbl = project_name_tbl,
+      project_name_tbl = project_name_tbls_arr[i],
       project_time = project.total_time,
       height = bar_height,
       color = highlight,
@@ -269,7 +257,7 @@ function M.create_bars_data(
     }
   end
 
-  return bars_data, max_lines_proj_names, project_id_to_color
+  return bars_data, project_id_to_color
 end
 
 ---@param final_project_data_arr chronicles.Dashboard.FinalProjectData[]

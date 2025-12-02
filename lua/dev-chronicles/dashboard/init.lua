@@ -137,6 +137,10 @@ function M._create_dashboard_content(
   local lines = {}
   local highlights = {}
 
+  local header_height = 4
+  local max_footer_height = 3
+  local max_chart_width = win_width - 4 -- margins
+
   local arr_projects = dashboard_data.final_project_data_arr
   if arr_projects == nil then
     return dashboard_content.handle_no_projects_lines_hl(
@@ -148,13 +152,6 @@ function M._create_dashboard_content(
       dashboard_type_opts.header
     )
   end
-
-  local header_height = 4
-  local footer_height = 3
-  local chart_height = win_height - header_height - footer_height
-  local max_chart_width = win_width - 4 -- margins
-  local vertical_space_for_bars = chart_height - 3 -- projects_time + gap 1 + chart floor
-  local max_bar_height = vertical_space_for_bars
 
   if dashboard_type_opts.min_proj_time_to_display_proj > 0 then
     arr_projects = dashboard_logic.filter_by_min_time(
@@ -191,6 +188,18 @@ function M._create_dashboard_content(
     )
   end
 
+  ---@type string[][], integer
+  local project_name_tbls_arr, footer_height = dashboard_logic.get_project_name_tbls_arr(
+    arr_projects,
+    max_footer_height,
+    dashboard_opts.bar_width,
+    dashboard_opts.footer.let_proj_names_extend_bars_by_one
+  )
+
+  local chart_height = win_height - header_height - footer_height
+  local vertical_space_for_bars = chart_height - 3 -- time labels row + gap 1 + chart floor
+  local max_bar_height = vertical_space_for_bars
+
   if dashboard_type_opts.dynamic_bar_height_thresholds then
     max_bar_height = dashboard_logic.calc_max_bar_height(
       vertical_space_for_bars,
@@ -208,21 +217,20 @@ function M._create_dashboard_content(
     dashboard_opts.bar_footer_extends_by
   )
 
-  ---@type chronicles.Dashboard.BarData[], integer, table<string, string>
-  local bars_data, max_lines_proj_names, project_id_to_color = dashboard_logic.create_bars_data(
+  ---@type chronicles.Dashboard.BarData[], table<string, string>
+  local bars_data, project_id_to_color = dashboard_logic.create_bars_data(
     arr_projects,
+    project_name_tbls_arr,
     dashboard_data.max_project_time,
     max_bar_height,
     chart_start_col,
     dashboard_opts.bar_width,
     dashboard_opts.bar_spacing,
-    dashboard_opts.footer.let_proj_names_extend_bars_by_one,
     dashboard_type_opts.random_bars_coloring,
     dashboard_type_opts.bars_coloring_follows_sorting_in_order
         and dashboard_type_opts.sorting.ascending
       or not dashboard_type_opts.sorting.ascending,
-    bar_representation.header.realized_rows,
-    footer_height
+    bar_representation.header.realized_rows
   )
 
   dashboard_content.set_header_lines_hl(
@@ -265,7 +273,7 @@ function M._create_dashboard_content(
     lines,
     highlights,
     bars_data,
-    max_lines_proj_names,
+    footer_height,
     dashboard_opts.footer.let_proj_names_extend_bars_by_one,
     win_width
   )
