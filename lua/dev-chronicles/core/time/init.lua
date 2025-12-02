@@ -1,6 +1,6 @@
 local M = {}
 
----Return seconds as a formatted time string
+---Returns seconds as a formatted time string
 ---@param seconds integer Seconds
 ---@param max_hours? boolean Should the maximal unit be hours (default true)
 ---@param min_hours? boolean Should the minimal unit be hours (default false)
@@ -9,7 +9,7 @@ local M = {}
 function M.format_time(seconds, max_hours, min_hours, round_hours_ge_x)
   max_hours = (max_hours == nil) and true or max_hours
 
-  if seconds == 0 then
+  if seconds <= 0 then
     return '0'
   end
 
@@ -22,7 +22,9 @@ function M.format_time(seconds, max_hours, min_hours, round_hours_ge_x)
 
   if seconds < 3600 then
     if min_hours then
-      return ('%.1fh'):format(math.max(0.1, seconds / 3600))
+      local res = ('%.1fh'):format(math.max(0.1, seconds / 3600))
+      local ret, _ = res:gsub('%.0h$', 'h')
+      return ret
     end
     return ('%dm'):format(seconds / 60)
   end
@@ -32,7 +34,7 @@ function M.format_time(seconds, max_hours, min_hours, round_hours_ge_x)
     if round_hours_ge_x and n_hours >= round_hours_ge_x then
       return ('%dh'):format(math.floor(n_hours + 0.5))
     end
-    return ('%.1fh'):format(seconds / 3600)
+    return ('%.1fh'):format(n_hours)
   end
 
   local n_days = math.floor(seconds / 86400 + 0.5)
