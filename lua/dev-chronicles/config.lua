@@ -1,6 +1,7 @@
 local M = {}
 
 local notify = require('dev-chronicles.utils.notify')
+local timeline_cfg = require('dev-chronicles.config.timeline_cfg')
 local dashboard_cfg = require('dev-chronicles.config.dashboard_cfg')
 local default_dashboard_vars = dashboard_cfg.default_dashboard_vars
 
@@ -75,6 +76,61 @@ local defaults = {
       window_height = 0.85,
       window_width = 0.99,
       window_border = { '╳', '━', '╳', '┃', '╳', '━', '╳', '┃' },
+    }),
+  },
+  timeline = {
+    row_repr = { '█' },
+    timeline_days = timeline_cfg.make_timeline_section({
+      n_by_default = 30,
+      window_width = 0.85,
+      header = {
+        period_indicator = {
+          time_period_str = 'last %s days',
+          time_period_str_singular = 'today',
+        },
+        window_title = ' Dev Chronicles Timeline Days',
+      },
+      segment_abbr_labels = {
+        date_abbrs = { 'su', 'mo', 'tu', 'we', 'th', 'fr', 'sa' },
+      },
+    }),
+    timeline_months = timeline_cfg.make_timeline_section({
+      bar_width = 8,
+      n_by_default = 12,
+      header = {
+        period_indicator = {
+          time_period_str = 'last %s months',
+          time_period_str_singular = 'this month',
+        },
+        window_title = ' Dev Chronicles Timeline Months',
+      },
+    }),
+    timeline_years = timeline_cfg.make_timeline_section({
+      bar_width = 12,
+      n_by_default = 2,
+      header = {
+        period_indicator = {
+          time_period_str = 'last %s years',
+          time_period_str_singular = 'this years',
+        },
+        window_title = ' Dev Chronicles Timeline Years',
+      },
+      segment_abbr_labels = {
+        enable = false,
+      },
+    }),
+    timeline_all = timeline_cfg.make_timeline_section({
+      bar_width = 60,
+      header = {
+        window_title = ' Dev Chronicles Timeline All',
+        show_current_session_time = false,
+        total_time = {
+          format_str = 'global total time: %s',
+        },
+      },
+      segment_numeric_labels = {
+        enable = false,
+      },
     }),
   },
   project_list = {
