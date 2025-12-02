@@ -164,7 +164,7 @@ end
 ---@param max_project_time integer
 ---@param sorting chronicles.Options.Dashboard.Sorting
 ---@return chronicles.Dashboard.FinalProjectData[], integer, integer: arr_projects, len_arr_projects, max_project_time
-function M.sort_and_cutoff_projects(
+function M.sort_and_cut_off_projects(
   arr_projects,
   len_arr_projects,
   n_projects_to_keep,

@@ -104,4 +104,35 @@ function M.construct_row_representation(row_repr, bar_width)
   }
 end
 
+---@param timeline_data chronicles.Timeline.Data
+---@param n_segments integer
+---@param n_segments_to_keep integer
+function M.cut_off_segments(timeline_data, n_segments, n_segments_to_keep)
+  ---@type chronicles.Timeline.SegmentData[]
+  local kept_segments, len_kept_segments = {}, 0
+  local cutoff_start = n_segments - n_segments_to_keep + 1
+
+  for i = cutoff_start, n_segments do
+    len_kept_segments = len_kept_segments + 1
+    kept_segments[len_kept_segments] = timeline_data.segments[i]
+  end
+
+  -- A segment whose `total_segment_time` equals `max_segment_time` could have been cut off
+  local max_segment_time = timeline_data.max_segment_time
+  for i = 1, cutoff_start - 1 do
+    if timeline_data.segments[i].total_segment_time == max_segment_time then
+      local new_max_segment_time = 0
+
+      for _, segment_data in ipairs(kept_segments) do
+        new_max_segment_time = math.max(segment_data.total_segment_time, new_max_segment_time)
+      end
+
+      timeline_data.max_segment_time = new_max_segment_time
+      break
+    end
+  end
+
+  timeline_data.segments = kept_segments
+end
+
 return M

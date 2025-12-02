@@ -171,7 +171,7 @@ function M._create_dashboard_content(
   )
 
   -- Reset len_arr_projects to avoid using stale value later
-  arr_projects, len_arr_projects, max_project_time = dashboard_logic.sort_and_cutoff_projects(
+  arr_projects, len_arr_projects, max_project_time = dashboard_logic.sort_and_cut_off_projects(
     arr_projects,
     len_arr_projects,
     n_projects_to_keep,
