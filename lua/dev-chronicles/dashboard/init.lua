@@ -140,6 +140,7 @@ function M._create_dashboard_content(
   local header_height = 4
   local max_footer_height = 3
   local max_chart_width = win_width - 4 -- margins
+  local max_project_time = dashboard_data.max_project_time
 
   local arr_projects = dashboard_data.final_project_data_arr
   if arr_projects == nil then
@@ -170,10 +171,11 @@ function M._create_dashboard_content(
   )
 
   -- Reset len_arr_projects to avoid using stale value later
-  arr_projects, len_arr_projects = dashboard_logic.sort_and_cutoff_projects(
+  arr_projects, len_arr_projects, max_project_time = dashboard_logic.sort_and_cutoff_projects(
     arr_projects,
     len_arr_projects,
     n_projects_to_keep,
+    max_project_time,
     dashboard_type_opts.sorting
   )
 
@@ -204,7 +206,7 @@ function M._create_dashboard_content(
     max_bar_height = dashboard_logic.calc_max_bar_height(
       vertical_space_for_bars,
       dashboard_type_opts.dynamic_bar_height_thresholds,
-      dashboard_data.max_project_time
+      max_project_time
     )
   end
 
@@ -221,7 +223,7 @@ function M._create_dashboard_content(
   local bars_data, project_id_to_highlight = dashboard_logic.create_bars_data(
     arr_projects,
     project_name_tbls_arr,
-    dashboard_data.max_project_time,
+    max_project_time,
     max_bar_height,
     chart_start_col,
     dashboard_opts.bar_width,

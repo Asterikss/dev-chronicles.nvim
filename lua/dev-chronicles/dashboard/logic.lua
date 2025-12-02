@@ -161,9 +161,16 @@ end
 ---@param arr_projects chronicles.Dashboard.FinalProjectData[]
 ---@param len_arr_projects integer
 ---@param n_projects_to_keep integer
+---@param max_project_time integer
 ---@param sorting chronicles.Options.Dashboard.Sorting
----@return chronicles.Dashboard.FinalProjectData[], integer
-function M.sort_and_cutoff_projects(arr_projects, len_arr_projects, n_projects_to_keep, sorting)
+---@return chronicles.Dashboard.FinalProjectData[], integer, integer: arr_projects, len_arr_projects, max_project_time
+function M.sort_and_cutoff_projects(
+  arr_projects,
+  len_arr_projects,
+  n_projects_to_keep,
+  max_project_time,
+  sorting
+)
   if sorting.enable then
     table.sort(arr_projects, function(a, b)
       if sorting.sort_by_last_worked_not_total_time then
@@ -183,7 +190,7 @@ function M.sort_and_cutoff_projects(arr_projects, len_arr_projects, n_projects_t
   end
 
   if n_projects_to_keep == len_arr_projects then
-    return arr_projects, len_arr_projects
+    return arr_projects, len_arr_projects, max_project_time
   end
 
   local first, last
@@ -195,13 +202,18 @@ function M.sort_and_cutoff_projects(arr_projects, len_arr_projects, n_projects_t
     last = math.min(n_projects_to_keep, len_arr_projects)
   end
 
+  ---@type chronicles.Dashboard.FinalProjectData[]
   local arr_projects_filtered, len_arr_projects_filtered = {}, 0
+  local new_max_project_time = 0
+
   for i = first, last do
+    local project_data = arr_projects[i]
     len_arr_projects_filtered = len_arr_projects_filtered + 1
-    arr_projects_filtered[len_arr_projects_filtered] = arr_projects[i]
+    arr_projects_filtered[len_arr_projects_filtered] = project_data
+    new_max_project_time = math.max(new_max_project_time, project_data.total_time)
   end
 
-  return arr_projects_filtered, len_arr_projects_filtered
+  return arr_projects_filtered, len_arr_projects_filtered, new_max_project_time
 end
 
 ---@param arr_projects chronicles.Dashboard.FinalProjectData[]
