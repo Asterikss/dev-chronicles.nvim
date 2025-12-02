@@ -290,4 +290,35 @@ function M.calc_max_bar_height(initial_max_bar_height, thresholds, max_time)
   return initial_max_bar_height
 end
 
+---@param arr_projects chronicles.Dashboard.FinalProjectData[]
+---@param max_footer_height integer
+---@param bar_width integer
+---@param let_proj_names_extend_bars_by_one boolean
+---@return string[][], integer
+function M.get_project_name_tbls_arr(
+  arr_projects,
+  max_footer_height,
+  bar_width,
+  let_proj_names_extend_bars_by_one
+)
+  local string_utils = require('dev-chronicles.utils.strings')
+
+  ---@type string[][]
+  local project_name_tbls_arr = {}
+  local footer_height = 0
+
+  for i, project_data in ipairs(arr_projects) do
+    local project_name_tbl = string_utils.format_project_name(
+      string_utils.get_project_name(project_data.project_id),
+      bar_width + (let_proj_names_extend_bars_by_one and 2 or 0),
+      max_footer_height
+    )
+
+    project_name_tbls_arr[i] = project_name_tbl
+    footer_height = math.max(footer_height, #project_name_tbl)
+  end
+
+  return project_name_tbls_arr, footer_height
+end
+
 return M
