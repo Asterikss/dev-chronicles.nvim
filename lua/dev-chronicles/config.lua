@@ -1,12 +1,18 @@
 local M = {}
 
 local notify = require('dev-chronicles.utils.notify')
-local timeline_cfg = require('dev-chronicles.config.timeline_cfg')
-local dashboard_cfg = require('dev-chronicles.config.dashboard_cfg')
-local default_dashboard_vars = dashboard_cfg.default_dashboard_vars
+local section_helpers = require('dev-chronicles.config.section_helpers')
 
 ---@type chronicles.Options
 local options
+
+---@type chronicles.Options.Dashboard.DefaultVars
+local default_dashboard_vars = {
+  bar_width = 9,
+  bar_header_extends_by = 1,
+  bar_footer_extends_by = 1,
+  bar_spacing = 3,
+}
 
 ---@type chronicles.Options
 local defaults = {
@@ -22,8 +28,6 @@ local defaults = {
     optimize_storage_for_x_days = 30,
   },
   extend_today_to_4am = true,
-  data_file = 'dev-chronicles.json',
-  log_file = 'log.dev-chronicles.log',
   dashboard = {
     bar_width = default_dashboard_vars.bar_width,
     bar_header_extends_by = default_dashboard_vars.bar_header_extends_by,
@@ -37,7 +41,7 @@ local defaults = {
     footer = {
       let_proj_names_extend_bars_by_one = true,
     },
-    dashboard_days = dashboard_cfg.make_dashboard_section({
+    dashboard_days = section_helpers.make_dashboard_section({
       header = {
         window_title = ' Dev Chronicles Days ',
         period_indicator = {
@@ -46,9 +50,9 @@ local defaults = {
         },
       },
       n_by_default = 30,
-      dynamic_bar_height_thresholds = { 2, 3.5, 5 }, -- It could be a integer[] and integer[][]
+      dynamic_bar_height_thresholds = { 2, 3, 4 },
     }),
-    dashboard_months = dashboard_cfg.make_dashboard_section({
+    dashboard_months = section_helpers.make_dashboard_section({
       header = {
         window_title = ' Dev Chronicles Months ',
         top_projects = { wide_bars = true },
@@ -57,7 +61,7 @@ local defaults = {
       window_border = { '╬', '═', '╬', '║', '╬', '═', '╬', '║' },
       dynamic_bar_height_thresholds = nil, -- = { 15, 25, 40 },
     }),
-    dashboard_years = dashboard_cfg.make_dashboard_section({
+    dashboard_years = section_helpers.make_dashboard_section({
       header = {
         window_title = ' Dev Chronicles Years ',
         top_projects = { super_extra_duper_wide_bars = true },
@@ -66,7 +70,7 @@ local defaults = {
       sorting = { sort_by_last_worked_not_total_time = false },
       window_border = { '╬', '═', '╬', '║', '╬', '═', '╬', '║' },
     }),
-    dashboard_all = dashboard_cfg.make_dashboard_section({
+    dashboard_all = section_helpers.make_dashboard_section({
       header = {
         window_title = ' Dev Chronicles All ',
         show_current_session_time = false,
@@ -82,7 +86,7 @@ local defaults = {
   },
   timeline = {
     row_repr = { '█' },
-    timeline_days = timeline_cfg.make_timeline_section({
+    timeline_days = section_helpers.make_timeline_section({
       n_by_default = 30,
       window_width = 0.85,
       header = {
@@ -96,7 +100,7 @@ local defaults = {
         date_abbrs = { 'su', 'mo', 'tu', 'we', 'th', 'fr', 'sa' },
       },
     }),
-    timeline_months = timeline_cfg.make_timeline_section({
+    timeline_months = section_helpers.make_timeline_section({
       bar_width = 8,
       n_by_default = 12,
       header = {
@@ -107,7 +111,7 @@ local defaults = {
         window_title = ' Dev Chronicles Timeline Months',
       },
     }),
-    timeline_years = timeline_cfg.make_timeline_section({
+    timeline_years = section_helpers.make_timeline_section({
       bar_width = 12,
       n_by_default = 2,
       header = {
@@ -121,7 +125,7 @@ local defaults = {
         enable = false,
       },
     }),
-    timeline_all = timeline_cfg.make_timeline_section({
+    timeline_all = section_helpers.make_timeline_section({
       bar_width = 60,
       header = {
         window_title = ' Dev Chronicles Timeline All',
@@ -152,6 +156,8 @@ local defaults = {
     for_dev_state_override = nil,
     parsed_exclude_subdirs_relative_map = nil,
   },
+  data_file = 'dev-chronicles.json',
+  log_file = 'log.dev-chronicles.log',
   extra_default_dashboard_bar_reprs = {
     {
       { ' ▼ ' },
