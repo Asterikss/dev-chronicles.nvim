@@ -3,8 +3,9 @@ local M = {}
 local notify = require('dev-chronicles.utils.notify')
 
 ---@param data chronicles.ChroniclesData
+---@param session_base chronicles.SessionBase
 ---@return chronicles.Dashboard.Data
-function M.get_dashboard_data_all(data)
+function M.get_dashboard_data_all(data, session_base)
   local time = require('dev-chronicles.core.time')
 
   ---@type chronicles.Dashboard.FinalProjectData[]
@@ -33,7 +34,7 @@ function M.get_dashboard_data_all(data)
     final_project_data_arr = next(final_project_data_arr) ~= nil and final_project_data_arr or nil,
     max_project_time = max_project_time,
     does_include_curr_date = true,
-    time_period_str = time.get_time_period_str(data.tracking_start, os.time()),
+    time_period_str = time.get_time_period_str(data.tracking_start, session_base.now_ts),
   }
 end
 

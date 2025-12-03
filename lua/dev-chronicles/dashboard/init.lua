@@ -59,7 +59,7 @@ function M.dashboard(data, panel_subtype, panel_subtype_args, opts, session_base
     )
   elseif panel_subtype == PanelSubtype.All then
     dashboard_type_options = opts.dashboard.dashboard_all
-    dashboard_data = dashboard_data_extraction.get_dashboard_data_all(data)
+    dashboard_data = dashboard_data_extraction.get_dashboard_data_all(data, session_base)
   elseif panel_subtype == PanelSubtype.Months then
     dashboard_type_options = opts.dashboard.dashboard_months
     dashboard_data = dashboard_data_extraction.get_dashboard_data_months(
