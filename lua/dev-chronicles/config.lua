@@ -29,10 +29,10 @@ local defaults = {
     bar_header_extends_by = default_dashboard_vars.bar_header_extends_by,
     bar_footer_extends_by = default_dashboard_vars.bar_footer_extends_by,
     bar_spacing = default_dashboard_vars.bar_spacing,
-    bar_chars = {
+    bar_repr_list = {
       { {}, { '▉' }, {} },
     },
-    use_extra_default_dashboard_bar_chars = true,
+    use_extra_default_dashboard_bar_reprs = true,
     dsh_days_today_force_precise_time = true,
     footer = {
       let_proj_names_extend_bars_by_one = true,
@@ -152,7 +152,7 @@ local defaults = {
     for_dev_state_override = nil,
     parsed_exclude_subdirs_relative_map = nil,
   },
-  extra_default_dashboard_bar_chars = {
+  extra_default_dashboard_bar_reprs = {
     {
       { ' ▼ ' },
       {
@@ -246,14 +246,14 @@ function M.setup(opts)
   end
 
   if
-    merged.dashboard.use_extra_default_dashboard_bar_chars
+    merged.dashboard.use_extra_default_dashboard_bar_reprs
     and merged.dashboard.bar_width == default_dashboard_vars.bar_width
     and merged.dashboard.bar_header_extends_by == default_dashboard_vars.bar_header_extends_by
     and merged.dashboard.bar_footer_extends_by == default_dashboard_vars.bar_footer_extends_by
     and merged.dashboard.bar_spacing == default_dashboard_vars.bar_spacing
   then
-    for _, extra_bar_chars in ipairs(merged.extra_default_dashboard_bar_chars) do
-      table.insert(merged.dashboard.bar_chars, extra_bar_chars)
+    for _, extra_bar_repr in ipairs(merged.extra_default_dashboard_bar_reprs) do
+      table.insert(merged.dashboard.bar_repr_list, extra_bar_repr)
     end
   end
 

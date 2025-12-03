@@ -212,7 +212,7 @@ function M._create_dashboard_content(
   end
 
   local bar_repr =
-    utils.get_random_from_tbl(dashboard_type_opts.bar_chars or dashboard_opts.bar_chars)
+    utils.get_random_from_tbl(dashboard_type_opts.bar_repr_list or dashboard_opts.bar_repr_list)
 
   local bar_representation = dashboard_logic.construct_bar_representation(
     bar_repr,

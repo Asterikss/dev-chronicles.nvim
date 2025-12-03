@@ -258,19 +258,19 @@
 ---@field window_height number
 ---@field window_width number
 ---@field window_border? string[]
----@field bar_chars any?
+---@field bar_repr_list? string[][][]
 ---@field project_total_time chronicles.Options.Dashboard.Section.ProjectTotalTime
 
 ---@class chronicles.Options.Dashboard.Footer
 ---@field let_proj_names_extend_bars_by_one boolean
 
 ---@class chronicles.Options.Dashboard
----@field bar_width integer width of each column
+---@field bar_width integer
 ---@field bar_header_extends_by integer
 ---@field bar_footer_extends_by integer
----@field bar_spacing integer spacing between each column
----@field bar_chars string[][][] All the bar representation patterns
----@field use_extra_default_dashboard_bar_chars boolean
+---@field bar_spacing integer
+---@field bar_repr_list string[][][] All the bar representation patterns
+---@field use_extra_default_dashboard_bar_reprs boolean
 ---@field dsh_days_today_force_precise_time boolean
 ---@field footer chronicles.Options.Dashboard.Footer
 ---@field dashboard_days chronicles.Options.Dashboard.Section
@@ -358,4 +358,4 @@
 ---@field data_file string Path to the data file
 ---@field log_file string Path to the log file
 ---@field runtime_opts { for_dev_state_override?: chronicles.SessionState, parsed_exclude_subdirs_relative_map?: table<string, boolean>} -- exclude_subdirs_relative as a map
----@field extra_default_dashboard_bar_chars string[][][]
+---@field extra_default_dashboard_bar_reprs string[][][]

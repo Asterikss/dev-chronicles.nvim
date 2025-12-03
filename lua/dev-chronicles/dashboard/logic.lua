@@ -34,7 +34,7 @@ function M.construct_bar_representation(
       width = bar_width + (return_bar_footer_extends_by * 2)
     elseif j == 2 and next(pattern[j]) == nil then
       notify.warn(
-        'bar_chars BodyLevel (middle one) cannot be empty. Falling back to @ bar representation'
+        'bar_repr BodyLevel (middle one) cannot be empty. Falling back to @ bar representation'
       )
       return M._construct_fallback_bar_representation(bar_width)
     end
@@ -61,7 +61,7 @@ function M.construct_bar_representation(
 
         if n_to_fill_bar_width ~= math.floor(n_to_fill_bar_width) then
           notify.warn(
-            'Provided bar_chars row characters in '
+            'Provided bar_repr row characters in '
               .. keys[j]
               .. ' level: '
               .. row_chars

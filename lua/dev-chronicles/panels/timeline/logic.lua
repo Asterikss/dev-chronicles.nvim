@@ -43,7 +43,7 @@ function M.construct_row_representation(row_repr, bar_width)
 
     if n_to_fill_bar_width ~= math.floor(n_to_fill_bar_width) then
       notify.warn(
-        'Provided bar_chars row characters: '
+        'Provided row_repr row characters: '
           .. row_repr
           .. ' cannot be smoothly expanded to width='
           .. tostring(bar_width)
