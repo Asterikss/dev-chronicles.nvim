@@ -238,126 +238,110 @@ function M.set_header_lines_hl(
   M.set_hline_lines_hl(lines, highlights, win_width, '─', DefaultColors.DevChroniclesAccent)
 end
 
---- If global_time_line is set, then it overrides 3rd lines line
+---Adds 2 entries to the lines table. If project_global_time_opts.enable is set to true,
+---then it overrides the 3rd lines entry.
 ---@param lines string[]
 ---@param highlights chronicles.Highlight[]
 ---@param bars_data chronicles.Dashboard.BarData[]
 ---@param win_width integer
----@param project_total_time chronicles.Options.Dashboard.Section.ProjectTotalTime
----@param project_global_time chronicles.Options.Dashboard.Header.ProjectGlobalTime
+---@param project_total_time_opts chronicles.Options.Dashboard.Section.ProjectTotalTime
+---@param project_global_time_opts chronicles.Options.Dashboard.Header.ProjectGlobalTime
+---@param len_lines? integer
+---@return integer: len_lines
 function M.set_time_labels_above_bars_lines_hl(
   lines,
   highlights,
   bars_data,
   win_width,
-  project_total_time,
-  project_global_time
+  project_total_time_opts,
+  project_global_time_opts,
+  len_lines
 )
-  -- Helper function to place a formatted time string onto a character array.
-  ---@param target_line string[]
-  ---@param time_to_format integer
-  ---@param bar_start_col integer
-  ---@param bar_width integer
-  ---@param highlights_insert_positon integer
-  ---@param color? string
-  ---@param as_hours_max boolean
-  ---@param as_hours_min boolean
-  ---@param round_hours_ge_x? integer
-  local function place_label(
-    target_line,
-    time_to_format,
-    bar_start_col,
-    bar_width,
-    highlights_insert_positon,
-    color,
-    as_hours_max,
-    as_hours_min,
-    round_hours_ge_x
-  )
-    local time_str = format_time(time_to_format, as_hours_max, as_hours_min, round_hours_ge_x)
-    local len_time_str = #time_str
-    local label_start = bar_start_col + math.floor((bar_width - len_time_str) / 2)
+  local strings = require('dev-chronicles.utils.strings')
+  len_lines = len_lines or #lines
 
-    if label_start >= 0 and label_start + len_time_str <= win_width then
-      for i = 1, len_time_str do
-        target_line[label_start + i] = time_str:sub(i, i)
-      end
+  ---@type string[]
+  local time_labels_row = vim.split(string.rep(' ', win_width), '')
+  local time_labels_row_hl_pos = len_lines + 1
+  local time_labels_as_hours_max = project_total_time_opts.as_hours_max
+  local time_labels_as_hours_min = project_total_time_opts.as_hours_min
+  local time_labels_round_hours_ge_x = project_total_time_opts.round_hours_ge_x
+  local time_labels_color_like_bars = project_total_time_opts.color_like_bars
 
-      if color then
-        table.insert(highlights, {
-          line = highlights_insert_positon,
-          col = label_start,
-          end_col = label_start + len_time_str,
-          hl_group = color,
-        })
-      end
-    end
-  end
-
-  local highlights_insert_positon = #lines + 1
-  local time_line = vim.split(string.rep(' ', win_width), '')
-
-  local global_time_line
-  if project_global_time.enable then
-    global_time_line = vim.split(string.rep(' ', win_width), '')
-  end
+  ---@type string[]?
+  local global_time_labels_row = project_global_time_opts.enable
+      and vim.split(string.rep(' ', win_width), '')
+    or nil
+  local global_time_labels_row_index = 3
+  local global_time_labels_as_hours_max = project_global_time_opts.as_hours_max
+  local global_time_labels_as_hours_min = project_global_time_opts.as_hours_min
+  local global_time_labels_round_hours_ge_x = project_global_time_opts.round_hours_ge_x
+  local global_time_labels_color_like_bars = project_global_time_opts.color_like_bars
 
   for _, bar in ipairs(bars_data) do
-    if global_time_line then
+    if global_time_labels_row then
       if
-        not project_global_time.show_only_if_differs
+        not project_global_time_opts.show_only_if_differs
         or bar.global_project_time ~= bar.project_time
       then
-        place_label(
-          global_time_line,
-          bar.global_project_time,
+        strings.place_label_simple(
+          global_time_labels_row,
+          format_time(
+            bar.global_project_time,
+            global_time_labels_as_hours_max,
+            global_time_labels_as_hours_min,
+            global_time_labels_round_hours_ge_x
+          ),
           bar.start_col,
           bar.width,
-          3,
-          project_global_time.color_like_bars and bar.color or nil,
-          project_global_time.as_hours_max,
-          project_global_time.as_hours_min,
-          project_global_time.round_hours_ge_x
+          highlights,
+          global_time_labels_row_index,
+          global_time_labels_color_like_bars and bar.color or nil
         )
       end
     end
 
-    place_label(
-      time_line,
-      bar.project_time,
+    strings.place_label_simple(
+      time_labels_row,
+      format_time(
+        bar.project_time,
+        time_labels_as_hours_max,
+        time_labels_as_hours_min,
+        time_labels_round_hours_ge_x
+      ),
       bar.start_col,
       bar.width,
-      highlights_insert_positon,
-      project_total_time.color_like_bars and bar.color or nil,
-      project_total_time.as_hours_max,
-      project_total_time.as_hours_min,
-      project_total_time.round_hours_ge_x
+      highlights,
+      time_labels_row_hl_pos,
+      time_labels_color_like_bars and bar.color or nil
     )
   end
 
-  -- TODO: add this to private config
-  local global_time_line_number = 3
-  if global_time_line then
-    lines[global_time_line_number] = table.concat(global_time_line)
+  if global_time_labels_row then
+    lines[global_time_labels_row_index] = table.concat(global_time_labels_row)
     table.insert(highlights, {
-      line = global_time_line_number,
+      line = global_time_labels_row_index,
       col = 0,
       end_col = -1,
       hl_group = DefaultColors.DevChroniclesGlobalProjectTime,
     })
   end
 
-  table.insert(lines, table.concat(time_line))
-  if not project_total_time.color_like_bars then
+  len_lines = len_lines + 1
+  lines[len_lines] = table.concat(time_labels_row)
+  if not project_total_time_opts.color_like_bars then
     table.insert(highlights, {
-      line = highlights_insert_positon,
+      line = time_labels_row_hl_pos,
       col = 0,
       end_col = -1,
       hl_group = DefaultColors.DevChroniclesProjectTime,
     })
   end
 
-  table.insert(lines, '')
+  len_lines = len_lines + 1
+  lines[len_lines] = ''
+
+  return len_lines
 end
 
 ---@param lines string[]
