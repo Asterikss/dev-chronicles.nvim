@@ -1,96 +1,97 @@
 local M = {}
 
----Unrolls provided bar representation pattern to match the width of each BarLevel. Upon
----failure, returns the fallback bar representation consisting of `@`. Also returns
----codepoints counts for all the rows and char display width for each character in
----each row.
----@param pattern string[][]
+---Unrolls provided bar representation pattern. Upon failure, returns
+---the fallback bar representation consisting of `@`.
+---@param bar_repr string[][]
 ---@param bar_width integer
 ---@param bar_header_extends_by integer
 ---@param bar_footer_extends_by integer
 ---@return chronicles.BarRepresentation
 function M.construct_bar_representation(
-  pattern,
+  bar_repr,
   bar_width,
   bar_header_extends_by,
   bar_footer_extends_by
 )
   local notify = require('dev-chronicles.utils.notify')
-  local str_sub = require('dev-chronicles.utils.strings').str_sub
+  local strings = require('dev-chronicles.utils.strings')
+
+  ---@type chronicles.BarRepresentation|{}
   local bar_representation = {}
-  local return_bar_header_extends_by = bar_header_extends_by
-  local return_bar_footer_extends_by = bar_footer_extends_by
   local keys = { 'header', 'body', 'footer' }
 
-  for j = 1, 3 do
+  for i = 1, 3 do
+    ---@type string[]
     local realized_rows = {}
+    ---@type integer[]
     local row_codepoint_counts = {}
+    ---@type integer[][]
     local char_display_widths = {}
     local width = bar_width
 
-    if j == 1 then
-      width = bar_width + (return_bar_header_extends_by * 2)
-    elseif j == 3 then
-      width = bar_width + (return_bar_footer_extends_by * 2)
-    elseif j == 2 and next(pattern[j]) == nil then
+    if i == 1 then
+      width = bar_width + (bar_header_extends_by * 2)
+    elseif i == 3 then
+      width = bar_width + (bar_footer_extends_by * 2)
+    elseif i == 2 and next(bar_repr[i]) == nil then
       notify.warn(
         'bar_repr BodyLevel (middle one) cannot be empty. Falling back to @ bar representation'
       )
       return M._construct_fallback_bar_representation(bar_width)
     end
 
-    for _, row_chars in ipairs(pattern[j]) do
+    for j, row_repr in ipairs(bar_repr[i]) do
+      ---@type integer[]
       local tmp_char_display_widths = {}
-      local row_chars_display_width = 0
-      local row_chars_codepoints = vim.str_utfindex(row_chars)
+      local row_repr_display_width = 0
+      local row_repr_codepoints = vim.str_utfindex(row_repr)
 
-      for i = 1, row_chars_codepoints do
-        local char = str_sub(row_chars, i, i)
+      for k = 1, row_repr_codepoints do
+        local char = strings.str_sub(row_repr, k, k)
         local char_display_width = vim.fn.strdisplaywidth(char)
-        row_chars_display_width = row_chars_display_width + char_display_width
-        table.insert(tmp_char_display_widths, char_display_width)
+        row_repr_display_width = row_repr_display_width + char_display_width
+        tmp_char_display_widths[k] = char_display_width
       end
 
       local n_to_fill_bar_width
 
-      if row_chars_display_width == width then
-        table.insert(char_display_widths, tmp_char_display_widths)
+      if row_repr_display_width == width then
+        char_display_widths[j] = tmp_char_display_widths
         n_to_fill_bar_width = 1
       else
-        n_to_fill_bar_width = width / row_chars_display_width
+        n_to_fill_bar_width = width / row_repr_display_width
 
         if n_to_fill_bar_width ~= math.floor(n_to_fill_bar_width) then
           notify.warn(
             'Provided bar_repr row characters in '
-              .. keys[j]
+              .. keys[i]
               .. ' level: '
-              .. row_chars
+              .. row_repr
               .. ' cannot be smoothly expanded to width='
               .. tostring(width)
               .. ' given their display_width='
-              .. tostring(row_chars_display_width)
+              .. tostring(row_repr_display_width)
               .. '. Falling back to @ bar representation'
           )
           return M._construct_fallback_bar_representation(bar_width)
         end
 
         local char_display_widths_entry = {}
-        local len_tmp_char_display_widths = #tmp_char_display_widths
 
-        for i = 1, #tmp_char_display_widths * n_to_fill_bar_width do
-          char_display_widths_entry[i] =
-            tmp_char_display_widths[((i - 1) % len_tmp_char_display_widths) + 1]
+        -- The length of tmp_char_display_widths should always equal row_chars_codepoints
+        for k = 1, row_repr_codepoints * n_to_fill_bar_width do
+          char_display_widths_entry[k] =
+            tmp_char_display_widths[((k - 1) % row_repr_codepoints) + 1]
         end
 
-        table.insert(char_display_widths, char_display_widths_entry)
+        char_display_widths[j] = char_display_widths_entry
       end
 
-      local row = string.rep(row_chars, n_to_fill_bar_width)
-      table.insert(realized_rows, row)
-      table.insert(row_codepoint_counts, n_to_fill_bar_width * row_chars_codepoints)
+      realized_rows[j] = row_repr:rep(n_to_fill_bar_width)
+      row_codepoint_counts[j] = n_to_fill_bar_width * row_repr_codepoints
     end
 
-    bar_representation[keys[j]] = {
+    bar_representation[keys[i]] = {
       realized_rows = realized_rows,
       row_codepoint_counts = row_codepoint_counts,
       char_display_widths = char_display_widths,
@@ -123,7 +124,7 @@ function M._construct_fallback_bar_representation(bar_width)
     char_display_widths = {},
   }
   bar_representation.body = {
-    realized_rows = { string.rep('@', bar_width) },
+    realized_rows = { ('@'):rep(bar_width) },
     row_codepoint_counts = { bar_width },
     char_display_widths = { char_display_widths_entry },
   }
