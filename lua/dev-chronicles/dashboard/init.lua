@@ -132,17 +132,20 @@ function M._create_dashboard_content(
 )
   local dashboard_content = require('dev-chronicles.dashboard.content')
   local dashboard_logic = require('dev-chronicles.dashboard.logic')
-  local get_random_from_tbl = require('dev-chronicles.utils').get_random_from_tbl
+  local utils = require('dev-chronicles.utils')
 
   local lines = {}
   local highlights = {}
 
   local header_height = 4
   local max_footer_height = 3
-  local max_chart_width = win_width - 4 -- margins
-  local max_project_time = dashboard_data.max_project_time
+  local horizontal_margin = 2
+  local max_chart_width = win_width - (2 * horizontal_margin)
 
+  local max_project_time = dashboard_data.max_project_time
   local arr_projects = dashboard_data.final_project_data_arr
+  local len_arr_projects = #arr_projects
+
   if arr_projects == nil then
     return dashboard_content.handle_no_projects_lines_hl(
       lines,
@@ -155,12 +158,11 @@ function M._create_dashboard_content(
   end
 
   if dashboard_type_opts.min_proj_time_to_display_proj > 0 then
-    arr_projects = dashboard_logic.filter_by_min_time(
+    arr_projects, len_arr_projects = dashboard_logic.filter_by_min_time(
       arr_projects,
       dashboard_type_opts.min_proj_time_to_display_proj
     )
   end
-  local len_arr_projects = #arr_projects
 
   local n_projects_to_keep, chart_start_col = dashboard_logic.calc_chart_stats(
     dashboard_opts.bar_width,
@@ -170,7 +172,6 @@ function M._create_dashboard_content(
     win_width
   )
 
-  -- Reset len_arr_projects to avoid using stale value later
   arr_projects, len_arr_projects, max_project_time = dashboard_logic.sort_and_cut_off_projects(
     arr_projects,
     len_arr_projects,
@@ -210,7 +211,8 @@ function M._create_dashboard_content(
     )
   end
 
-  local bar_repr = get_random_from_tbl(dashboard_type_opts.bar_chars or dashboard_opts.bar_chars)
+  local bar_repr =
+    utils.get_random_from_tbl(dashboard_type_opts.bar_chars or dashboard_opts.bar_chars)
 
   local bar_representation = dashboard_logic.construct_bar_representation(
     bar_repr,
