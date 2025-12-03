@@ -435,4 +435,30 @@ function M.set_abbr_labels_lines_hl(
   return len_lines
 end
 
+---@param lines string[]
+---@param highlights chronicles.Highlight[]
+---@param timeline_data chronicles.Timeline.Data
+---@param win_width integer
+---@param win_height integer
+---@param header_timeline_type_opts chronicles.Options.Timeline.Header
+---@return string[], chronicles.Highlight[]
+function M.handle_no_segments_lines_hl(
+  lines,
+  highlights,
+  timeline_data,
+  win_width,
+  win_height,
+  header_timeline_type_opts
+)
+  M.set_header_lines_hl(lines, highlights, timeline_data, header_timeline_type_opts, win_width, nil)
+
+  require('dev-chronicles.utils').set_no_data_mess_lines_hl(
+    lines,
+    highlights,
+    win_width,
+    win_height
+  )
+  return lines, highlights
+end
+
 return M
