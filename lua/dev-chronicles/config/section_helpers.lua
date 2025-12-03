@@ -22,10 +22,11 @@ function M.make_dashboard_section(opts)
       project_global_time = {
         enable = true,
         show_only_if_differs = true,
-        color_like_bars = false,
+        color_like_bars = true,
         as_hours_max = true,
         as_hours_min = true,
         round_hours_ge_x = 1,
+        color = '#b2bec3',
       },
       top_projects = {
         enable = true,
@@ -53,7 +54,8 @@ function M.make_dashboard_section(opts)
       as_hours_max = true,
       as_hours_min = true,
       round_hours_ge_x = 1,
-      color_like_bars = false,
+      color_like_bars = true,
+      color = nil,
     },
   }
 

@@ -210,6 +210,7 @@
 ---@field as_hours_max boolean
 ---@field as_hours_min boolean
 ---@field round_hours_ge_x? integer
+---@field color? string
 
 -- -- --------------------------------------------
 -- -- Dashboard Opts

@@ -258,25 +258,32 @@ function M.set_time_labels_above_bars_lines_hl(
   len_lines
 )
   local strings = require('dev-chronicles.utils.strings')
+  local colors = require('dev-chronicles.core.colors')
   len_lines = len_lines or #lines
 
   ---@type string[]
   local time_labels_row = vim.split(string.rep(' ', win_width), '')
-  local time_labels_row_hl_pos = len_lines + 1
   local time_labels_as_hours_max = project_total_time_opts.as_hours_max
   local time_labels_as_hours_min = project_total_time_opts.as_hours_min
   local time_labels_round_hours_ge_x = project_total_time_opts.round_hours_ge_x
   local time_labels_color_like_bars = project_total_time_opts.color_like_bars
+  local time_labels_row_hl_pos = len_lines + 1
+  local time_labels_row_hl = project_total_time_opts.color
+      and colors.get_or_create_hex_highlight(project_total_time_opts.color)
+    or DefaultColors.DevChroniclesAccent
 
   ---@type string[]?
   local global_time_labels_row = project_global_time_opts.enable
       and vim.split(string.rep(' ', win_width), '')
     or nil
-  local global_time_labels_row_index = 3
   local global_time_labels_as_hours_max = project_global_time_opts.as_hours_max
   local global_time_labels_as_hours_min = project_global_time_opts.as_hours_min
   local global_time_labels_round_hours_ge_x = project_global_time_opts.round_hours_ge_x
   local global_time_labels_color_like_bars = project_global_time_opts.color_like_bars
+  local global_time_labels_row_index = 3
+  local global_time_labels_row_hl = project_global_time_opts.color
+      and colors.get_or_create_hex_highlight(project_global_time_opts.color)
+    or DefaultColors.DevChroniclesAccent
 
   for _, bar in ipairs(bars_data) do
     if global_time_labels_row then
@@ -296,7 +303,7 @@ function M.set_time_labels_above_bars_lines_hl(
           bar.width,
           highlights,
           global_time_labels_row_index,
-          global_time_labels_color_like_bars and bar.color or nil
+          global_time_labels_color_like_bars and bar.color or global_time_labels_row_hl
         )
       end
     end
@@ -313,31 +320,16 @@ function M.set_time_labels_above_bars_lines_hl(
       bar.width,
       highlights,
       time_labels_row_hl_pos,
-      time_labels_color_like_bars and bar.color or nil
+      time_labels_color_like_bars and bar.color or time_labels_row_hl
     )
   end
 
   if global_time_labels_row then
     lines[global_time_labels_row_index] = table.concat(global_time_labels_row)
-    table.insert(highlights, {
-      line = global_time_labels_row_index,
-      col = 0,
-      end_col = -1,
-      hl_group = DefaultColors.DevChroniclesGlobalProjectTime,
-    })
   end
 
   len_lines = len_lines + 1
   lines[len_lines] = table.concat(time_labels_row)
-  if not project_total_time_opts.color_like_bars then
-    table.insert(highlights, {
-      line = time_labels_row_hl_pos,
-      col = 0,
-      end_col = -1,
-      hl_group = DefaultColors.DevChroniclesProjectTime,
-    })
-  end
-
   len_lines = len_lines + 1
   lines[len_lines] = ''
 
