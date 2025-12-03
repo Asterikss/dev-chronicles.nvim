@@ -144,7 +144,6 @@ function M._create_dashboard_content(
 
   local max_project_time = dashboard_data.max_project_time
   local arr_projects = dashboard_data.final_project_data_arr
-  local len_arr_projects = #arr_projects
 
   if arr_projects == nil then
     return dashboard_content.handle_no_projects_lines_hl(
@@ -156,6 +155,8 @@ function M._create_dashboard_content(
       dashboard_type_opts.header
     )
   end
+
+  local len_arr_projects = #arr_projects
 
   if dashboard_type_opts.min_proj_time_to_display_proj > 0 then
     arr_projects, len_arr_projects = dashboard_logic.filter_by_min_time(
