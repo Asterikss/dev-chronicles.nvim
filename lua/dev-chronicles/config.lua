@@ -1,7 +1,8 @@
 local M = {}
 
-local notify = require('dev-chronicles.utils.notify')
+local checks = require('dev-chronicles.config.checks')
 local section_helpers = require('dev-chronicles.config.section_helpers')
+local utils = require('dev-chronicles.utils')
 
 ---@type chronicles.Options
 local options
@@ -181,12 +182,10 @@ local defaults = {
 
 ---@param opts? chronicles.Options
 function M.setup(opts)
-  local utils = require('dev-chronicles.utils')
-
   ---@type chronicles.Options
   local merged = vim.tbl_deep_extend('force', defaults, opts or {})
 
-  local function handle_paths_field(path_field_key, sort)
+  local function handle_paths_tbl_field(path_field_key, sort)
     local paths_tbl_field = merged[path_field_key]
     for i = 1, #paths_tbl_field do
       paths_tbl_field[i] = utils.expand(paths_tbl_field[i])
@@ -199,9 +198,9 @@ function M.setup(opts)
     merged[path_field_key] = paths_tbl_field
   end
 
-  handle_paths_field('tracked_parent_dirs', merged.sort_tracked_parent_dirs)
-  handle_paths_field('tracked_dirs')
-  handle_paths_field('exclude_dirs_absolute')
+  handle_paths_tbl_field('tracked_parent_dirs', merged.sort_tracked_parent_dirs)
+  handle_paths_tbl_field('tracked_dirs')
+  handle_paths_tbl_field('exclude_dirs_absolute')
 
   if not merged.runtime_opts.parsed_exclude_subdirs_relative_map then
     ---@type table<string, boolean>
@@ -223,34 +222,6 @@ function M.setup(opts)
   vim.fn.mkdir(vim.fn.fnamemodify(merged.data_file, ':h'), 'p')
   vim.fn.mkdir(vim.fn.fnamemodify(merged.log_file, ':h'), 'p')
 
-  if merged.dashboard.dashboard_months.n_by_default < 1 then
-    notify.error('n_months_by_default should be greter than 0')
-    return
-  end
-
-  if merged.dashboard.bar_spacing < 0 then
-    notify.error('bar_spacing should be a positive number')
-    return
-  end
-
-  if
-    merged.dashboard.footer.let_proj_names_extend_bars_by_one and merged.dashboard.bar_spacing < 2
-  then
-    notify.error(
-      'if let_proj_names_extend_bars_by_one is set to true then bar_spacing should be at least 2'
-    )
-    return
-  end
-
-  if merged.dashboard.bar_header_extends_by * 2 > merged.dashboard.bar_spacing then
-    notify.error('dashboard.bar_header_extends_by extends too much given dashboard.bar_spacing')
-    return
-  end
-  if merged.dashboard.bar_footer_extends_by * 2 > merged.dashboard.bar_spacing then
-    notify.error('dashboard.bar_footer_extends_by extends too much given dashboard.bar_spacing')
-    return
-  end
-
   if
     merged.dashboard.use_extra_default_dashboard_bar_reprs
     and merged.dashboard.bar_width == default_dashboard_vars.bar_width
@@ -263,19 +234,8 @@ function M.setup(opts)
     end
   end
 
-  if merged.track_days.optimize_storage_for_x_days then
-    if merged.track_days.optimize_storage_for_x_days <= 0 then
-      notify.error('optimize_storage_for_x_days should be greater than 0')
-      return
-    end
-    if
-      merged.dashboard.dashboard_days.n_by_default > merged.track_days.optimize_storage_for_x_days
-    then
-      notify.error(
-        'dashboard.dashboard_days.n_by_default is greater than track_days.optimize_storage_for_x_days. Cannot show older days than previous optimize_storage_for_x_days days. Setting it to the limit'
-      )
-      merged.dashboard.dashboard_days.n_by_default = merged.track_days.optimize_storage_for_x_days
-    end
+  if not checks.check_opts(merged) then
+    return
   end
 
   ---@type chronicles.Options
