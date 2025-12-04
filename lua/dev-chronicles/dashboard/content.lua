@@ -468,7 +468,7 @@ function M.set_hline_lines_hl(lines, highlights, win_width, char, hl_group, len_
     line = len_lines,
     col = 0,
     end_col = -1,
-    hl_group = hl_group or DefaultColors.DevChroniclesGlobalProjectTime,
+    hl_group = hl_group or DefaultColors.DevChroniclesChartFloor,
   })
   return len_lines
 end

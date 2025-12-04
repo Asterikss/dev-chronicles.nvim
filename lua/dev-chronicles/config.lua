@@ -145,8 +145,7 @@ local defaults = {
   },
   highlights = {
     DevChroniclesAccent = { fg = '#ffffff', bold = true },
-    DevChroniclesProjectTime = { fg = '#dddddd', bold = true },
-    DevChroniclesGlobalProjectTime = { fg = '#b2bec3', bold = true },
+    DevChroniclesChartFloor = { fg = '#b2bec3', bold = true },
     DevChroniclesGrayedOut = { fg = '#606065', bold = true },
     DevChroniclesLightGray = { fg = '#d3d3d3', bold = true },
     DevChroniclesWindowBG = { bg = '#100e18' },

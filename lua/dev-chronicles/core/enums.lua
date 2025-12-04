@@ -22,8 +22,7 @@ M.BarLevel = {
 
 M.DefaultColors = {
   DevChroniclesAccent = 'DevChroniclesAccent',
-  DevChroniclesProjectTime = 'DevChroniclesProjectTime',
-  DevChroniclesGlobalProjectTime = 'DevChroniclesGlobalProjectTime',
+  DevChroniclesChartFloor = 'DevChroniclesChartFloor',
   DevChroniclesGrayedOut = 'DevChroniclesGrayedOut',
   DevChroniclesLightGray = 'DevChroniclesLightGray',
   DevChroniclesWindowBG = 'DevChroniclesWindowBG',

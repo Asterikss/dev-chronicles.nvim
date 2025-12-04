@@ -287,8 +287,7 @@
 
 ---@class chronicles.Options.HighlightDefinitions
 ---@field DevChroniclesAccent chronicles.Options.HighlightDefinitions.Definition
----@field DevChroniclesProjectTime chronicles.Options.HighlightDefinitions.Definition
----@field DevChroniclesGlobalProjectTime chronicles.Options.HighlightDefinitions.Definition
+---@field DevChroniclesChartFloor chronicles.Options.HighlightDefinitions.Definition
 ---@field DevChroniclesGrayedOut chronicles.Options.HighlightDefinitions.Definition
 ---@field DevChroniclesLightGray chronicles.Options.HighlightDefinitions.Definition
 ---@field DevChroniclesWindowBG chronicles.Options.HighlightDefinitions.Definition
