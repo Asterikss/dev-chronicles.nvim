@@ -238,7 +238,7 @@ function M._create_dashboard_content(
     bar_representation.header.realized_rows
   )
 
-  dashboard_content.set_header_lines_hl(
+  local len_lines = dashboard_content.set_header_lines_hl(
     lines,
     highlights,
     dashboard_data.time_period_str,
@@ -251,16 +251,17 @@ function M._create_dashboard_content(
     project_id_to_highlight
   )
 
-  dashboard_content.set_time_labels_above_bars_lines_hl(
+  len_lines = dashboard_content.set_time_labels_above_bars_lines_hl(
     lines,
     highlights,
     bars_data,
     win_width,
     dashboard_type_opts.project_total_time,
-    dashboard_type_opts.header.project_global_time
+    dashboard_type_opts.header.project_global_time,
+    len_lines
   )
 
-  dashboard_content.set_bars_lines_hl(
+  len_lines = dashboard_content.set_bars_lines_hl(
     lines,
     highlights,
     bars_data,
@@ -269,10 +270,12 @@ function M._create_dashboard_content(
     dashboard_opts.bar_footer_extends_by,
     vertical_space_for_bars,
     dashboard_opts.bar_width,
-    win_width
+    win_width,
+    len_lines
   )
 
-  dashboard_content.set_hline_lines_hl(lines, highlights, win_width)
+  len_lines =
+    dashboard_content.set_hline_lines_hl(lines, highlights, win_width, nil, nil, len_lines)
 
   dashboard_content.set_project_names_lines_hl(
     lines,
@@ -280,7 +283,8 @@ function M._create_dashboard_content(
     bars_data,
     footer_height,
     dashboard_opts.footer.let_proj_names_extend_bars_by_one,
-    win_width
+    win_width,
+    len_lines
   )
 
   return lines, highlights

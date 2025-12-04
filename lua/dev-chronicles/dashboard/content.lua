@@ -3,7 +3,7 @@ local M = {}
 local format_time = require('dev-chronicles.core.time').format_time
 local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
 
----Adds 4 line header. Monster function
+---Adds 4 line header. Monster function -- TODO: make this not that bad
 ---@param lines string[]
 ---@param highlights chronicles.Highlight[]
 ---@param time_period_str string
@@ -14,6 +14,8 @@ local DefaultColors = require('dev-chronicles.core.enums').DefaultColors
 ---@param curr_session_time? integer
 ---@param top_projects? chronicles.Dashboard.TopProjectsArray
 ---@param project_id_to_highlight table<string, string>
+---@param len_lines? integer
+---@return integer: len_lines
 function M.set_header_lines_hl(
   lines,
   highlights,
@@ -24,8 +26,10 @@ function M.set_header_lines_hl(
   header_dashboard_type_opts,
   curr_session_time,
   top_projects,
-  project_id_to_highlight
+  project_id_to_highlight,
+  len_lines
 )
+  len_lines = len_lines or #lines
   local total_time_opts = header_dashboard_type_opts.total_time
   local left_header = string.format(
     total_time_opts.format_str,
@@ -151,13 +155,13 @@ function M.set_header_lines_hl(
         curr_highlight_end_col_bottom = curr_highlight_col_bottom + single_top_bar_bytes
 
         table.insert(highlights, {
-          line = 1,
+          line = len_lines + 1,
           col = curr_highlight_col_top,
           end_col = curr_highlight_end_col_top,
           hl_group = color,
         })
         table.insert(highlights, {
-          line = 2,
+          line = len_lines + 2,
           col = curr_highlight_col_bottom,
           end_col = curr_highlight_end_col_bottom,
           hl_group = color,
@@ -205,37 +209,47 @@ function M.set_header_lines_hl(
   end
 
   table.insert(highlights, {
-    line = 1,
+    line = len_lines + 1,
     col = 0,
     end_col = left_header_bytes,
     hl_group = DefaultColors.DevChroniclesAccent,
   })
   table.insert(highlights, {
-    line = 1,
+    line = len_lines + 1,
     col = right_header_highlight_start_col,
     end_col = -1,
     hl_group = DefaultColors.DevChroniclesAccent,
   })
   if prettify then
     table.insert(highlights, {
-      line = 2,
+      line = len_lines + 2,
       col = 0,
       end_col = decorator_left_bytes,
       hl_group = DefaultColors.DevChroniclesAccent,
     })
     table.insert(highlights, {
-      line = 2,
+      line = len_lines + 2,
       col = decorator_right_highlight_start_col,
       end_col = -1,
       hl_group = DefaultColors.DevChroniclesAccent,
     })
   end
 
-  lines[1] = header_line1
-  lines[2] = header_line2
-  lines[3] = ''
+  lines[len_lines + 1] = header_line1
+  lines[len_lines + 2] = header_line2
+  lines[len_lines + 3] = ''
+  len_lines = len_lines + 3
 
-  M.set_hline_lines_hl(lines, highlights, win_width, '─', DefaultColors.DevChroniclesAccent)
+  len_lines = M.set_hline_lines_hl(
+    lines,
+    highlights,
+    win_width,
+    '─',
+    DefaultColors.DevChroniclesAccent,
+    len_lines
+  )
+
+  return len_lines
 end
 
 ---Adds 2 entries to the lines table. If project_global_time_opts.enable is set to true,
@@ -345,6 +359,8 @@ end
 ---@param vertical_space_for_bars integer
 ---@param bar_width integer
 ---@param win_width integer
+---@param len_lines? integer
+---@return integer: len_lines
 function M.set_bars_lines_hl(
   lines,
   highlights,
@@ -354,8 +370,10 @@ function M.set_bars_lines_hl(
   bar_footer_extends_by,
   vertical_space_for_bars,
   bar_width,
-  win_width
+  win_width,
+  len_lines
 )
+  len_lines = len_lines or #lines
   local BarLevel = require('dev-chronicles.core.enums').BarLevel
   local str_sub = require('dev-chronicles.utils.strings').str_sub
   local len_bar_header_rows = #bar_representation.header.realized_rows
@@ -364,6 +382,7 @@ function M.set_bars_lines_hl(
   local blank_line_chars = vim.split(string.rep(' ', win_width), '')
 
   for row = vertical_space_for_bars, 1, -1 do
+    len_lines = len_lines + 1
     local line_chars = { unpack(blank_line_chars) }
     local hl_bytes_shift = 0
 
@@ -436,7 +455,7 @@ function M.set_bars_lines_hl(
         -- bar.start_col does not account for multibyte characters and
         -- highlights operate on bytes, so we use hl_bytes_shift to combat that
         table.insert(highlights, {
-          line = #lines + 1,
+          line = len_lines,
           col = bar.start_col - offset + hl_bytes_shift,
           end_col = bar.start_col - offset + n_bytes_bar_row_str + hl_bytes_shift,
           hl_group = bar.color,
@@ -450,8 +469,10 @@ function M.set_bars_lines_hl(
       end
     end
 
-    table.insert(lines, table.concat(line_chars))
+    lines[len_lines] = table.concat(line_chars)
   end
+
+  return len_lines
 end
 
 ---@param lines string[]
@@ -479,17 +500,22 @@ end
 ---@param max_lines_proj_names integer
 ---@param let_proj_names_extend_bars_by_one boolean
 ---@param win_width integer
+---@param len_lines? integer
+---@return integer: len_lines
 function M.set_project_names_lines_hl(
   lines,
   highlights,
   bars_data,
   max_lines_proj_names,
   let_proj_names_extend_bars_by_one,
-  win_width
+  win_width,
+  len_lines
 )
+  len_lines = len_lines or #lines
   local string_utils = require('dev-chronicles.utils.strings')
 
   for line_idx = 1, max_lines_proj_names do
+    len_lines = len_lines + 1
     local line_chars = {}
     for i = 1, win_width do
       line_chars[i] = ' '
@@ -511,9 +537,6 @@ function M.set_project_names_lines_hl(
         end
         local n_bytes_name = #name_part
 
-        -- str_utfindex -> How many Unicode codepoints (characters) are in the string.
-        -- It actually returns two numbers. First one is used for the loop, but it does
-        -- not seems to matter here which one is used
         for i = 1, vim.str_utfindex(name_part) do
           local char = string_utils.str_sub(name_part, i, i)
           local pos = name_start + i
@@ -523,7 +546,7 @@ function M.set_project_names_lines_hl(
         -- bar.start_col (name_start) does not account for multibyte characters and
         -- highlights operate on bytes, so we use hl_bytes_shift to combat that
         table.insert(highlights, {
-          line = #lines + 1,
+          line = len_lines,
           col = name_start + hl_bytes_shift,
           end_col = name_start + hl_bytes_shift + n_bytes_name,
           hl_group = bar.color,
@@ -533,8 +556,10 @@ function M.set_project_names_lines_hl(
       end
     end
 
-    table.insert(lines, table.concat(line_chars))
+    lines[len_lines] = table.concat(line_chars)
   end
+
+  return len_lines
 end
 
 ---@param lines string[]
