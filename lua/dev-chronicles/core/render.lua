@@ -24,7 +24,7 @@ function M.render(panel_data)
     'winhighlight',
     table.concat({
       'NormalFloat:' .. DefaultColors.DevChroniclesWindowBG,
-      'FloatBorder:' .. DefaultColors.DevChroniclesLightGray,
+      'FloatBorder:' .. DefaultColors.DevChroniclesWindowBorder,
       'FloatTitle:' .. DefaultColors.DevChroniclesWindowTitle,
     }, ','),
     { win = win }

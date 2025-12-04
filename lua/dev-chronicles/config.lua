@@ -149,7 +149,8 @@ local defaults = {
     DevChroniclesGrayedOut = { fg = '#606065', bold = true },
     DevChroniclesLightGray = { fg = '#d3d3d3', bold = true },
     DevChroniclesWindowBG = { bg = '#100e18' },
-    DevChroniclesWindowTitle = { fg = '#d3d3d3' },
+    DevChroniclesWindowBorder = { fg = '#d3d3d3', bg = '#100e18', bold = true },
+    DevChroniclesWindowTitle = { fg = '#d3d3d3', bg = '#100e18', bold = true },
     DevChroniclesBackupColor = { fg = '#fff588', bold = true },
   },
   runtime_opts = {

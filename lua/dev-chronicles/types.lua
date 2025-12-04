@@ -290,7 +290,8 @@
 ---@field DevChroniclesChartFloor chronicles.Options.HighlightDefinitions.Definition
 ---@field DevChroniclesGrayedOut chronicles.Options.HighlightDefinitions.Definition
 ---@field DevChroniclesLightGray chronicles.Options.HighlightDefinitions.Definition
----@field DevChroniclesWindowBG chronicles.Options.HighlightDefinitions.Definition
+---@field DevChroniclesWindowBG? chronicles.Options.HighlightDefinitions.Definition
+---@field DevChroniclesWindowBorder chronicles.Options.HighlightDefinitions.Definition
 ---@field DevChroniclesWindowTitle chronicles.Options.HighlightDefinitions.Definition
 ---@field DevChroniclesBackupColor chronicles.Options.HighlightDefinitions.Definition
 

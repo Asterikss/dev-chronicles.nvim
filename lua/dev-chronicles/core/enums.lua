@@ -26,6 +26,7 @@ M.DefaultColors = {
   DevChroniclesGrayedOut = 'DevChroniclesGrayedOut',
   DevChroniclesLightGray = 'DevChroniclesLightGray',
   DevChroniclesWindowBG = 'DevChroniclesWindowBG',
+  DevChroniclesWindowBorder = 'DevChroniclesWindowBorder',
   DevChroniclesWindowTitle = 'DevChroniclesWindowTitle',
   DevChroniclesBackupColor = 'DevChroniclesBackupColor',
 }
