@@ -49,15 +49,13 @@ function M.is_project(
     end
   end
 
-  -- only subdirectories are matched
-  for _, parent_dir in ipairs(tracked_parent_dirs) do
-    if cwd == parent_dir then
-      return
-    end
-  end
-
   for _, parent_dir in ipairs(tracked_parent_dirs) do
     if cwd:find(parent_dir, 1, true) == 1 then
+      -- Only subdirectories are matched
+      if parent_dir == cwd then
+        return
+      end
+
       -- Get the first directory after the parent_dir
       local first_dir = cwd:sub(#parent_dir):match('([^/]+)')
       if first_dir then

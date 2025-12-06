@@ -56,8 +56,8 @@ describe('core.is_project', function()
       f.differentiate_projects_by_folder_not_path
     )
 
-    assert.are.equal(project_id, 'foo')
-    assert.are.equal(project_name, 'foo')
+    assert.are.equal('foo', project_id)
+    assert.are.equal('foo', project_name)
   end)
 
   it(
@@ -76,8 +76,8 @@ describe('core.is_project', function()
         f.differentiate_projects_by_folder_not_path
       )
 
-      assert.are.equal(project_id, '~/projects/foo/')
-      assert.are.equal(project_name, 'foo')
+      assert.are.equal('~/projects/foo/', project_id)
+      assert.are.equal('foo', project_name)
     end
   )
 
@@ -97,8 +97,8 @@ describe('core.is_project', function()
         f.differentiate_projects_by_folder_not_path
       )
 
-      assert.are.equal(project_id, '~/projects/foo/')
-      assert.are.equal(project_name, 'foo')
+      assert.are.equal('~/projects/foo/', project_id)
+      assert.are.equal('foo', project_name)
     end
   )
 
@@ -133,8 +133,8 @@ describe('core.is_project', function()
       f.differentiate_projects_by_folder_not_path
     )
 
-    assert.are.equal(project_id, 'foo')
-    assert.are.equal(project_name, 'foo')
+    assert.are.equal('foo', project_id)
+    assert.are.equal('foo', project_name)
   end)
 
   it('skips excluded subprojects listed in the relative exclude map', function()
@@ -168,7 +168,98 @@ describe('core.is_project', function()
       f.differentiate_projects_by_folder_not_path
     )
 
-    assert.are.equal(project_id, 'foo')
-    assert.are.equal(project_name, 'foo')
+    assert.are.equal('foo', project_id)
+    assert.are.equal('foo', project_name)
   end)
+
+  it('correctly identifies the nested project if the deepest parent is listed first', function()
+    local f = new_test_fixture()
+    f.cwd = '/home/user/projects/work/api-service/'
+    f.tracked_parent_dirs = {
+      '/home/user/projects/work/',
+      '/home/user/projects/',
+    }
+
+    local project_id, project_name = core.is_project(
+      f.cwd,
+      f.tracked_parent_dirs,
+      f.tracked_dirs,
+      f.exclude_dirs_absolute,
+      f.parsed_exclude_subdirs_relative_map,
+      f.differentiate_projects_by_folder_not_path
+    )
+
+    assert.are.equal('api-service', project_id)
+    assert.are.equal('api-service', project_name)
+  end)
+
+  it(
+    'fails by identifying the intermediate folder as project if the shallowest parent is listed first',
+    function()
+      local f = new_test_fixture()
+      f.cwd = '/home/user/projects/work/api-service/'
+      f.tracked_parent_dirs = {
+        '/home/user/projects/',
+        '/home/user/projects/work/',
+      }
+
+      local project_id, project_name = core.is_project(
+        f.cwd,
+        f.tracked_parent_dirs,
+        f.tracked_dirs,
+        f.exclude_dirs_absolute,
+        f.parsed_exclude_subdirs_relative_map,
+        f.differentiate_projects_by_folder_not_path
+      )
+
+      assert.are.equal('work', project_id)
+      assert.are.equal('work', project_name)
+    end
+  )
+
+  it('returns nil if CWD is exactly the nested parent, if the order is correct', function()
+    local f = new_test_fixture()
+    f.cwd = '/home/user/projects/work/'
+    f.tracked_parent_dirs = {
+      '/home/user/projects/work/',
+      '/home/user/projects/',
+    }
+
+    local project_id, project_name = core.is_project(
+      f.cwd,
+      f.tracked_parent_dirs,
+      f.tracked_dirs,
+      f.exclude_dirs_absolute,
+      f.parsed_exclude_subdirs_relative_map,
+      f.differentiate_projects_by_folder_not_path
+    )
+
+    assert.is_nil(project_id)
+    assert.is_nil(project_name)
+  end)
+
+  it(
+    'returns project relative to shallowest parent when CWD is in shallow scope but not deep scope',
+    function()
+      local f = new_test_fixture()
+      f.cwd = '/home/user/projects/personal-blog/'
+
+      f.tracked_parent_dirs = {
+        '/home/user/projects/work/',
+        '/home/user/projects/',
+      }
+
+      local project_id, project_name = core.is_project(
+        f.cwd,
+        f.tracked_parent_dirs,
+        f.tracked_dirs,
+        f.exclude_dirs_absolute,
+        f.parsed_exclude_subdirs_relative_map,
+        f.differentiate_projects_by_folder_not_path
+      )
+
+      assert.are.equal('personal-blog', project_id)
+      assert.are.equal('personal-blog', project_name)
+    end
+  )
 end)
