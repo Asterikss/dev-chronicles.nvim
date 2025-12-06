@@ -276,21 +276,20 @@ function M.create_bars_data(
   return bars_data, project_id_to_highlight
 end
 
----@param final_project_data_arr chronicles.Dashboard.FinalProjectData[]
+---@param project_data_arr chronicles.Dashboard.FinalProjectData[]
 ---@param min_proj_time_to_display_proj integer
----@return chronicles.Dashboard.FinalProjectData[]
-function M.filter_by_min_time(final_project_data_arr, min_proj_time_to_display_proj)
-  local out = {}
-  local len_out = 0
+---@return chronicles.Dashboard.FinalProjectData[], integer
+function M.filter_by_min_time(project_data_arr, min_proj_time_to_display_proj)
+  local out, len_out = {}, 0
 
-  for _, project_data in ipairs(final_project_data_arr) do
+  for _, project_data in ipairs(project_data_arr) do
     if project_data.total_time >= min_proj_time_to_display_proj then
       len_out = len_out + 1
       out[len_out] = project_data
     end
   end
 
-  return out
+  return out, len_out
 end
 
 ---@param initial_max_bar_height integer
