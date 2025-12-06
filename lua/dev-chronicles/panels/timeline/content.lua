@@ -312,6 +312,7 @@ end
 ---@param highlights chronicles.Highlight[]
 ---@param timeline_data chronicles.Timeline.Data
 ---@param row_representation chronicles.Timeline.RowRepresentation
+---@param bar_distribution_data chronicles.Timeline.BarDistributionData
 ---@param vertical_space_for_bars integer
 ---@param chart_start_col integer
 ---@param bar_spacing integer
@@ -323,6 +324,7 @@ function M.set_bars_lines_hl(
   highlights,
   timeline_data,
   row_representation,
+  bar_distribution_data,
   vertical_space_for_bars,
   chart_start_col,
   bar_spacing,
@@ -338,60 +340,11 @@ function M.set_bars_lines_hl(
   local row_char_bytes = row_representation.row_char_bytes
   local row_bytes = row_representation.row_bytes
   local row_width = row_representation.row_display_width
-
-  ---@type integer[]
-  local bar_heights = {}
-  ---@type integer[][]
-  local n_project_cells_by_share_by_segment = {}
-  ---@type integer[]
-  local n_project_cells_by_share_by_segment_index = {}
-
-  for i, segment_data in ipairs(timeline_data.segments) do
-    local bar_height = 0
-    if segment_data.total_segment_time > 0 then
-      bar_height = math.max(
-        1,
-        math.floor(
-          (segment_data.total_segment_time / timeline_data.max_segment_time)
-            * vertical_space_for_bars
-        )
-      )
-    end
-    bar_heights[i] = bar_height
-
-    local n_available_cells = bar_height * row_codepoint_count
-
-    local cells_assigned = 0
-    ---@type integer[]
-    local n_project_cells_by_share_by_segment_entry = {}
-
-    local j = 0
-    for _, proj_share_data in ipairs(segment_data.project_shares) do
-      j = j + 1
-      -- Making n_proj_cells at least 1 makes it so that n_proj_cells sum
-      -- across segment's projects might be greater than n_available_cells
-      -- (very rare). This is fine. Excess cells will be silently discarded.
-      -- Example: bar_height=1, bar_width=5, n_projects=6
-      local n_proj_cells = math.max(1, math.floor(proj_share_data.share * n_available_cells))
-      n_project_cells_by_share_by_segment_entry[j] = n_proj_cells
-      cells_assigned = cells_assigned + n_proj_cells
-    end
-
-    if cells_assigned < n_available_cells then
-      -- Add any deficiency to the project with the highest share (last one, since they are sorted asc)
-      n_project_cells_by_share_by_segment_entry[j] = n_project_cells_by_share_by_segment_entry[j]
-        + (n_available_cells - cells_assigned)
-    end
-
-    if j == 1 then
-      -- No need to keep track of cells per project if there is only one project
-      n_project_cells_by_share_by_segment_index[i] = -1
-      n_project_cells_by_share_by_segment_entry = { 0 }
-    else
-      n_project_cells_by_share_by_segment_index[i] = 1
-    end
-    n_project_cells_by_share_by_segment[i] = n_project_cells_by_share_by_segment_entry
-  end
+  local bar_heights = bar_distribution_data.bar_heights
+  local n_project_cells_by_share_by_segment =
+    bar_distribution_data.n_project_cells_by_share_by_segment
+  local n_project_cells_by_share_by_segment_index =
+    bar_distribution_data.n_project_cells_by_share_by_segment_index
 
   for row = vertical_space_for_bars, 1, -1 do
     len_lines = len_lines + 1
