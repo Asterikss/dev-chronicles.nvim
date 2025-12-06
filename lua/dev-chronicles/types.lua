@@ -98,7 +98,7 @@
 ---@alias chronicles.Dashboard.TopProjectsArray chronicles.StringOrFalse[]
 
 -- --------------------------------------------
--- Timeline
+-- Timeline Data
 -- --------------------------------------------
 
 ---@class chronicles.Timeline.Data
@@ -129,6 +129,11 @@
 ---@field row_chars string[]
 ---@field row_char_display_widths integer[]
 ---@field row_char_bytes integer[]
+
+---@class chronicles.Timeline.BarDistributionData
+---@field bar_heights integer[]
+---@field n_project_cells_by_share_by_segment integer[][]
+---@field n_project_cells_by_share_by_segment_index integer[]
 
 -- --------------------------------------------
 -- Panel Data
@@ -212,6 +217,9 @@
 ---@field round_hours_ge_x? integer
 ---@field color? string
 
+---@class chronicles.Options.Common.Header.TotalTime: chronicles.Options.Common.TotalTimeBase
+---@field format_str string -- TODO: color not impl yet
+
 -- -- --------------------------------------------
 -- -- Dashboard Opts
 -- -- --------------------------------------------
@@ -223,9 +231,6 @@
 ---@field super_extra_duper_wide_bars boolean
 ---@field min_top_projects_len_to_show integer
 
----@class chronicles.Options.Dashboard.Header.TotalTime: chronicles.Options.Common.TotalTimeBase
----@field format_str string
-
 ---@class chronicles.Options.Dashboard.Header.ProjectGlobalTime: chronicles.Options.Common.TotalTimeBase
 ---@field enable boolean
 ---@field show_only_if_differs boolean
@@ -236,7 +241,7 @@
 ---@field show_current_session_time boolean
 ---@field prettify boolean
 ---@field window_title string
----@field total_time chronicles.Options.Dashboard.Header.TotalTime
+---@field total_time chronicles.Options.Common.Header.TotalTime
 ---@field project_global_time chronicles.Options.Dashboard.Header.ProjectGlobalTime
 ---@field top_projects chronicles.Options.Dashboard.Header.TopProjects
 
@@ -303,6 +308,8 @@
 ---@field row_repr string[]
 ---@field timeline_days chronicles.Options.Timeline.Section
 ---@field timeline_months chronicles.Options.Timeline.Section
+---@field timeline_years chronicles.Options.Timeline.Section
+---@field timeline_all chronicles.Options.Timeline.Section
 
 ---@class chronicles.Options.Timeline.Section
 ---@field bar_width integer
@@ -317,7 +324,7 @@
 ---@field segment_abbr_labels chronicles.Options.Timeline.Section.SegmentAbbrLabels
 
 ---@class chronicles.Options.Timeline.Header
----@field total_time chronicles.Options.Dashboard.Header.TotalTime
+---@field total_time chronicles.Options.Common.Header.TotalTime
 ---@field show_current_session_time boolean
 ---@field window_title string
 ---@field period_indicator chronicles.Options.Common.Header.PeriodIndicator

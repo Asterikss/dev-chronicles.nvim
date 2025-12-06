@@ -18,6 +18,7 @@ function M.make_dashboard_section(opts)
         as_hours_min = true,
         round_hours_ge_x = 1,
         format_str = 'total time: %s',
+        color = nil, -- TODO: not impl yet
       },
       project_global_time = {
         enable = true,
@@ -77,6 +78,7 @@ function M.make_timeline_section(opts)
         as_hours_min = true,
         round_hours_ge_x = 1,
         format_str = 'total time: %s',
+        color = nil, -- TODO: not impl yet
       },
       period_indicator = {
         date_range = true,
