@@ -512,47 +512,31 @@ function M.set_project_names_lines_hl(
   len_lines
 )
   len_lines = len_lines or #lines
-  local string_utils = require('dev-chronicles.utils.strings')
+  local strings = require('dev-chronicles.utils.strings')
+  local blank_line_chars = vim.split(string.rep(' ', win_width), '')
+  local left_margin_col_offset = let_proj_names_extend_bars_by_one and -1 or 0
+  local extra_available_width = let_proj_names_extend_bars_by_one and 2 or 0
 
-  for line_idx = 1, max_lines_proj_names do
+  for proj_names_tbl_idx = 1, max_lines_proj_names do
     len_lines = len_lines + 1
-    local line_chars = {}
-    for i = 1, win_width do
-      line_chars[i] = ' '
-    end
-
+    local line_chars = { unpack(blank_line_chars) }
     local hl_bytes_shift = 0
 
     for _, bar in ipairs(bars_data) do
-      local name_part = bar.project_name_tbl[line_idx]
+      local name_part = bar.project_name_tbl[proj_names_tbl_idx]
 
       if name_part then
-        -- The number of display columns the string will occupy in the terminal
-        local name_display_width = vim.fn.strdisplaywidth(name_part)
-        local name_start
-        if let_proj_names_extend_bars_by_one then
-          name_start = bar.start_col - 1 + math.floor((bar.width + 2 - name_display_width) / 2)
-        else
-          name_start = bar.start_col + math.floor((bar.width - name_display_width) / 2)
-        end
-        local n_bytes_name = #name_part
-
-        for i = 1, vim.str_utfindex(name_part) do
-          local char = string_utils.str_sub(name_part, i, i)
-          local pos = name_start + i
-          line_chars[pos] = char
-        end
-
-        -- bar.start_col (name_start) does not account for multibyte characters and
-        -- highlights operate on bytes, so we use hl_bytes_shift to combat that
-        table.insert(highlights, {
-          line = len_lines,
-          col = name_start + hl_bytes_shift,
-          end_col = name_start + hl_bytes_shift + n_bytes_name,
-          hl_group = bar.color,
-        })
-
-        hl_bytes_shift = hl_bytes_shift + n_bytes_name - name_display_width
+        local extra_hl_bytes_shift = strings.place_label(
+          line_chars,
+          name_part,
+          bar.start_col + left_margin_col_offset,
+          bar.width + extra_available_width,
+          highlights,
+          len_lines,
+          bar.color,
+          hl_bytes_shift
+        )
+        hl_bytes_shift = hl_bytes_shift + extra_hl_bytes_shift
       end
     end
 
