@@ -402,7 +402,9 @@ function M.set_abbr_labels_lines_hl(
       and get_or_create_hex_highlight(abbr_label_opts.color)
     or DefaultColors.DevChroniclesAccent
   local highlight = initial_highlight
-  local hl_bytes_shift = 0
+
+  local place_label =
+    require('dev-chronicles.utils.strings').closure_place_label(abbr_row_arr, highlights, len_lines)
 
   for index, segment_data in ipairs(timeline_data.segments) do
     if not hide_when_empty or segment_data.total_segment_time > 0 then
@@ -416,17 +418,12 @@ function M.set_abbr_labels_lines_hl(
         end
       end
 
-      local additional_hl_bytes_shift = strings.place_label(
-        abbr_row_arr,
+      place_label(
         segment_data.date_abbr,
         chart_start_col + (index - 1) * (bar_width + bar_spacing),
         bar_width,
-        highlights,
-        len_lines,
-        highlight,
-        hl_bytes_shift
+        highlight
       )
-      hl_bytes_shift = hl_bytes_shift + additional_hl_bytes_shift
     end
   end
 

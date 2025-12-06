@@ -512,7 +512,6 @@ function M.set_project_names_lines_hl(
   len_lines
 )
   len_lines = len_lines or #lines
-  local strings = require('dev-chronicles.utils.strings')
   local blank_line_chars = vim.split(string.rep(' ', win_width), '')
   local left_margin_col_offset = let_proj_names_extend_bars_by_one and -1 or 0
   local extra_available_width = let_proj_names_extend_bars_by_one and 2 or 0
@@ -520,23 +519,19 @@ function M.set_project_names_lines_hl(
   for proj_names_tbl_idx = 1, max_lines_proj_names do
     len_lines = len_lines + 1
     local line_chars = { unpack(blank_line_chars) }
-    local hl_bytes_shift = 0
+    local place_label =
+      require('dev-chronicles.utils.strings').closure_place_label(line_chars, highlights, len_lines)
 
     for _, bar in ipairs(bars_data) do
       local name_part = bar.project_name_tbl[proj_names_tbl_idx]
 
       if name_part then
-        local extra_hl_bytes_shift = strings.place_label(
-          line_chars,
+        place_label(
           name_part,
           bar.start_col + left_margin_col_offset,
           bar.width + extra_available_width,
-          highlights,
-          len_lines,
-          bar.color,
-          hl_bytes_shift
+          bar.color
         )
-        hl_bytes_shift = hl_bytes_shift + extra_hl_bytes_shift
       end
     end
 

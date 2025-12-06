@@ -147,64 +147,55 @@ function M.place_label_simple(
   end
 end
 
----Places a label into a character array. Designed as a helper for positioning
----textual labels relative to rendered bars. Returns `hl_bytes_shift`, if any.
+---Returns a closure for positioning textual labels relative to rendered bars.
+---The closure automatically manages highlight byte offset across invocations.
 ---@param target_line_arr string[]
----@param label string
----@param left_margin_col integer
----@param available_width integer
 ---@param highlights chronicles.Highlight[]
 ---@param highlights_line integer
----@param highlight? string
----@param hl_bytes_shift? integer
----@return integer: hl_bytes_shift
-function M.place_label(
-  target_line_arr,
-  label,
-  left_margin_col,
-  available_width,
-  highlights,
-  highlights_line,
-  highlight,
-  hl_bytes_shift
-)
-  local label_display_width = vim.fn.strdisplaywidth(label)
-  if label_display_width > available_width then
-    return 0
-  end
+---@return fun(label: string, left_margin_col: integer, available_width: integer, highlight: string): nil
+function M.closure_place_label(target_line_arr, highlights, highlights_line)
+  local hl_bytes_shift = 0
 
-  local label_left_margin_col = left_margin_col
-    + math.floor((available_width - label_display_width) / 2)
-  local label_curr_col = label_left_margin_col
-
-  for i = 1, vim.str_utfindex(label) do
-    local char = M.str_sub(label, i, i)
-    local char_disp_width = vim.fn.strdisplaywidth(char)
-
-    label_curr_col = label_curr_col + 1
-    target_line_arr[label_curr_col] = char
-
-    for j = 1, char_disp_width - 1 do
-      target_line_arr[label_curr_col + j] = ''
+  ---@param label string
+  ---@param left_margin_col integer
+  ---@param available_width integer
+  ---@param highlight? string
+  return function(label, left_margin_col, available_width, highlight)
+    local label_display_width = vim.fn.strdisplaywidth(label)
+    if label_display_width > available_width then
+      return
     end
-    label_curr_col = label_curr_col + char_disp_width - 1
+
+    local label_left_margin_col = left_margin_col
+      + math.floor((available_width - label_display_width) / 2)
+    local label_curr_col = label_left_margin_col
+
+    for i = 1, vim.str_utfindex(label) do
+      local char = M.str_sub(label, i, i)
+      local char_disp_width = vim.fn.strdisplaywidth(char)
+
+      label_curr_col = label_curr_col + 1
+      target_line_arr[label_curr_col] = char
+
+      for j = 1, char_disp_width - 1 do
+        target_line_arr[label_curr_col + j] = ''
+      end
+      label_curr_col = label_curr_col + char_disp_width - 1
+    end
+
+    if highlight then
+      local label_bytes = #label
+
+      table.insert(highlights, {
+        line = highlights_line,
+        col = label_left_margin_col + hl_bytes_shift,
+        end_col = label_left_margin_col + label_bytes + hl_bytes_shift,
+        hl_group = highlight,
+      })
+
+      hl_bytes_shift = hl_bytes_shift + (label_bytes - label_display_width)
+    end
   end
-
-  if highlight then
-    hl_bytes_shift = hl_bytes_shift or 0
-    local label_bytes = #label
-
-    table.insert(highlights, {
-      line = highlights_line,
-      col = label_left_margin_col + hl_bytes_shift,
-      end_col = label_left_margin_col + label_bytes + hl_bytes_shift,
-      hl_group = highlight,
-    })
-
-    return label_bytes - label_display_width
-  end
-
-  return 0
 end
 
 return M
