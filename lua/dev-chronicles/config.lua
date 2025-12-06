@@ -95,7 +95,7 @@ local defaults = {
           time_period_str = 'last %s days',
           time_period_str_singular = 'today',
         },
-        window_title = ' Dev Chronicles Timeline Days',
+        window_title = ' Dev Chronicles Timeline Days ',
       },
       segment_abbr_labels = {
         date_abbrs = { 'su', 'mo', 'tu', 'we', 'th', 'fr', 'sa' },
@@ -109,7 +109,7 @@ local defaults = {
           time_period_str = 'last %s months',
           time_period_str_singular = 'this month',
         },
-        window_title = ' Dev Chronicles Timeline Months',
+        window_title = ' Dev Chronicles Timeline Months ',
       },
     }),
     timeline_years = section_helpers.make_timeline_section({
@@ -120,7 +120,7 @@ local defaults = {
           time_period_str = 'last %s years',
           time_period_str_singular = 'this years',
         },
-        window_title = ' Dev Chronicles Timeline Years',
+        window_title = ' Dev Chronicles Timeline Years ',
       },
       segment_abbr_labels = {
         enable = false,
