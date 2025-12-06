@@ -308,8 +308,208 @@ function M.set_time_labels_above_bars_lines_hl(
   return len_lines
 end
 
+---@param lines string[]
+---@param highlights chronicles.Highlight[]
+---@param timeline_data chronicles.Timeline.Data
+---@param row_representation chronicles.Timeline.RowRepresentation
+---@param vertical_space_for_bars integer
+---@param chart_start_col integer
+---@param bar_spacing integer
+---@param win_width integer
+---@param len_lines? integer
+---@return integer: len_lines
+function M.set_bars_lines_hl(
+  lines,
+  highlights,
+  timeline_data,
+  row_representation,
+  vertical_space_for_bars,
+  chart_start_col,
+  bar_spacing,
+  win_width,
+  len_lines
+)
+  len_lines = len_lines or #lines
+  local blank_line_chars = vim.split(string.rep(' ', win_width), '')
+  local project_id_to_highlight = timeline_data.project_id_to_highlight
+  local row_chars = row_representation.row_chars
+  local row_codepoint_count = row_representation.row_codepoint_count
+  local row_char_display_widths = row_representation.row_char_display_widths
+  local row_char_bytes = row_representation.row_char_bytes
+  local row_bytes = row_representation.row_bytes
+  local row_width = row_representation.row_display_width
 
----Adds 1 line
+  ---@type integer[]
+  local bar_heights = {}
+  ---@type integer[][]
+  local n_project_cells_by_share_by_segment = {}
+  ---@type integer[]
+  local n_project_cells_by_share_by_segment_index = {}
+
+  for i, segment_data in ipairs(timeline_data.segments) do
+    local bar_height = 0
+    if segment_data.total_segment_time > 0 then
+      bar_height = math.max(
+        1,
+        math.floor(
+          (segment_data.total_segment_time / timeline_data.max_segment_time)
+            * vertical_space_for_bars
+        )
+      )
+    end
+    bar_heights[i] = bar_height
+
+    local n_available_cells = bar_height * row_codepoint_count
+
+    local cells_assigned = 0
+    ---@type integer[]
+    local n_project_cells_by_share_by_segment_entry = {}
+
+    local j = 0
+    for _, proj_share_data in ipairs(segment_data.project_shares) do
+      j = j + 1
+      -- Making n_proj_cells at least 1 makes it so that n_proj_cells sum
+      -- across segment's projects might be greater than n_available_cells
+      -- (very rare). This is fine. Excess cells will be silently discarded.
+      -- Example: bar_height=1, bar_width=5, n_projects=6
+      local n_proj_cells = math.max(1, math.floor(proj_share_data.share * n_available_cells))
+      n_project_cells_by_share_by_segment_entry[j] = n_proj_cells
+      cells_assigned = cells_assigned + n_proj_cells
+    end
+
+    if cells_assigned < n_available_cells then
+      -- Add any deficiency to the project with the highest share (last one, since they are sorted asc)
+      n_project_cells_by_share_by_segment_entry[j] = n_project_cells_by_share_by_segment_entry[j]
+        + (n_available_cells - cells_assigned)
+    end
+
+    if j == 1 then
+      -- No need to keep track of cells per project if there is only one project
+      n_project_cells_by_share_by_segment_index[i] = -1
+      n_project_cells_by_share_by_segment_entry = { 0 }
+    else
+      n_project_cells_by_share_by_segment_index[i] = 1
+    end
+    n_project_cells_by_share_by_segment[i] = n_project_cells_by_share_by_segment_entry
+  end
+
+  for row = vertical_space_for_bars, 1, -1 do
+    len_lines = len_lines + 1
+    local line_chars = { unpack(blank_line_chars) }
+    local col = chart_start_col
+    local start_col_highlights = chart_start_col
+
+    for index, segment_data in ipairs(timeline_data.segments) do
+      if row <= bar_heights[index] then
+        local n_project_cells_curr_share_index = n_project_cells_by_share_by_segment_index[index]
+
+        local highlight
+        if n_project_cells_curr_share_index == -1 then
+          -- Only 1 project entry for this segment
+          highlight = project_id_to_highlight[segment_data.project_shares[1].project_id]
+        else
+          highlight =
+            project_id_to_highlight[segment_data.project_shares[n_project_cells_curr_share_index].project_id]
+        end
+
+        for i, char in ipairs(row_chars) do
+          col = col + 1
+          line_chars[col] = char
+
+          local char_disp_width = row_char_display_widths[i]
+          for j = 1, char_disp_width - 1 do
+            line_chars[col + j] = ''
+          end
+          col = col + char_disp_width - 1
+        end
+
+        if n_project_cells_curr_share_index == -1 then
+          table.insert(highlights, {
+            line = len_lines,
+            col = start_col_highlights,
+            end_col = start_col_highlights + row_bytes,
+            hl_group = highlight,
+          })
+        else
+          local cells_left_curr_project =
+            n_project_cells_by_share_by_segment[index][n_project_cells_curr_share_index]
+
+          local left_cells_after_filling_row = cells_left_curr_project - row_codepoint_count
+          if left_cells_after_filling_row >= 0 then
+            table.insert(highlights, {
+              line = len_lines,
+              col = start_col_highlights,
+              end_col = start_col_highlights + row_bytes,
+              hl_group = highlight,
+            })
+
+            n_project_cells_by_share_by_segment[index][n_project_cells_curr_share_index] =
+              left_cells_after_filling_row
+
+            if left_cells_after_filling_row == 0 then
+              -- This will put the index `n_project_cells_by_share_by_segment_index[index]`
+              -- out of bounds of the `timeline_data.segments[index].project_shares` table
+              -- when processing the last row of the segment, which is fine.
+              n_project_cells_by_share_by_segment_index[index] = n_project_cells_curr_share_index
+                + 1
+            end
+          else
+            -- Row cells need to be split between multiple projects
+            local local_start_col_highlights = start_col_highlights
+            for _, cell_bytes in ipairs(row_char_bytes) do
+              table.insert(highlights, {
+                line = len_lines,
+                col = local_start_col_highlights,
+                end_col = local_start_col_highlights + cell_bytes,
+                hl_group = highlight,
+              })
+              local_start_col_highlights = local_start_col_highlights + cell_bytes
+
+              cells_left_curr_project = cells_left_curr_project - 1
+              if
+                cells_left_curr_project == 0
+                and #segment_data.project_shares >= n_project_cells_curr_share_index + 1
+              then
+                -- This line isn’t strictly required for correct execution, but
+                -- it ensures that `n_project_cells_by_share_by_segment` ends
+                -- with 0-filled tables once all segment shares are processed.
+                -- (Assuming all entries sum to bar_height * bar_width, which
+                -- is true 99.9% of the time, but might not be, since
+                -- n_proj_cells is capped at a minimum of 1)
+                n_project_cells_by_share_by_segment[index][n_project_cells_curr_share_index] =
+                  cells_left_curr_project
+
+                n_project_cells_curr_share_index = n_project_cells_curr_share_index + 1
+                n_project_cells_by_share_by_segment_index[index] = n_project_cells_curr_share_index
+
+                cells_left_curr_project =
+                  n_project_cells_by_share_by_segment[index][n_project_cells_curr_share_index]
+
+                highlight =
+                  project_id_to_highlight[segment_data.project_shares[n_project_cells_curr_share_index].project_id]
+              end
+            end
+
+            n_project_cells_by_share_by_segment[index][n_project_cells_curr_share_index] =
+              cells_left_curr_project
+          end
+        end
+
+        col = col + bar_spacing
+        start_col_highlights = start_col_highlights + row_bytes + bar_spacing
+      else
+        col = col + row_width + bar_spacing
+        start_col_highlights = start_col_highlights + row_codepoint_count + bar_spacing
+      end
+    end
+
+    lines[len_lines] = table.concat(line_chars)
+  end
+
+  return len_lines
+end
+
+---Adds 1 entry to the lines table.
 ---@param lines string[]
 ---@param highlights chronicles.Highlight[]
 ---@param timeline_data chronicles.Timeline.Data
@@ -403,8 +603,7 @@ function M.set_abbr_labels_lines_hl(
     or DefaultColors.DevChroniclesAccent
   local highlight = initial_highlight
 
-  local place_label =
-    require('dev-chronicles.utils.strings').closure_place_label(abbr_row_arr, highlights, len_lines)
+  local place_label = strings.closure_place_label(abbr_row_arr, highlights, len_lines)
 
   for index, segment_data in ipairs(timeline_data.segments) do
     if not hide_when_empty or segment_data.total_segment_time > 0 then
