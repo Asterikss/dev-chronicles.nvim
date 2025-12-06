@@ -67,16 +67,16 @@ function M.get_timeline_data_days(
     end_ts
   )
 
-  ---@type chronicles.Timeline.SegmentData[]
-  local segments, len_segments = {}, 0
-  local max_segment_time = 0
-  local total_period_time = 0
-
   local orig_locale
   if abbr_labels_opts.locale then
     orig_locale = os.setlocale(nil, 'time')
     os.setlocale(abbr_labels_opts.locale, 'time')
   end
+
+  ---@type chronicles.Timeline.SegmentData[]
+  local segments, len_segments = {}, 0
+  local max_segment_time = 0
+  local total_period_time = 0
 
   if next(projects) ~= nil then
     for ts = start_ts, end_ts, DAY_SEC do

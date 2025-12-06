@@ -6,7 +6,7 @@ local format_time = require('dev-chronicles.core.time').format_time
 local get_or_create_hex_highlight =
   require('dev-chronicles.core.colors').get_or_create_hex_highlight
 
----Adds a 4 line header
+---Adds 4 entries to the lines table.
 ---@param lines string[]
 ---@param highlights chronicles.Highlight[]
 ---@param timeline_data chronicles.Timeline.Data
@@ -241,7 +241,7 @@ function M.set_header_lines_hl(
   return len_lines
 end
 
----Adds 2 lines.
+---Adds 2 entries to the lines table.
 ---@param lines string[]
 ---@param highlights chronicles.Highlight[]
 ---@param timeline_data chronicles.Timeline.Data

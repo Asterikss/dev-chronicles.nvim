@@ -58,7 +58,7 @@ function M.construct_row_representation(row_repr, bar_width)
       end
       ---@type chronicles.Timeline.RowRepresentation
       return {
-        realized_row = (fallback_char):rep(bar_width),
+        realized_row = fallback_char:rep(bar_width),
         row_codepoint_count = bar_width,
         row_display_width = bar_width,
         row_bytes = bar_width,
@@ -68,10 +68,9 @@ function M.construct_row_representation(row_repr, bar_width)
       }
     end
 
-    -- The length of tmp_row_char_display_widths should always equal
-    -- row_repr_codepoints
-    -- Also the length of both row_char_display_widths and row_char_bytes
-    -- should equal row_codepoint_count
+    -- The length of tmp_row_char_display_widths should always equal row_repr_codepoints.
+    -- Also the length of both row_char_display_widths and row_char_bytes should equal
+    -- row_codepoint_count.
     for i = 1, row_repr_codepoints * n_to_fill_bar_width do
       local next_index = ((i - 1) % row_repr_codepoints) + 1
       row_char_display_widths[i] = tmp_row_char_display_widths[((i - 1) % row_repr_codepoints) + 1]
@@ -89,7 +88,7 @@ function M.construct_row_representation(row_repr, bar_width)
 
   assert(
     bar_width == row_repr_codepoints * row_repr_display_width * n_to_fill_bar_width,
-    'Timeline: construct_bar_representation: row_width should equal row_repr_codepoints * row_repr_display_width * n_to_fill_bar_width'
+    'Timeline: construct_row_representation: row_width should equal row_repr_codepoints * row_repr_display_width * n_to_fill_bar_width'
   )
 
   ---@type chronicles.Timeline.RowRepresentation
