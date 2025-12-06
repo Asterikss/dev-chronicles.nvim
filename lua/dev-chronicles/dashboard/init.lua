@@ -165,7 +165,7 @@ function M._create_dashboard_content(
     )
   end
 
-  local n_projects_to_keep, chart_start_col = dashboard_logic.calc_chart_stats(
+  local n_projects_to_keep, chart_left_margin_col = dashboard_logic.calc_chart_stats(
     dashboard_opts.bar_width,
     dashboard_opts.bar_spacing,
     max_chart_width,
@@ -228,7 +228,7 @@ function M._create_dashboard_content(
     project_name_tbls_arr,
     max_project_time,
     max_bar_height,
-    chart_start_col,
+    chart_left_margin_col,
     dashboard_opts.bar_width,
     dashboard_opts.bar_spacing,
     dashboard_type_opts.random_bars_coloring,

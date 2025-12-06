@@ -142,7 +142,7 @@ end
 ---@param max_chart_width integer
 ---@param n_projects integer
 ---@param win_width integer
----@return integer, integer: n_projects_to_keep, chart_start_col
+---@return integer, integer: n_projects_to_keep, chart_left_margin_col
 function M.calc_chart_stats(bar_width, bar_spacing, max_chart_width, n_projects, win_width)
   if n_projects < 1 then
     return 0, -1
@@ -154,9 +154,9 @@ function M.calc_chart_stats(bar_width, bar_spacing, max_chart_width, n_projects,
   local n_projects_to_keep = math.min(n_projects, max_n_bars)
 
   local chart_width = (n_projects_to_keep * bar_width) + ((n_projects_to_keep - 1) * bar_spacing)
-  local chart_start_col = math.floor((win_width - chart_width) / 2)
+  local chart_left_margin_col = math.floor((win_width - chart_width) / 2)
 
-  return n_projects_to_keep, chart_start_col
+  return n_projects_to_keep, chart_left_margin_col
 end
 
 ---@param arr_projects chronicles.Dashboard.FinalProjectData[]
@@ -221,7 +221,7 @@ end
 ---@param project_name_tbls_arr string[][]
 ---@param max_time integer
 ---@param max_bar_height integer
----@param chart_start_col integer
+---@param chart_left_margin_col integer
 ---@param bar_width integer
 ---@param bar_spacing integer
 ---@param random_bars_coloring boolean
@@ -233,7 +233,7 @@ function M.create_bars_data(
   project_name_tbls_arr,
   max_time,
   max_bar_height,
-  chart_start_col,
+  chart_left_margin_col,
   bar_width,
   bar_spacing,
   random_bars_coloring,
@@ -264,7 +264,7 @@ function M.create_bars_data(
       project_time = project.total_time,
       height = bar_height,
       color = highlight,
-      start_col = chart_start_col + (i - 1) * (bar_width + bar_spacing),
+      left_margin_col = chart_left_margin_col + (i - 1) * (bar_width + bar_spacing),
       width = bar_width,
       current_bar_level = (next(bar_header_realized_rows_tbl) ~= nil) and BarLevel.Header
         or BarLevel.Body,

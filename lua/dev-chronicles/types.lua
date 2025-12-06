@@ -79,7 +79,7 @@
 ---@field project_time integer
 ---@field height  integer
 ---@field color string
----@field start_col integer
+---@field left_margin_col integer
 ---@field width integer
 ---@field current_bar_level chronicles.BarLevel
 ---@field curr_bar_representation_index integer

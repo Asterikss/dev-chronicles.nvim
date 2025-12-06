@@ -313,7 +313,7 @@ function M.set_time_labels_above_bars_lines_hl(
             global_time_labels_as_hours_min,
             global_time_labels_round_hours_ge_x
           ),
-          bar.start_col,
+          bar.left_margin_col,
           bar.width,
           highlights,
           global_time_labels_row_index,
@@ -330,7 +330,7 @@ function M.set_time_labels_above_bars_lines_hl(
         time_labels_as_hours_min,
         time_labels_round_hours_ge_x
       ),
-      bar.start_col,
+      bar.left_margin_col,
       bar.width,
       highlights,
       time_labels_row_hl_pos,
@@ -397,7 +397,7 @@ function M.set_bars_lines_hl(
 
         if bar.current_bar_level == BarLevel.Header then
           offset = bar_header_extends_by
-          pos = bar.start_col - offset
+          pos = bar.left_margin_col - offset
           bar_representation_index = bar.curr_bar_representation_index
           realized_row = bar_representation.header.realized_rows[bar_representation_index]
           row_codepoint_counts = bar_representation.header.row_codepoint_counts
@@ -418,14 +418,14 @@ function M.set_bars_lines_hl(
           end
 
           offset = bar_footer_extends_by
-          pos = bar.start_col - offset
+          pos = bar.left_margin_col - offset
           realized_row = bar_representation.footer.realized_rows[bar_representation_index]
           row_codepoint_counts = bar_representation.footer.row_codepoint_counts
           char_display_widths = bar_representation.footer.char_display_widths
           bar.curr_bar_representation_index = bar.curr_bar_representation_index + 1
         elseif bar.current_bar_level == BarLevel.Body then
           offset = 0
-          pos = bar.start_col
+          pos = bar.left_margin_col
           bar_representation_index = bar.curr_bar_representation_index
           realized_row = bar_representation.body.realized_rows[bar_representation_index]
           row_codepoint_counts = bar_representation.body.row_codepoint_counts
@@ -452,12 +452,12 @@ function M.set_bars_lines_hl(
         -- TODO: I should precalculate that
         local n_bytes_bar_row_str = #realized_row
 
-        -- bar.start_col does not account for multibyte characters and
+        -- bar.left_margin_col does not account for multibyte characters and
         -- highlights operate on bytes, so we use hl_bytes_shift to combat that
         table.insert(highlights, {
           line = len_lines,
-          col = bar.start_col - offset + hl_bytes_shift,
-          end_col = bar.start_col - offset + n_bytes_bar_row_str + hl_bytes_shift,
+          col = bar.left_margin_col - offset + hl_bytes_shift,
+          end_col = bar.left_margin_col - offset + n_bytes_bar_row_str + hl_bytes_shift,
           hl_group = bar.color,
         })
 
@@ -528,7 +528,7 @@ function M.set_project_names_lines_hl(
       if name_part then
         place_label(
           name_part,
-          bar.start_col + left_margin_col_offset,
+          bar.left_margin_col + left_margin_col_offset,
           bar.width + extra_available_width,
           bar.color
         )
