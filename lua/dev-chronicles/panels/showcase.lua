@@ -26,11 +26,11 @@ function M.showcase(opts, panel_subtype)
     now_ts = mock_now,
   }
 
-  local panel_data = require('dev-chronicles.dashboard').dashboard(
-    panel_subtype,
+  local panel_data = require('dev-chronicles.panels.dashboard').dashboard(
     sample_data,
-    opts,
+    panel_subtype,
     {},
+    opts,
     mock_session_base,
     5400
   )

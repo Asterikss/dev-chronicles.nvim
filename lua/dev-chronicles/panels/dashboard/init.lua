@@ -9,7 +9,7 @@ local M = {}
 ---@return chronicles.Panel.Data?
 function M.dashboard(data, panel_subtype, panel_subtype_args, opts, session_base, session_time)
   local notify = require('dev-chronicles.utils.notify')
-  local dashboard_data_extraction = require('dev-chronicles.dashboard.data_extraction')
+  local dashboard_data_extraction = require('dev-chronicles.panels.dashboard.data_extraction')
   local PanelSubtype = require('dev-chronicles.core.enums').PanelSubtype
   local get_window_dimensions = require('dev-chronicles.utils').get_window_dimensions
 
@@ -130,8 +130,8 @@ function M._create_dashboard_content(
   dashboard_opts,
   curr_session_time
 )
-  local dashboard_content = require('dev-chronicles.dashboard.content')
-  local dashboard_logic = require('dev-chronicles.dashboard.logic')
+  local dashboard_content = require('dev-chronicles.panels.dashboard.content')
+  local dashboard_logic = require('dev-chronicles.panels.dashboard.logic')
   local utils = require('dev-chronicles.utils')
 
   local lines = {}

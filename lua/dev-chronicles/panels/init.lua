@@ -34,7 +34,7 @@ function M.panel(panel_type, panel_subtype, panel_subtype_args, opts)
   local panel_data
 
   if panel_type == PanelType.Dashboard then
-    panel_data = require('dev-chronicles.dashboard').dashboard(
+    panel_data = require('dev-chronicles.panels.dashboard').dashboard(
       data,
       panel_subtype,
       panel_subtype_args,
