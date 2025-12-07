@@ -73,7 +73,7 @@ function M.set_header_lines_hl(
   local right_header_highlight_start_col
   local decorator_right_highlight_start_col
 
-  ---@type integer? -- I know... I don't want to calculate #top_projects twice
+  ---@type integer? -- I know... I didn't want to calculate #top_projects twice
   local len_top_projects = top_projects and #top_projects
 
   if

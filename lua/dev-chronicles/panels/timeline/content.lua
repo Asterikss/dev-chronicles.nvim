@@ -246,20 +246,18 @@ end
 ---@param highlights chronicles.Highlight[]
 ---@param timeline_data chronicles.Timeline.Data
 ---@param bar_width integer
----@param bar_spacing integer
 ---@param win_width integer
----@param chart_left_margin_col integer
 ---@param segment_time_labels_opts chronicles.Options.Timeline.Section.SegmentTimeLabels
+---@param bar_left_margin_cols integer[]
 ---@param len_lines? integer
 function M.set_time_labels_above_bars_lines_hl(
   lines,
   highlights,
   timeline_data,
   bar_width,
-  bar_spacing,
   win_width,
-  chart_left_margin_col,
   segment_time_labels_opts,
+  bar_left_margin_cols,
   len_lines
 )
   len_lines = (len_lines or #lines) + 1
@@ -292,7 +290,7 @@ function M.set_time_labels_above_bars_lines_hl(
       strings.place_label_simple(
         time_labels_row_arr,
         format_time(total_segment_time, as_hours_max, as_hours_min, round_hours_ge_x),
-        chart_left_margin_col + (index - 1) * (bar_width + bar_spacing),
+        bar_left_margin_cols[index],
         bar_width,
         highlights,
         len_lines,
@@ -467,21 +465,19 @@ end
 ---@param highlights chronicles.Highlight[]
 ---@param timeline_data chronicles.Timeline.Data
 ---@param bar_width integer
----@param bar_spacing integer
 ---@param win_width integer
----@param chart_left_margin_col integer
 ---@param numeric_label_opts chronicles.Options.Timeline.Section.SegmentNumericLabels
 ---@param len_lines? integer
+---@param bar_left_margin_cols integer[]
 ---@return integer: len_lines
 function M.set_numeric_labels_lines_hl(
   lines,
   highlights,
   timeline_data,
   bar_width,
-  bar_spacing,
   win_width,
-  chart_left_margin_col,
   numeric_label_opts,
+  bar_left_margin_cols,
   len_lines
 )
   len_lines = (len_lines or #lines) + 1
@@ -510,7 +506,7 @@ function M.set_numeric_labels_lines_hl(
       strings.place_label_simple(
         labels_row_arr,
         date_label,
-        chart_left_margin_col + (index - 1) * (bar_width + bar_spacing),
+        bar_left_margin_cols[index],
         bar_width,
         highlights,
         len_lines,
@@ -529,10 +525,9 @@ end
 ---@param highlights chronicles.Highlight[]
 ---@param timeline_data chronicles.Timeline.Data
 ---@param bar_width integer
----@param bar_spacing integer
 ---@param win_width integer
----@param chart_left_margin_col integer
 ---@param abbr_label_opts chronicles.Options.Timeline.Section.SegmentAbbrLabels
+---@param bar_left_margin_cols integer[]
 ---@param len_lines? integer
 ---@return integer: len_lines
 function M.set_abbr_labels_lines_hl(
@@ -540,10 +535,9 @@ function M.set_abbr_labels_lines_hl(
   highlights,
   timeline_data,
   bar_width,
-  bar_spacing,
   win_width,
-  chart_left_margin_col,
   abbr_label_opts,
+  bar_left_margin_cols,
   len_lines
 )
   len_lines = (len_lines or #lines) + 1
@@ -570,12 +564,7 @@ function M.set_abbr_labels_lines_hl(
         end
       end
 
-      place_label(
-        segment_data.date_abbr,
-        chart_left_margin_col + (index - 1) * (bar_width + bar_spacing),
-        bar_width,
-        highlight
-      )
+      place_label(segment_data.date_abbr, bar_left_margin_cols[index], bar_width, highlight)
     end
   end
 

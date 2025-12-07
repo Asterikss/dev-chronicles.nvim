@@ -137,11 +137,17 @@ end
 ---@param timeline_data chronicles.Timeline.Data
 ---@param vertical_space_for_bars integer
 ---@param row_codepoint_count integer
+---@param chart_left_margin_col integer
+---@param bar_width integer
+---@param bar_spacing integer
 ---@return chronicles.Timeline.BarDistributionData
 function M.construct_bar_distribution_data(
   timeline_data,
   vertical_space_for_bars,
-  row_codepoint_count
+  row_codepoint_count,
+  chart_left_margin_col,
+  bar_width,
+  bar_spacing
 )
   ---@type integer[]
   local bar_heights = {}
@@ -149,9 +155,13 @@ function M.construct_bar_distribution_data(
   local n_project_cells_by_share_by_segment = {}
   ---@type integer[]
   local n_project_cells_by_share_by_segment_index = {}
+  ---@type integer[]
+  local bar_left_margin_cols = {}
   local max_segment_time = timeline_data.max_segment_time
 
   for i, segment_data in ipairs(timeline_data.segments) do
+    bar_left_margin_cols[i] = chart_left_margin_col + (i - 1) * (bar_width + bar_spacing)
+
     local bar_height = 0
     if segment_data.total_segment_time > 0 then
       bar_height = math.max(
@@ -201,6 +211,7 @@ function M.construct_bar_distribution_data(
     bar_heights = bar_heights,
     n_project_cells_by_share_by_segment = n_project_cells_by_share_by_segment,
     n_project_cells_by_share_by_segment_index = n_project_cells_by_share_by_segment_index,
+    bar_left_margin_cols = bar_left_margin_cols,
   }
 end
 

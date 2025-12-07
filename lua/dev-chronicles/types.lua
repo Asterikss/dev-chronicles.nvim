@@ -134,6 +134,7 @@
 ---@field bar_heights integer[]
 ---@field n_project_cells_by_share_by_segment integer[][]
 ---@field n_project_cells_by_share_by_segment_index integer[]
+---@field bar_left_margin_cols integer[]
 
 -- --------------------------------------------
 -- Panel Data

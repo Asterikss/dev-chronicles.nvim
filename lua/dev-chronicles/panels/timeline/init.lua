@@ -182,7 +182,10 @@ function M._create_timeline_content(
   local bar_distribution_data = timeline_logic.construct_bar_distribution_data(
     timeline_data,
     vertical_space_for_bars,
-    row_representation.row_codepoint_count
+    row_representation.row_codepoint_count,
+    chart_left_margin_col,
+    timeline_type_opts.bar_width,
+    timeline_type_opts.bar_spacing
   )
 
   local len_lines = 0
@@ -201,10 +204,9 @@ function M._create_timeline_content(
     highlights,
     timeline_data,
     timeline_type_opts.bar_width,
-    timeline_type_opts.bar_spacing,
     win_width,
-    chart_left_margin_col,
     timeline_type_opts.segment_time_labels,
+    bar_distribution_data.bar_left_margin_cols,
     len_lines
   )
 
@@ -235,10 +237,9 @@ function M._create_timeline_content(
       highlights,
       timeline_data,
       timeline_type_opts.bar_width,
-      timeline_type_opts.bar_spacing,
       win_width,
-      chart_left_margin_col,
       timeline_type_opts.segment_numeric_labels,
+      bar_distribution_data.bar_left_margin_cols,
       len_lines
     )
   end
@@ -249,10 +250,9 @@ function M._create_timeline_content(
       highlights,
       timeline_data,
       timeline_type_opts.bar_width,
-      timeline_type_opts.bar_spacing,
       win_width,
-      chart_left_margin_col,
       timeline_type_opts.segment_abbr_labels,
+      bar_distribution_data.bar_left_margin_cols,
       len_lines
     )
   end
