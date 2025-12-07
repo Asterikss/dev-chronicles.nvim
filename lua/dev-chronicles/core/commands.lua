@@ -80,6 +80,31 @@ function M._setup_the_command(opts)
       end
     elseif first_arg == 'validate' then
       require('dev-chronicles.utils').validate_data({ data_path = opts.data_file })
+    elseif first_arg == 'timeline' then
+      if args[2] == 'months' then
+        api.panel(
+          enums.PanelType.Timeline,
+          enums.PanelSubtype.Months,
+          { start_date = args[3], end_date = args[4] },
+          opts
+        )
+      elseif args[2] == 'years' then
+        api.panel(
+          enums.PanelType.Timeline,
+          enums.PanelSubtype.Years,
+          { start_date = args[3], end_date = args[4] },
+          opts
+        )
+      elseif args[2] == 'all' then
+        api.panel(enums.PanelType.Timeline, enums.PanelSubtype.All, nil, opts)
+      else
+        api.panel(
+          enums.PanelType.Timeline,
+          enums.PanelSubtype.Days,
+          { start_offset = tonumber(args[2]), end_offset = tonumber(args[3]) },
+          opts
+        )
+      end
     elseif first_arg == 'pause' then
       require('dev-chronicles.panels.paused').pause(opts.extend_today_to_4am)
     else
