@@ -333,14 +333,10 @@ function M.get_dashboard_data_years(
     start_date = n_years_by_default == -1
         and time_years.get_previous_year(session_base.canonical_year_str)
       or time_years.get_previous_year(session_base.canonical_year_str, n_years_by_default - 1)
-  end
 
-  if not end_date then
-    if not start_date then
-      end_date = n_years_by_default == -1 and start_date or session_base.canonical_year_str
-    else
-      end_date = session_base.canonical_year_str
-    end
+    end_date = n_years_by_default == -1 and start_date or session_base.canonical_year_str
+  else
+    end_date = end_date or session_base.canonical_year_str
   end
 
   local l_pointer_year, r_pointer_year =
